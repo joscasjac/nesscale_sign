@@ -1,0 +1,179 @@
+{
+ "actions": [],
+ "creation": "2026-06-25 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "field_order": [
+  "signer_name",
+  "signer_email",
+  "role_key",
+  "role_label",
+  "signing_order",
+  "col1",
+  "status",
+  "color",
+  "auth_method",
+  "sec_track",
+  "token",
+  "access_count",
+  "signing_session",
+  "col2",
+  "sent_on",
+  "viewed_on",
+  "signed_on",
+  "declined_on",
+  "sec_meta",
+  "decline_reason",
+  "ip_address",
+  "user_agent"
+ ],
+ "fields": [
+  {
+   "fieldname": "signer_name",
+   "fieldtype": "Data",
+   "label": "Signer Name",
+   "reqd": 0,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "signer_email",
+   "fieldtype": "Data",
+   "label": "Signer Email",
+   "options": "Email",
+   "reqd": 0,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "role_key",
+   "fieldtype": "Data",
+   "label": "Role Key"
+  },
+  {
+   "fieldname": "role_label",
+   "fieldtype": "Data",
+   "label": "Role Label",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "signing_order",
+   "fieldtype": "Int",
+   "label": "Signing Order",
+   "default": "1",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending\nSent\nViewed\nSigned\nDeclined",
+   "default": "Pending",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Data",
+   "label": "Color",
+   "default": "#2563EB"
+  },
+  {
+   "fieldname": "auth_method",
+   "fieldtype": "Select",
+   "label": "Auth Method",
+   "options": "Email\nNone",
+   "default": "None"
+  },
+  {
+   "fieldname": "sec_track",
+   "fieldtype": "Section Break",
+   "label": "Tracking"
+  },
+  {
+   "fieldname": "token",
+   "fieldtype": "Data",
+   "label": "Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "access_count",
+   "fieldtype": "Int",
+   "label": "Access Count",
+   "default": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signing_session",
+   "fieldtype": "Data",
+   "label": "Signing Session",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sent_on",
+   "fieldtype": "Datetime",
+   "label": "Sent On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "viewed_on",
+   "fieldtype": "Datetime",
+   "label": "Viewed On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signed_on",
+   "fieldtype": "Datetime",
+   "label": "Signed On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "declined_on",
+   "fieldtype": "Datetime",
+   "label": "Declined On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_meta",
+   "fieldtype": "Section Break",
+   "label": "Meta"
+  },
+  {
+   "fieldname": "decline_reason",
+   "fieldtype": "Small Text",
+   "label": "Decline Reason"
+  },
+  {
+   "fieldname": "ip_address",
+   "fieldtype": "Data",
+   "label": "Ip Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_agent",
+   "fieldtype": "Small Text",
+   "label": "User Agent",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Nesscale Digital Signature",
+ "name": "NS Envelope Signer",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "istable": 1
+}

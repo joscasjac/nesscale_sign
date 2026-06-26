@@ -1,0 +1,282 @@
+{
+ "actions": [],
+ "creation": "2026-06-25 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "field_order": [
+  "title",
+  "status",
+  "organization",
+  "col1",
+  "routing_type",
+  "expiry_days",
+  "reminder_enabled",
+  "sec_pdf",
+  "pdf_file",
+  "page_count",
+  "col2",
+  "current_version",
+  "version_count",
+  "sec_automation",
+  "auto_create",
+  "trigger_doctype",
+  "col_trigger",
+  "trigger_event",
+  "trigger_auto_send",
+  "trigger_value_field",
+  "trigger_value_to",
+  "trigger_date_field",
+  "trigger_days",
+  "sec_roles",
+  "signer_roles",
+  "sec_email",
+  "email_subject",
+  "email_message",
+  "sec_meta",
+  "description",
+  "tags"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nActive\nArchived",
+   "default": "Draft",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "organization",
+   "fieldtype": "Link",
+   "label": "Organization",
+   "options": "NS Organization",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "routing_type",
+   "fieldtype": "Select",
+   "label": "Routing Type",
+   "options": "Sequential\nParallel",
+   "default": "Sequential"
+  },
+  {
+   "fieldname": "expiry_days",
+   "fieldtype": "Int",
+   "label": "Expiry Days",
+   "default": "30"
+  },
+  {
+   "fieldname": "reminder_enabled",
+   "fieldtype": "Check",
+   "label": "Reminder Enabled",
+   "default": "1"
+  },
+  {
+   "fieldname": "sec_pdf",
+   "fieldtype": "Section Break",
+   "label": "Document"
+  },
+  {
+   "fieldname": "pdf_file",
+   "fieldtype": "Attach",
+   "label": "Pdf File"
+  },
+  {
+   "fieldname": "page_count",
+   "fieldtype": "Int",
+   "label": "Page Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "current_version",
+   "fieldtype": "Link",
+   "label": "Current Version",
+   "options": "NS Template Version",
+   "read_only": 1
+  },
+  {
+   "fieldname": "version_count",
+   "fieldtype": "Int",
+   "label": "Version Count",
+   "default": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_roles",
+   "fieldtype": "Section Break",
+   "label": "Signer Roles"
+  },
+  {
+   "fieldname": "signer_roles",
+   "fieldtype": "Table",
+   "label": "Signer Roles",
+   "options": "NS Signer Role"
+  },
+  {
+   "fieldname": "sec_email",
+   "fieldtype": "Section Break",
+   "label": "Email Defaults"
+  },
+  {
+   "fieldname": "email_subject",
+   "fieldtype": "Data",
+   "label": "Email Subject"
+  },
+  {
+   "fieldname": "email_message",
+   "fieldtype": "Text",
+   "label": "Email Message"
+  },
+  {
+   "fieldname": "sec_meta",
+   "fieldtype": "Section Break",
+   "label": "Meta"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "tags",
+   "fieldtype": "Data",
+   "label": "Tags"
+  },
+  {
+   "fieldname": "sec_automation",
+   "fieldtype": "Section Break",
+   "label": "Automation"
+  },
+  {
+   "fieldname": "auto_create",
+   "fieldtype": "Check",
+   "label": "Auto Creation",
+   "description": "Automatically create an envelope from a document event."
+  },
+  {
+   "fieldname": "trigger_doctype",
+   "fieldtype": "Link",
+   "label": "Reference DocType",
+   "options": "DocType",
+   "depends_on": "auto_create",
+   "mandatory_depends_on": "auto_create"
+  },
+  {
+   "fieldname": "col_trigger",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "trigger_event",
+   "fieldtype": "Select",
+   "label": "Event",
+   "options": "New\nSave\nSubmit\nCancel\nValue Change\nDays Before\nDays After",
+   "default": "Submit",
+   "depends_on": "auto_create"
+  },
+  {
+   "fieldname": "trigger_auto_send",
+   "fieldtype": "Check",
+   "label": "Auto-send when ready",
+   "default": "1",
+   "depends_on": "auto_create"
+  },
+  {
+   "fieldname": "trigger_value_field",
+   "fieldtype": "Data",
+   "label": "Watch Field",
+   "depends_on": "eval:doc.trigger_event=='Value Change'"
+  },
+  {
+   "fieldname": "trigger_value_to",
+   "fieldtype": "Data",
+   "label": "Changes To (optional)",
+   "depends_on": "eval:doc.trigger_event=='Value Change'"
+  },
+  {
+   "fieldname": "trigger_date_field",
+   "fieldtype": "Data",
+   "label": "Date Field",
+   "depends_on": "eval:['Days Before','Days After'].includes(doc.trigger_event)"
+  },
+  {
+   "fieldname": "trigger_days",
+   "fieldtype": "Int",
+   "label": "Days",
+   "default": "1",
+   "depends_on": "eval:['Days Before','Days After'].includes(doc.trigger_event)"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Nesscale Digital Signature",
+ "name": "NS Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Nesscale Sign Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Nesscale Sign User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "allow_rename": 0,
+ "quick_entry": 1,
+ "autoname": "NS-TMPL-.#####",
+ "naming_rule": "Expression (old style)",
+ "title_field": "title",
+ "show_title_field_in_link": 1,
+ "search_fields": "title,status"
+}

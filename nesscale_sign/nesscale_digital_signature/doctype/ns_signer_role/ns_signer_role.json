@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "creation": "2026-06-25 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "field_order": [
+  "role_label",
+  "role_key",
+  "signing_order",
+  "color",
+  "source_email_field",
+  "manual_email",
+  "source_name_field",
+  "manual_name",
+  "optional"
+ ],
+ "fields": [
+  {
+   "fieldname": "role_label",
+   "fieldtype": "Data",
+   "label": "Role Label",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "role_key",
+   "fieldtype": "Data",
+   "label": "Role Key",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "signing_order",
+   "fieldtype": "Int",
+   "label": "Signing Order",
+   "default": "1",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Data",
+   "label": "Color",
+   "default": "#2563EB"
+  },
+  {
+   "fieldname": "optional",
+   "fieldtype": "Check",
+   "label": "Optional"
+  },
+  {
+   "fieldname": "source_email_field",
+   "fieldtype": "Data",
+   "label": "Email Field"
+  },
+  {
+   "fieldname": "manual_email",
+   "fieldtype": "Data",
+   "label": "Manual Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "source_name_field",
+   "fieldtype": "Data",
+   "label": "Name Field"
+  },
+  {
+   "fieldname": "manual_name",
+   "fieldtype": "Data",
+   "label": "Manual Name"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Nesscale Digital Signature",
+ "name": "NS Signer Role",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "istable": 1
+}

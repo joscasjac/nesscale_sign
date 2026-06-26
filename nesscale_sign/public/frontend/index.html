@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" data-theme="dark" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Nesscale Sign</title>
+    <meta name="theme-color" content="#0f0f0f" />
+    <script>
+      // Public signing pages render light; the app is dark. Set before paint.
+      if (location.pathname.startsWith('/sign'))
+        document.documentElement.setAttribute('data-theme', 'light')
+    </script>
+    <script type="module" crossorigin src="/assets/nesscale_sign/frontend/assets/index-B_vl9NM5.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/nesscale_sign/frontend/assets/icons-DOw7W6da.js">
+    <link rel="stylesheet" crossorigin href="/assets/nesscale_sign/frontend/assets/index-DGIGhvLg.css">
+  </head>
+  <body class="antialiased h-full">
+    <div id="app" class="h-full"></div>
+  
+          <script>
+              {% for key in boot %}
+              window["{{ key }}"] = {{ boot[key] | tojson }};
+              {% endfor %}
+          </script>
+          </body>
+          
+</html>

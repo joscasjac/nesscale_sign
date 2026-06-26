@@ -1,0 +1,326 @@
+{
+ "actions": [],
+ "creation": "2026-06-25 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "field_order": [
+  "title",
+  "status",
+  "organization",
+  "col1",
+  "template",
+  "template_version",
+  "routing_type",
+  "progress",
+  "sec_docs",
+  "source_pdf",
+  "page_count",
+  "col2",
+  "signed_pdf",
+  "certificate_pdf",
+  "sec_signers",
+  "signers",
+  "current_order",
+  "sec_sender",
+  "sender",
+  "sender_name",
+  "sender_email",
+  "col3",
+  "email_subject",
+  "email_message",
+  "message",
+  "sec_dates",
+  "sent_on",
+  "expires_on",
+  "completed_on",
+  "col4",
+  "declined_on",
+  "decline_reason",
+  "voided_on",
+  "void_reason",
+  "sec_reminder",
+  "reminder_count",
+  "last_reminder_on",
+  "col5",
+  "metadata_json"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nSent\nIn Progress\nCompleted\nDeclined\nVoided\nExpired",
+   "default": "Draft",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "organization",
+   "fieldtype": "Link",
+   "label": "Organization",
+   "options": "NS Organization",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "label": "Template",
+   "options": "NS Template"
+  },
+  {
+   "fieldname": "template_version",
+   "fieldtype": "Link",
+   "label": "Template Version",
+   "options": "NS Template Version"
+  },
+  {
+   "fieldname": "routing_type",
+   "fieldtype": "Select",
+   "label": "Routing Type",
+   "options": "Sequential\nParallel",
+   "default": "Sequential"
+  },
+  {
+   "fieldname": "progress",
+   "fieldtype": "Percent",
+   "label": "Progress",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_docs",
+   "fieldtype": "Section Break",
+   "label": "Documents"
+  },
+  {
+   "fieldname": "source_pdf",
+   "fieldtype": "Attach",
+   "label": "Source Pdf",
+   "read_only": 1
+  },
+  {
+   "fieldname": "page_count",
+   "fieldtype": "Int",
+   "label": "Page Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "signed_pdf",
+   "fieldtype": "Attach",
+   "label": "Signed Pdf",
+   "read_only": 1
+  },
+  {
+   "fieldname": "certificate_pdf",
+   "fieldtype": "Attach",
+   "label": "Certificate Pdf",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_signers",
+   "fieldtype": "Section Break",
+   "label": "Signers"
+  },
+  {
+   "fieldname": "signers",
+   "fieldtype": "Table",
+   "label": "Signers",
+   "options": "NS Envelope Signer"
+  },
+  {
+   "fieldname": "current_order",
+   "fieldtype": "Int",
+   "label": "Current Order",
+   "default": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_sender",
+   "fieldtype": "Section Break",
+   "label": "Sender & Email"
+  },
+  {
+   "fieldname": "sender",
+   "fieldtype": "Link",
+   "label": "Sender",
+   "options": "User"
+  },
+  {
+   "fieldname": "sender_name",
+   "fieldtype": "Data",
+   "label": "Sender Name"
+  },
+  {
+   "fieldname": "sender_email",
+   "fieldtype": "Data",
+   "label": "Sender Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "col3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "email_subject",
+   "fieldtype": "Data",
+   "label": "Email Subject"
+  },
+  {
+   "fieldname": "email_message",
+   "fieldtype": "Text",
+   "label": "Email Message"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "label": "Message"
+  },
+  {
+   "fieldname": "sec_dates",
+   "fieldtype": "Section Break",
+   "label": "Lifecycle"
+  },
+  {
+   "fieldname": "sent_on",
+   "fieldtype": "Datetime",
+   "label": "Sent On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expires_on",
+   "fieldtype": "Datetime",
+   "label": "Expires On"
+  },
+  {
+   "fieldname": "completed_on",
+   "fieldtype": "Datetime",
+   "label": "Completed On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "declined_on",
+   "fieldtype": "Datetime",
+   "label": "Declined On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decline_reason",
+   "fieldtype": "Small Text",
+   "label": "Decline Reason",
+   "read_only": 1
+  },
+  {
+   "fieldname": "voided_on",
+   "fieldtype": "Datetime",
+   "label": "Voided On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "void_reason",
+   "fieldtype": "Small Text",
+   "label": "Void Reason"
+  },
+  {
+   "fieldname": "sec_reminder",
+   "fieldtype": "Section Break",
+   "label": "Reminders"
+  },
+  {
+   "fieldname": "reminder_count",
+   "fieldtype": "Int",
+   "label": "Reminder Count",
+   "default": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_reminder_on",
+   "fieldtype": "Datetime",
+   "label": "Last Reminder On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "metadata_json",
+   "fieldtype": "Long Text",
+   "label": "Metadata Json"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Nesscale Digital Signature",
+ "name": "NS Envelope",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Nesscale Sign Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Nesscale Sign User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "allow_rename": 0,
+ "quick_entry": 1,
+ "autoname": "NS-ENV-.YYYY.-.#####",
+ "naming_rule": "Expression (old style)",
+ "title_field": "title",
+ "show_title_field_in_link": 1,
+ "search_fields": "title,status"
+}

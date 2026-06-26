@@ -1,0 +1,21 @@
+{
+ "app": "nesscale_sign",
+ "bg_color": "gray",
+ "creation": "2026-06-25 23:04:01.702758",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "App",
+ "idx": 0,
+ "label": "Nesscale Sign",
+ "link": "/nesscale-sign",
+ "link_type": "External",
+ "logo_url": "/assets/nesscale_sign/images/logo.svg",
+ "modified": "2026-06-25 23:05:56.077025",
+ "modified_by": "Administrator",
+ "name": "Nesscale Sign",
+ "owner": "Administrator",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

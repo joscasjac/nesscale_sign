@@ -1,0 +1,171 @@
+{
+ "actions": [],
+ "creation": "2026-06-25 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "field_order": [
+  "organization_name",
+  "disabled",
+  "description",
+  "logo",
+  "brand_color",
+  "col1",
+  "default_sender_name",
+  "default_sender_email",
+  "timezone",
+  "sec_policy",
+  "default_expiry_days",
+  "reminder_enabled",
+  "reminder_interval_days",
+  "col2",
+  "reminder_max_count",
+  "require_all_fields"
+ ],
+ "fields": [
+  {
+   "fieldname": "organization_name",
+   "fieldtype": "Data",
+   "label": "Organization Name",
+   "reqd": 1,
+   "unique": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "logo",
+   "fieldtype": "Attach Image",
+   "label": "Logo"
+  },
+  {
+   "fieldname": "brand_color",
+   "fieldtype": "Data",
+   "label": "Brand Color",
+   "default": "#2563EB"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_sender_name",
+   "fieldtype": "Data",
+   "label": "Default Sender Name"
+  },
+  {
+   "fieldname": "default_sender_email",
+   "fieldtype": "Data",
+   "label": "Default Sender Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "timezone",
+   "fieldtype": "Data",
+   "label": "Timezone"
+  },
+  {
+   "fieldname": "sec_policy",
+   "fieldtype": "Section Break",
+   "label": "Policies"
+  },
+  {
+   "fieldname": "default_expiry_days",
+   "fieldtype": "Int",
+   "label": "Default Expiry Days",
+   "default": "30"
+  },
+  {
+   "fieldname": "reminder_enabled",
+   "fieldtype": "Check",
+   "label": "Reminder Enabled",
+   "default": "1"
+  },
+  {
+   "fieldname": "reminder_interval_days",
+   "fieldtype": "Int",
+   "label": "Reminder Interval Days",
+   "default": "3"
+  },
+  {
+   "fieldname": "col2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reminder_max_count",
+   "fieldtype": "Int",
+   "label": "Reminder Max Count",
+   "default": "3"
+  },
+  {
+   "fieldname": "require_all_fields",
+   "fieldtype": "Check",
+   "label": "Require All Fields",
+   "default": "1"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Nesscale Digital Signature",
+ "name": "NS Organization",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Nesscale Sign Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Nesscale Sign User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "allow_rename": 0,
+ "quick_entry": 1,
+ "autoname": "field:organization_name",
+ "naming_rule": "By fieldname",
+ "title_field": "organization_name",
+ "show_title_field_in_link": 1
+}

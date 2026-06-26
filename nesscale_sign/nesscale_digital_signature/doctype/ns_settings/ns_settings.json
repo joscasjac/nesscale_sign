@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "creation": "2026-06-25 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "editable_grid": 1,
+ "field_order": [
+  "default_organization",
+  "signing_brand_name",
+  "support_email",
+  "col1",
+  "public_base_url",
+  "enforce_audit_chain",
+  "sec_email",
+  "sender_email",
+  "email_footer"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_organization",
+   "fieldtype": "Link",
+   "label": "Default Organization",
+   "options": "NS Organization"
+  },
+  {
+   "fieldname": "signing_brand_name",
+   "fieldtype": "Data",
+   "label": "Signing Brand Name",
+   "default": "Nesscale Sign"
+  },
+  {
+   "fieldname": "support_email",
+   "fieldtype": "Data",
+   "label": "Support Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "col1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "public_base_url",
+   "fieldtype": "Data",
+   "label": "Public Base Url"
+  },
+  {
+   "fieldname": "enforce_audit_chain",
+   "fieldtype": "Check",
+   "label": "Enforce Audit Chain",
+   "default": "1"
+  },
+  {
+   "fieldname": "sec_email",
+   "fieldtype": "Section Break",
+   "label": "Email"
+  },
+  {
+   "fieldname": "sender_email",
+   "fieldtype": "Data",
+   "label": "Sender Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "email_footer",
+   "fieldtype": "Small Text",
+   "label": "Email Footer"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-25 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Nesscale Digital Signature",
+ "name": "NS Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Nesscale Sign Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  },
+  {
+   "role": "Nesscale Sign User",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "report": 1,
+   "export": 1,
+   "share": 1,
+   "print": 1,
+   "email": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "allow_rename": 0,
+ "quick_entry": 1,
+ "issingle": 1
+}
