@@ -252,10 +252,11 @@ class EnvelopeService:
 		audit_rows = AuditService(env.name).list()
 		chain = AuditService(env.name).verify()
 		certificate = pdf_service.build_certificate(env, audit_rows, chain)
-		final_pdf = pdf_service.append_certificate(filled, certificate)
 
+		# The signed copy is the flattened document only — the certificate of
+		# completion is kept as a separate file (certificate_pdf), not appended.
 		signed_file = files.save_private_file(
-			f"{env.name}-signed.pdf", final_pdf,
+			f"{env.name}-signed.pdf", filled,
 			attached_to_doctype="NS Envelope", attached_to_name=env.name,
 			attached_to_field="signed_pdf",
 		)
