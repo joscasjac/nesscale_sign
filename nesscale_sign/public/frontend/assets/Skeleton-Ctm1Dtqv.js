@@ -1,1 +1,0 @@
-import{c as a}from"./utils-DaT-yT0k.js";import{C as n,x as t,K as l,u as o}from"./icons-DOw7W6da.js";const u={__name:"Skeleton",props:{class:{type:null,default:""}},setup(e){const s=e;return(r,c)=>(n(),t("div",{class:l(o(a)("animate-pulse rounded-md bg-muted",s.class))},null,2))}};export{u as _};

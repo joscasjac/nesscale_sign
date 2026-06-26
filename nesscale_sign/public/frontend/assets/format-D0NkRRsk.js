@@ -1,1 +1,0 @@
-function r(t,n=!1){if(!t)return"—";const i=new Date(t.replace(" ","T"));if(isNaN(i.getTime()))return t;const e={day:"numeric",month:"short",year:"numeric"};return n&&(e.hour="2-digit",e.minute="2-digit"),i.toLocaleDateString(void 0,e)}export{r as f};
