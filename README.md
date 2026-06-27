@@ -16,6 +16,18 @@ An e-signature app for Frappe. Upload a PDF, place the fields, and send it out f
 - Editable email templates
 - Dark mode UI
 
+## Screenshots
+
+![Dashboard](docs/images/dashboard.png)
+
+![Field designer](docs/images/field-designer.png)
+
+![Signing](docs/images/signing.png)
+
+## Documentation
+
+Full documentation, with screenshots: https://sign.bhavesh.tech/nesscale-sign-home
+
 ## Install
 
 ```bash
@@ -25,15 +37,6 @@ bench install-app nesscale_sign
 ```
 
 The app opens at `/nesscale-sign`. Signing links open at `/sign/<token>`.
-
-## Development
-
-```bash
-cd apps/nesscale_sign/frontend
-yarn install
-yarn dev
-yarn build
-```
 
 ## Tests
 
