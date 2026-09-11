@@ -22,10 +22,21 @@ class TestTemplateApi(FrappeTestCase):
 	def test_save_fields_and_publish(self):
 		created = template.create_template({"title": "API Pub", "pdf_file": make_private_pdf("apipub.pdf")})
 		template.save_template_roles(created["name"], [{"role_label": "Signer", "role_key": "signer"}])
-		template.save_template_fields(created["name"], [
-			{"field_type": "Text", "label": "N", "signer_role": "signer", "page": 1,
-			 "pos_x": 0.1, "pos_y": 0.2, "width": 0.2, "height": 0.04},
-		])
+		template.save_template_fields(
+			created["name"],
+			[
+				{
+					"field_type": "Text",
+					"label": "N",
+					"signer_role": "signer",
+					"page": 1,
+					"pos_x": 0.1,
+					"pos_y": 0.2,
+					"width": 0.2,
+					"height": 0.04,
+				},
+			],
+		)
 		published = template.publish_template(created["name"])
 		self.assertEqual(published["status"], "Active")
 
@@ -38,22 +49,28 @@ class TestEnvelopeApi(FrappeTestCase):
 	def test_create_send_and_signing_roundtrip(self):
 		env = envelope.create_from_template(
 			self.tmpl.name,
-			{"title": "API Env", "signers": [
-				{"signer_name": "Z", "signer_email": "z@test.com", "role_key": "signer"}]},
+			{
+				"title": "API Env",
+				"signers": [{"signer_name": "Z", "signer_email": "z@test.com", "role_key": "signer"}],
+			},
 		)
 		envelope.send_envelope(env["name"])
 
 		got = envelope.get_envelope(env["name"])
 		self.assertEqual(got["envelope"]["status"], "Sent")
-		token = got["envelope"]["signers"][0]["token"]
+		self.assertNotIn("token", got["envelope"]["signers"][0])
+		token = frappe.get_doc("NS Envelope", env["name"]).signers[0].token
 		self.assertEqual(len(token), 40)
 
 		# Public signing endpoints (guest-style) by token.
 		ctx = signing.get_context(token)
 		self.assertTrue(ctx["signer"]["can_sign"])
 		values = {f["field_key"]: "Tester" for f in ctx["fields"] if f["field_type"] == "Text"}
-		result = signing.submit(token, values, signature_payload())
-		self.assertEqual(result["status"], "completed")
+		result = signing.submit(token, values, signature_payload(), consent=True)
+		self.assertEqual(result["status"], "processing")
+		from nesscale_sign.services.finalization import finalize_envelope
+
+		finalize_envelope(env["name"] if isinstance(env, dict) else env.name)
 
 		final = envelope.get_envelope(env["name"])
 		self.assertEqual(final["envelope"]["status"], "Completed")
@@ -62,8 +79,10 @@ class TestEnvelopeApi(FrappeTestCase):
 	def test_audit_endpoint_reports_integrity(self):
 		env = envelope.create_from_template(
 			self.tmpl.name,
-			{"title": "Audit API", "signers": [
-				{"signer_name": "Z", "signer_email": "z@test.com", "role_key": "signer"}]},
+			{
+				"title": "Audit API",
+				"signers": [{"signer_name": "Z", "signer_email": "z@test.com", "role_key": "signer"}],
+			},
 		)
 		audit = envelope.get_audit(env["name"])
 		self.assertIn("integrity", audit)

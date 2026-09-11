@@ -1,7 +1,7 @@
 app_name = "nesscale_sign"
-app_title = "Nesscale Digital Signature"
+app_title = "Open E-Sign ERPNext"
 app_publisher = "Nesscale Solutions Pvt Ltd"
-app_description = "Nesscale Digital Signature For the frappe"
+app_description = "Electronic signatures for Frappe and ERPNext"
 app_email = "info@nesscale.com"
 app_license = "AGPLv3"
 
@@ -11,7 +11,7 @@ add_to_apps_screen = [
 	{
 		"name": "nesscale_sign",
 		"logo": "/assets/nesscale_sign/images/logo.svg",
-		"title": "Nesscale Sign",
+		"title": "Open E-Sign ERPNext",
 		"route": "/nesscale-sign",
 		"has_permission": "nesscale_sign.api.permission.has_app_permission",
 	}
@@ -75,3 +75,9 @@ scheduler_events = {
 fixtures = [
 	{"dt": "Role", "filters": [["name", "in", ["Nesscale Sign Manager", "Nesscale Sign User"]]]},
 ]
+
+# Evidence and field access inherits its parent envelope/template permissions.
+for _dt in ("NS Envelope Field", "NS Signature", "NS Audit Log", "NS Signing Session", "NS Notification"):
+	has_permission[_dt] = "nesscale_sign.permissions.ns_permissions.related_has_permission"
+for _dt in ("NS Template Field", "NS Template Version"):
+	has_permission[_dt] = "nesscale_sign.permissions.ns_permissions.template_child_has_permission"

@@ -48,13 +48,21 @@ class AuditService:
 		doc.insert(ignore_permissions=True)
 		return doc.name
 
-	def list(self, limit: int = 200) -> list[dict]:
+	def list(self, limit: int = 0) -> list[dict]:
 		return frappe.get_all(
 			"NS Audit Log",
 			filters={"envelope": self.envelope},
 			fields=[
-				"name", "action", "signer_email", "signer_name", "timestamp",
-				"ip_address", "browser", "os", "country", "details",
+				"name",
+				"action",
+				"signer_email",
+				"signer_name",
+				"timestamp",
+				"ip_address",
+				"browser",
+				"os",
+				"country",
+				"details",
 			],
 			order_by="creation asc",
 			limit=limit,

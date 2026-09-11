@@ -19,6 +19,9 @@ class NSAuditLog(Document):
 	"""
 
 	def before_insert(self):
+		from nesscale_sign.utils.security import lock_envelope
+
+		lock_envelope(self.envelope)
 		if not self.timestamp:
 			self.timestamp = now_datetime()
 		self.prev_hash = self._get_prev_hash()
@@ -59,9 +62,8 @@ class NSAuditLog(Document):
 		if not self.flags.in_insert and not self.flags.ignore_audit_immutability:
 			frappe.throw(_("Audit Log entries are immutable and cannot be modified."))
 
-	# def on_trash(self):
-	# 	if not self.flags.ignore_audit_immutability:
-	# 		frappe.throw(_("Audit Log entries are immutable and cannot be deleted."))
+	def on_trash(self):
+		frappe.throw(_("Audit Log entries cannot be deleted."))
 
 
 def verify_chain(envelope: str) -> dict:

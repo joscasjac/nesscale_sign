@@ -51,8 +51,11 @@ def remind_envelope(name: str, manual: bool = False) -> int:
 	sent = 0
 	for signer in active:
 		notifier.send_reminder(signer)
-		AuditService(name).log(AuditAction.REMINDED, signer_email=signer.signer_email,
-			details="Manual reminder" if manual else "Scheduled reminder")
+		AuditService(name).log(
+			AuditAction.REMINDED,
+			signer_email=signer.signer_email,
+			details="Manual reminder" if manual else "Scheduled reminder",
+		)
 		sent += 1
 
 	if sent:
@@ -65,7 +68,8 @@ def _reminder_policy(envelope) -> tuple[int, int]:
 	interval, max_count = 3, 3
 	if envelope.organization:
 		org = frappe.db.get_value(
-			"NS Organization", envelope.organization,
+			"NS Organization",
+			envelope.organization,
 			["reminder_enabled", "reminder_interval_days", "reminder_max_count"],
 			as_dict=True,
 		)

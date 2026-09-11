@@ -36,12 +36,7 @@ venv.bak/
 node_modules/
 jspm_packages/
 
-# Frontend SPA source — not shipped with the app; only the built assets under
-# nesscale_sign/public/frontend (and the generated www html) are committed.
-# Leading slash anchors this to the repo-root source dir ONLY, so it does NOT
-# also match nesscale_sign/public/frontend (the build output, which IS shipped).
-/frontend/
-
+# Frontend source and lockfile are intentionally published.
 # Sourcemaps are dev-only — never commit them (we only ship the runtime build).
 *.map
 

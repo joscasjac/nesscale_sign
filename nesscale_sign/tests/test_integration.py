@@ -47,7 +47,9 @@ class TestAutoCreate(FrappeTestCase):
 		todo = frappe.get_doc({"doctype": "ToDo", "description": "X"}).insert()
 		todo.description = "Y"
 		todo.save()
-		env = frappe.get_doc("NS Envelope", frappe.get_all("NS Envelope", filters={"template": t.name}, pluck="name")[0])
+		env = frappe.get_doc(
+			"NS Envelope", frappe.get_all("NS Envelope", filters={"template": t.name}, pluck="name")[0]
+		)
 		self.assertEqual(env.status, "Draft")
 
 
@@ -59,17 +61,32 @@ class TestPrefill(FrappeTestCase):
 		todo = frappe.get_doc({"doctype": "ToDo", "description": "Prefill me"}).insert()
 		tmpl = make_template(
 			"Prefill",
-			fields=[{
-				"field_type": "Text", "label": "D", "signer_role": "signer", "page": 1,
-				"pos_x": 0.1, "pos_y": 0.2, "width": 0.3, "height": 0.04, "mapping_key": "description",
-			}],
+			fields=[
+				{
+					"field_type": "Text",
+					"label": "D",
+					"signer_role": "signer",
+					"page": 1,
+					"pos_x": 0.1,
+					"pos_y": 0.2,
+					"width": 0.3,
+					"height": 0.04,
+					"mapping_key": "description",
+				}
+			],
 		)
 		env = EnvelopeService.create_from_template(
 			tmpl.name,
-			{"title": "P", "signers": [{"signer_name": "S", "signer_email": "s@test.com", "role_key": "signer"}],
-			 "source_doctype": "ToDo", "source_name": todo.name},
+			{
+				"title": "P",
+				"signers": [{"signer_name": "S", "signer_email": "s@test.com", "role_key": "signer"}],
+				"source_doctype": "ToDo",
+				"source_name": todo.name,
+			},
 		)
-		row = frappe.get_all("NS Envelope Field", filters={"envelope": env.name}, fields=["value", "read_only"])[0]
+		row = frappe.get_all(
+			"NS Envelope Field", filters={"envelope": env.name}, fields=["value", "read_only"]
+		)[0]
 		self.assertEqual(row.value, "Prefill me")
 		self.assertTrue(row.read_only)
 

@@ -15,10 +15,28 @@ TWO_ROLES = [
 ]
 
 TWO_FIELDS = [
-	{"field_type": "Signature", "label": "Sign 1", "signer_role": "first",
-	 "page": 1, "pos_x": 0.1, "pos_y": 0.3, "width": 0.2, "height": 0.06, "required": 1},
-	{"field_type": "Signature", "label": "Sign 2", "signer_role": "second",
-	 "page": 1, "pos_x": 0.1, "pos_y": 0.5, "width": 0.2, "height": 0.06, "required": 1},
+	{
+		"field_type": "Signature",
+		"label": "Sign 1",
+		"signer_role": "first",
+		"page": 1,
+		"pos_x": 0.1,
+		"pos_y": 0.3,
+		"width": 0.2,
+		"height": 0.06,
+		"required": 1,
+	},
+	{
+		"field_type": "Signature",
+		"label": "Sign 2",
+		"signer_role": "second",
+		"page": 1,
+		"pos_x": 0.1,
+		"pos_y": 0.5,
+		"width": 0.2,
+		"height": 0.06,
+		"required": 1,
+	},
 ]
 
 
@@ -44,13 +62,13 @@ class TestSequentialWorkflow(FrappeTestCase):
 		env = make_envelope(self.tmpl.name, two_signers(), routing="Sequential")
 		second_token = env.get_signer("bob@test.com").token
 		with self.assertRaises(frappe.ValidationError):
-			SigningService(second_token).submit({}, signature_payload())
+			SigningService(second_token).submit({}, signature_payload(), consent=True)
 
 	def test_sequential_advances_and_completes(self):
 		env = make_envelope(self.tmpl.name, two_signers(), routing="Sequential")
 		first_token = env.get_signer("alice@test.com").token
 
-		SigningService(first_token).submit({}, signature_payload())
+		SigningService(first_token).submit({}, signature_payload(), consent=True)
 		env.reload()
 		self.assertEqual(env.get_signer("alice@test.com").status, "Signed")
 		# Second signer should now be activated.
@@ -58,8 +76,11 @@ class TestSequentialWorkflow(FrappeTestCase):
 		self.assertEqual(env.status, "In Progress")
 
 		second_token = env.get_signer("bob@test.com").token
-		result = SigningService(second_token).submit({}, signature_payload())
-		self.assertEqual(result["status"], "completed")
+		result = SigningService(second_token).submit({}, signature_payload(), consent=True)
+		self.assertEqual(result["status"], "processing")
+		from nesscale_sign.services.finalization import finalize_envelope
+
+		finalize_envelope(env["name"] if isinstance(env, dict) else env.name)
 		env.reload()
 		self.assertEqual(env.status, "Completed")
 		self.assertTrue(env.signed_pdf)
@@ -80,12 +101,17 @@ class TestParallelWorkflow(FrappeTestCase):
 
 	def test_parallel_completes_after_both(self):
 		env = make_envelope(self.tmpl.name, two_signers(), routing="Parallel")
-		SigningService(env.get_signer("bob@test.com").token).submit({}, signature_payload())
+		SigningService(env.get_signer("bob@test.com").token).submit({}, signature_payload(), consent=True)
 		env.reload()
 		# Still not complete; first signer outstanding.
 		self.assertIn(env.status, ("In Progress", "Sent"))
-		result = SigningService(env.get_signer("alice@test.com").token).submit({}, signature_payload())
-		self.assertEqual(result["status"], "completed")
+		result = SigningService(env.get_signer("alice@test.com").token).submit(
+			{}, signature_payload(), consent=True
+		)
+		self.assertEqual(result["status"], "processing")
+		from nesscale_sign.services.finalization import finalize_envelope
+
+		finalize_envelope(env["name"] if isinstance(env, dict) else env.name)
 		env.reload()
 		self.assertEqual(env.status, "Completed")
 
@@ -112,4 +138,6 @@ class TestDeclineAndVoid(FrappeTestCase):
 		env.reload()
 		self.assertEqual(env.status, "Voided")
 		with self.assertRaises(Exception):
-			SigningService(env.get_signer("alice@test.com").token).submit({}, signature_payload())
+			SigningService(env.get_signer("alice@test.com").token).submit(
+				{}, signature_payload(), consent=True
+			)

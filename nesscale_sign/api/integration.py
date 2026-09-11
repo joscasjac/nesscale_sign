@@ -30,8 +30,21 @@ def get_doctype_fields(doctype: str):
 		return []
 	meta = frappe.get_meta(doctype)
 	mappable = {
-		"Data", "Small Text", "Text", "Long Text", "Select", "Link", "Read Only",
-		"Int", "Float", "Currency", "Date", "Datetime", "Phone", "Check", "Percent",
+		"Data",
+		"Small Text",
+		"Text",
+		"Long Text",
+		"Select",
+		"Link",
+		"Read Only",
+		"Int",
+		"Float",
+		"Currency",
+		"Date",
+		"Datetime",
+		"Phone",
+		"Check",
+		"Percent",
 	}
 	fields = [
 		{
@@ -45,6 +58,8 @@ def get_doctype_fields(doctype: str):
 	]
 	# Standard fields worth mapping: the document owner (a User) is a natural
 	# signer email source, alongside the record id.
-	fields.insert(0, {"fieldname": "owner", "label": "Owner (Created By)", "fieldtype": "Link", "options": "User"})
+	fields.insert(
+		0, {"fieldname": "owner", "label": "Owner (Created By)", "fieldtype": "Link", "options": "User"}
+	)
 	fields.insert(0, {"fieldname": "name", "label": "ID (name)", "fieldtype": "Data", "options": None})
 	return fields

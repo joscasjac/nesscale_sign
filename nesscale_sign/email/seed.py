@@ -40,48 +40,80 @@ _CLOSE = """
 def _button(url, label):
 	return (
 		f'<a href="{{{{ {url} }}}}" style="display:inline-block;background:#2563eb;color:#ffffff;'
-		'text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;'
+		"text-decoration:none;padding:11px 22px;border-radius:8px;font-weight:600;"
 		f'font-size:14px;margin:18px 0;">{label}</a>'
 	)
 
 
-_INVITATION = _OPEN + """
+_INVITATION = (
+	_OPEN
+	+ """
 	<p>Hi {{ signer_name }},</p>
 	<p>You have a document waiting for your signature:
 	<b>{{ title }}</b>{% if role %} (as {{ role }}){% endif %}.</p>
-""" + _button("sign_url", "Review &amp; Sign") + """
+"""
+	+ _button("sign_url", "Review &amp; Sign")
+	+ """
 	{% if expires_on %}<p style="color:#6b7280;">Please sign before {{ expires_on }}.</p>{% endif %}
 	<p style="color:#9ca3af;font-size:12px;">If the button doesn't work, copy this link:<br>
 		<a href="{{ sign_url }}" style="color:#2563eb;">{{ sign_url }}</a></p>
-""" + _CLOSE
+"""
+	+ _CLOSE
+)
 
-_REMINDER = _OPEN + """
+_REMINDER = (
+	_OPEN
+	+ """
 	<p>Hi {{ signer_name }},</p>
 	<p>A quick reminder that <b>{{ title }}</b> is still waiting for your signature.</p>
-""" + _button("sign_url", "Sign Now") + """
+"""
+	+ _button("sign_url", "Sign Now")
+	+ """
 	{% if expires_on %}<p style="color:#6b7280;">Please sign before {{ expires_on }}.</p>{% endif %}
-""" + _CLOSE
+"""
+	+ _CLOSE
+)
 
-_COMPLETED = _OPEN + """
+_COMPLETED = (
+	_OPEN
+	+ """
 	<p><b>{{ title }}</b> has been signed by everyone. A copy is kept on file.</p>
-""" + _CLOSE
+"""
+	+ _CLOSE
+)
 
-_DECLINED = _OPEN + """
+_DECLINED = (
+	_OPEN
+	+ """
 	<p><b>{{ title }}</b> was declined{% if reason %}: {{ reason }}{% endif %}.</p>
 	<p style="color:#6b7280;">No further action is required.</p>
-""" + _CLOSE
+"""
+	+ _CLOSE
+)
 
-_EXPIRED = _OPEN + """
+_EXPIRED = (
+	_OPEN
+	+ """
 	<p><b>{{ title }}</b> has expired and can no longer be signed.</p>
-""" + _CLOSE
+"""
+	+ _CLOSE
+)
 
-_VOIDED = _OPEN + """
+_VOIDED = (
+	_OPEN
+	+ """
 	<p><b>{{ title }}</b> has been voided{% if reason %}: {{ reason }}{% endif %}.</p>
 	<p style="color:#6b7280;">No further action is required.</p>
-""" + _CLOSE
+"""
+	+ _CLOSE
+)
 
 _DEFINITIONS = [
-	{"name": "Nesscale Sign Invitation", "subject": "Signature requested: {{ title }}", "response": _INVITATION},
+	{
+		"name": "Nesscale Sign Invitation",
+		"subject": "Signature requested: {{ title }}",
+		"response": _INVITATION,
+	},
 	{"name": "Nesscale Sign Reminder", "subject": "Reminder: please sign {{ title }}", "response": _REMINDER},
 	{"name": "Nesscale Sign Completed", "subject": "Completed: {{ title }}", "response": _COMPLETED},
 	{"name": "Nesscale Sign Declined", "subject": "Declined: {{ title }}", "response": _DECLINED},

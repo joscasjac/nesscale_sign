@@ -8,6 +8,7 @@ to. Files are streamed through these endpoints rather than via public URLs.
 """
 
 import frappe
+from frappe.rate_limiter import rate_limit
 
 from nesscale_sign.api import load
 from nesscale_sign.services.signing_service import SigningService
@@ -19,12 +20,14 @@ from nesscale_sign.services.signing_service import SigningService
 # nosemgrep markers below acknowledge `guest-whitelisted-method` by design.
 
 
-@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — token-authenticated
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=120, seconds=60)  # nosemgrep: guest-whitelisted-method — token-authenticated
 def get_context(token: str):
 	return SigningService(token).get_context()
 
 
-@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — token-authenticated
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=120, seconds=60)  # nosemgrep: guest-whitelisted-method — token-authenticated
 def get_pdf(token: str):
 	svc = SigningService(token)
 	content = svc.get_pdf_bytes()
@@ -34,22 +37,30 @@ def get_pdf(token: str):
 	frappe.local.response.display_content_as = "inline"
 
 
-@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — token-authenticated
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=30, seconds=60)  # nosemgrep: guest-whitelisted-method — token-authenticated
 def save_progress(token: str, values: dict | str | None = None):
 	return SigningService(token).save_values(load(values) or {})
 
 
-@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — token-authenticated
-def submit(token: str, values: dict | str | None = None, signature: dict | str | None = None):
-	return SigningService(token).submit(load(values) or {}, load(signature) or {})
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=30, seconds=60)  # nosemgrep: guest-whitelisted-method — token-authenticated
+def submit(
+	token: str, values: dict | str | None = None, signature: dict | str | None = None, consent: bool = False
+):
+	return SigningService(token).submit(
+		load(values) or {}, load(signature) or {}, consent=consent is True or consent == "true"
+	)
 
 
-@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — token-authenticated
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=30, seconds=60)  # nosemgrep: guest-whitelisted-method — token-authenticated
 def decline(token: str, reason: str | None = None):
 	return SigningService(token).decline(reason)
 
 
-@frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method — token-authenticated
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=120, seconds=60)  # nosemgrep: guest-whitelisted-method — token-authenticated
 def download_completed(token: str):
 	"""Allow a signer to download the final document once the envelope completes."""
 	svc = SigningService(token)

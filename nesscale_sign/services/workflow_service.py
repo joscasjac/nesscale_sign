@@ -25,8 +25,7 @@ class WorkflowService:
 
 	def _unfinished(self) -> list:
 		return [
-			s for s in self.envelope.signers
-			if s.status not in (SignerStatus.SIGNED, SignerStatus.DECLINED)
+			s for s in self.envelope.signers if s.status not in (SignerStatus.SIGNED, SignerStatus.DECLINED)
 		]
 
 	def current_order(self) -> int | None:
@@ -98,7 +97,8 @@ class WorkflowService:
 			return []
 		self.envelope.current_order = order
 		to_activate = [
-			s for s in self.envelope.signers
+			s
+			for s in self.envelope.signers
 			if int(s.signing_order or 1) == order and s.status == SignerStatus.PENDING
 		]
 		self.mark_sent(to_activate)

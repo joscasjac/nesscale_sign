@@ -59,3 +59,15 @@ def template_has_permission(doc, user: str | None = None, permission_type=None) 
 	if _is_manager(user):
 		return True
 	return doc.owner == user
+
+
+def related_has_permission(doc, user=None, permission_type=None):
+	if permission_type not in (None, "read"):
+		return False
+	parent = frappe.get_doc("NS Envelope", doc.envelope)
+	return envelope_has_permission(parent, user, "read")
+
+
+def template_child_has_permission(doc, user=None, permission_type=None):
+	parent = frappe.get_doc("NS Template", doc.template)
+	return template_has_permission(parent, user, permission_type)

@@ -46,10 +46,27 @@ class TestPdfEngine(FrappeTestCase):
 	def test_overlay_preserves_pages_and_flattens(self):
 		src = make_pdf(2)
 		fields = [
-			{"field_key": "t1", "field_type": "Text", "value": "Hello", "page": 1,
-			 "pos_x": 0.1, "pos_y": 0.2, "width": 0.3, "height": 0.04, "font_size": 12},
-			{"field_key": "c1", "field_type": "Checkbox", "value": "1", "page": 2,
-			 "pos_x": 0.1, "pos_y": 0.2, "width": 0.03, "height": 0.02},
+			{
+				"field_key": "t1",
+				"field_type": "Text",
+				"value": "Hello",
+				"page": 1,
+				"pos_x": 0.1,
+				"pos_y": 0.2,
+				"width": 0.3,
+				"height": 0.04,
+				"font_size": 12,
+			},
+			{
+				"field_key": "c1",
+				"field_type": "Checkbox",
+				"value": "1",
+				"page": 2,
+				"pos_x": 0.1,
+				"pos_y": 0.2,
+				"width": 0.03,
+				"height": 0.02,
+			},
 		]
 		out = pdf_service.generate_filled_pdf(src, fields, {})
 		self.assertEqual(pdf_service.get_page_count(out), 2)
@@ -79,8 +96,9 @@ class TestAuditChain(FrappeTestCase):
 		svc = AuditService(env.name)
 		svc.log("Viewed", signer_email="solo@test.com")
 		# Tamper with a middle row directly in the DB.
-		rows = frappe.get_all("NS Audit Log", filters={"envelope": env.name},
-			order_by="creation asc", pluck="name")
+		rows = frappe.get_all(
+			"NS Audit Log", filters={"envelope": env.name}, order_by="creation asc", pluck="name"
+		)
 		frappe.db.set_value("NS Audit Log", rows[0], "details", "TAMPERED", update_modified=False)
 		result = svc.verify()
 		self.assertFalse(result["valid"])

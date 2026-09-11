@@ -1,0 +1,27 @@
+{
+  "name": "open-esign-erpnext-ui",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "preview:local": "node scripts/preview.mjs",
+    "build": "vite build && node scripts/frappe-html.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.45.0",
+    "pdfjs-dist": "^4.10.38",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.0",
+    "express": "^4.21.2",
+    "pdf-lib": "^1.17.1",
+    "prettier": "^3.9.6",
+    "vite": "^6.1.0"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
+  }
+}

@@ -14,15 +14,37 @@ from nesscale_sign.utils import files
 # Field attributes copied between template fields, version snapshots and
 # envelope field instances.
 FIELD_ATTRS = [
-	"field_key", "field_type", "label", "signer_role", "page",
-	"pos_x", "pos_y", "width", "height", "required", "read_only",
-	"placeholder", "default_value", "options", "font_size", "font_family",
-	"max_length", "validation", "repeat_group", "mapping_key",
+	"field_key",
+	"field_type",
+	"label",
+	"signer_role",
+	"page",
+	"pos_x",
+	"pos_y",
+	"width",
+	"height",
+	"required",
+	"read_only",
+	"placeholder",
+	"default_value",
+	"options",
+	"font_size",
+	"font_family",
+	"max_length",
+	"validation",
+	"repeat_group",
+	"mapping_key",
 ]
 
 TRIGGER_FIELDS = [
-	"auto_create", "trigger_doctype", "trigger_event", "trigger_auto_send",
-	"trigger_value_field", "trigger_value_to", "trigger_date_field", "trigger_days",
+	"auto_create",
+	"trigger_doctype",
+	"trigger_event",
+	"trigger_auto_send",
+	"trigger_value_field",
+	"trigger_value_to",
+	"trigger_date_field",
+	"trigger_days",
 ]
 
 
@@ -62,14 +84,14 @@ class TemplateService:
 		doc = self._doc()
 		if not doc.pdf_file:
 			return
-		content = files.read_file_content(doc.pdf_file)
+		content = files.read_authorized_pdf(doc.pdf_file)
 		doc.db_set("page_count", pdf_service.get_page_count(content))
 
 	# ------------------------------------------------------------------ pdf
 	def set_pdf(self, file_url: str) -> "frappe.Document":
 		doc = self._doc()
 		doc.pdf_file = file_url
-		content = files.read_file_content(file_url)
+		content = files.read_authorized_pdf(file_url)
 		doc.page_count = pdf_service.get_page_count(content)
 		doc.save()
 		return doc
@@ -78,7 +100,7 @@ class TemplateService:
 		doc = self._doc()
 		if not doc.pdf_file:
 			return []
-		content = files.read_file_content(doc.pdf_file)
+		content = files.read_authorized_pdf(doc.pdf_file)
 		return pdf_service.get_page_metrics(content)
 
 	# ------------------------------------------------------------------ roles
@@ -102,9 +124,10 @@ class TemplateService:
 
 	def save_fields(self, fields: list[dict]) -> int:
 		"""Replace the template's field set atomically (designer save)."""
-		existing = frappe.get_all(
-			"NS Template Field", filters={"template": self.template}, pluck="name"
-		)
+		from nesscale_sign.utils.security import validate_fields
+
+		validate_fields(fields, self._doc().page_count or 0)
+		existing = frappe.get_all("NS Template Field", filters={"template": self.template}, pluck="name")
 		for name in existing:
 			frappe.delete_doc("NS Template Field", name, ignore_permissions=True, force=True)
 

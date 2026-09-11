@@ -30,7 +30,7 @@ class NotificationService:
 	def __init__(self, envelope: "frappe.Document"):
 		self.envelope = envelope
 		# Branding is fixed for now; white-label (custom brand/logo) comes later.
-		self.brand = "Nesscale Sign"
+		self.brand = "Open E-Sign ERPNext"
 
 	# --------------------------------------------------------------- public
 	def send_invitation(self, signer):
@@ -42,7 +42,9 @@ class NotificationService:
 	def send_reminder(self, signer):
 		ctx = self._signer_context(signer)
 		rendered = self._render("Reminder", ctx)
-		self._dispatch(signer.signer_email, rendered["subject"], rendered["message"], "Reminder", signer.signer_email)
+		self._dispatch(
+			signer.signer_email, rendered["subject"], rendered["message"], "Reminder", signer.signer_email
+		)
 
 	def send_completed(self):
 		ctx = self._base_context()
@@ -112,7 +114,7 @@ class NotificationService:
 			notification.db_set("status", "Failed")
 			notification.db_set("error", str(exc)[:140])
 			frappe.log_error(
-				title="Nesscale Sign: notification failed",
+				title="Open E-Sign ERPNext: notification failed",
 				message=f"Notification {notification.name} failed: {exc}\n\n{frappe.get_traceback()}",
 			)
 

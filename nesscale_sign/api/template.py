@@ -30,10 +30,25 @@ def update_template(name: str, data=None):
 	doc = frappe.get_doc("NS Template", name)
 	doc.check_permission("write")
 	data = load(data) or {}
-	for field in ("title", "description", "routing_type", "expiry_days",
-		"email_subject", "email_message", "reminder_enabled", "organization", "tags",
-		"auto_create", "trigger_doctype", "trigger_event", "trigger_auto_send",
-		"trigger_value_field", "trigger_value_to", "trigger_date_field", "trigger_days"):
+	for field in (
+		"title",
+		"description",
+		"routing_type",
+		"expiry_days",
+		"email_subject",
+		"email_message",
+		"reminder_enabled",
+		"organization",
+		"tags",
+		"auto_create",
+		"trigger_doctype",
+		"trigger_event",
+		"trigger_auto_send",
+		"trigger_value_field",
+		"trigger_value_to",
+		"trigger_date_field",
+		"trigger_days",
+	):
 		if field in data:
 			doc.set(field, data[field])
 	from nesscale_sign.services.template_service import validate_trigger
@@ -81,8 +96,9 @@ def duplicate_template(name: str, title: str | None = None):
 
 
 @frappe.whitelist()
-def list_templates(status: str | None = None, search: str | None = None,
-		start: int = 0, page_length: int = 20):
+def list_templates(
+	status: str | None = None, search: str | None = None, start: int = 0, page_length: int = 20
+):
 	filters = {}
 	if status:
 		filters["status"] = status
@@ -93,9 +109,26 @@ def list_templates(status: str | None = None, search: str | None = None,
 		"NS Template",
 		filters=filters,
 		or_filters=or_filters,
-		fields=["name", "title", "status", "organization", "page_count",
-			"version_count", "routing_type", "modified"],
+		fields=[
+			"name",
+			"title",
+			"status",
+			"organization",
+			"page_count",
+			"version_count",
+			"routing_type",
+			"modified",
+		],
 		order_by="modified desc",
 		start=int(start),
 		page_length=int(page_length),
 	)
+
+
+@frappe.whitelist()
+def preview_pdf(name: str):
+	doc = frappe.get_doc("NS Template", name)
+	doc.check_permission("read")
+	from nesscale_sign.api.envelope import _stream_private_file
+
+	_stream_private_file(doc.pdf_file, f"{doc.name}.pdf")

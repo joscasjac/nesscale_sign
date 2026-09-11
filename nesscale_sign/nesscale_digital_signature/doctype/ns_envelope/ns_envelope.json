@@ -43,7 +43,12 @@
   "reminder_count",
   "last_reminder_on",
   "col5",
-  "metadata_json"
+  "metadata_json",
+  "source_sha256",
+  "signed_sha256",
+  "seal_status",
+  "finalization_status",
+  "finalization_error"
  ],
  "fields": [
   {
@@ -264,6 +269,36 @@
    "fieldname": "metadata_json",
    "fieldtype": "Long Text",
    "label": "Metadata Json"
+  },
+  {
+   "fieldname": "source_sha256",
+   "label": "Original document SHA-256",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "signed_sha256",
+   "label": "Completed document SHA-256",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "seal_status",
+   "label": "PDF seal",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "finalization_status",
+   "label": "PDF processing",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "finalization_error",
+   "label": "Processing error",
+   "fieldtype": "Small Text",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 0,

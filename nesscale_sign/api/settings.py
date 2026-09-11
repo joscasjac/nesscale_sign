@@ -10,8 +10,12 @@ from nesscale_sign.api import load, require_manager
 # excluded for now — branding is fixed to "Nesscale Sign". They will return with
 # the white-label plan so customers can set their own brand/logo.
 SETTINGS_FIELDS = (
-	"default_organization", "support_email",
-	"public_base_url", "enforce_audit_chain", "sender_email", "email_footer",
+	"default_organization",
+	"support_email",
+	"public_base_url",
+	"enforce_audit_chain",
+	"sender_email",
+	"email_footer",
 )
 
 
@@ -37,9 +41,16 @@ def update_settings(data: dict | None = None):
 def list_organizations():
 	return frappe.get_list(
 		"NS Organization",
-		fields=["name", "organization_name", "brand_color", "disabled",
-			"default_expiry_days", "reminder_enabled", "reminder_interval_days",
-			"reminder_max_count"],
+		fields=[
+			"name",
+			"organization_name",
+			"brand_color",
+			"disabled",
+			"default_expiry_days",
+			"reminder_enabled",
+			"reminder_interval_days",
+			"reminder_max_count",
+		],
 		order_by="organization_name asc",
 		limit_page_length=0,
 	)
@@ -54,11 +65,30 @@ def save_organization(data: dict | None = None):
 		doc = frappe.get_doc("NS Organization", name)
 	else:
 		doc = frappe.new_doc("NS Organization")
-	for field in ("organization_name", "description", "brand_color", "disabled",
-		"default_sender_name", "default_sender_email", "timezone",
-		"default_expiry_days", "reminder_enabled", "reminder_interval_days",
-		"reminder_max_count", "require_all_fields"):
+	for field in (
+		"organization_name",
+		"description",
+		"brand_color",
+		"disabled",
+		"default_sender_name",
+		"default_sender_email",
+		"timezone",
+		"default_expiry_days",
+		"reminder_enabled",
+		"reminder_interval_days",
+		"reminder_max_count",
+		"require_all_fields",
+	):
 		if field in data:
 			doc.set(field, data[field])
 	doc.save()
 	return doc.as_dict()
+
+
+@frappe.whitelist()
+def get_readiness():
+	return {
+		"email_configured": bool(frappe.db.exists("Email Account", {"enable_outgoing": 1})),
+		"seal_configured": bool(frappe.conf.get("esign_pkcs12_path")),
+		"seal_required": bool(frappe.conf.get("esign_require_seal")),
+	}

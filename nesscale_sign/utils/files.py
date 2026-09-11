@@ -8,9 +8,11 @@ publicly guessable and access is mediated by permissions / signed tokens.
 """
 
 import base64
+import io
 import os
 
 import frappe
+from PIL import Image
 
 
 def save_private_file(
@@ -46,7 +48,19 @@ def save_base64_image(
 	"""Save a base64 / data-URL encoded image as a private File."""
 	if "," in data_url and data_url.strip().startswith("data:"):
 		data_url = data_url.split(",", 1)[1]
-	content = base64.b64decode(data_url)
+	if not isinstance(data_url, str) or len(data_url) > 3_000_000:
+		frappe.throw("Signature image is too large.")
+	try:
+		content = base64.b64decode(data_url, validate=True)
+		with Image.open(io.BytesIO(content)) as image:
+			if image.width * image.height > 4_000_000 or image.width < 2 or image.height < 2:
+				frappe.throw("Invalid signature image size.")
+			image.load()
+			out = io.BytesIO()
+			image.convert("RGBA").save(out, "PNG")
+			content = out.getvalue()
+	except ValueError, OSError:
+		frappe.throw("Upload a valid signature image.")
 	return save_private_file(file_name, content, **kwargs)
 
 
@@ -85,3 +99,29 @@ def _ensure_within_site(path: str) -> str:
 	if not (resolved == site_root or resolved.startswith(site_root + os.sep)):
 		frappe.throw(frappe._("Invalid file path"), frappe.PermissionError)
 	return resolved
+
+
+def read_authorized_pdf(file_url):
+	name = frappe.db.get_value("File", {"file_url": file_url}, "name")
+	if not name:
+		frappe.throw("Upload a PDF first.")
+	doc = frappe.get_doc("File", name)
+	doc.check_permission("read")
+	content = read_file_content(file_url)
+	validate_pdf(content)
+	return content
+
+
+def validate_pdf(content):
+	import fitz
+
+	if len(content) > 15 * 1024 * 1024:
+		frappe.throw("PDFs must be 15 MB or smaller.")
+	try:
+		with fitz.open(stream=content, filetype="pdf") as pdf:
+			if pdf.needs_pass or not 1 <= pdf.page_count <= 100:
+				frappe.throw("Use an unencrypted PDF with 1-100 pages.")
+			if any(list(p.widgets() or []) for p in pdf):
+				frappe.throw("Flatten existing PDF form fields before uploading.")
+	except RuntimeError, ValueError:
+		frappe.throw("This file could not be read as a PDF.")

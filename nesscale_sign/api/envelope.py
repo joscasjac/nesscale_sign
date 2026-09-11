@@ -2,21 +2,24 @@
 # For license information, please see license.txt
 """Envelope API endpoints."""
 
+import json
+
 import frappe
 
 from nesscale_sign.api import load
 from nesscale_sign.services.audit_service import AuditService
 from nesscale_sign.services.envelope_service import EnvelopeService
+from nesscale_sign.utils.security import public_envelope
 
 
 @frappe.whitelist()
 def create_from_template(template: str, data=None):
-	return EnvelopeService.create_from_template(template, load(data) or {}).as_dict()
+	return public_envelope(EnvelopeService.create_from_template(template, load(data) or {}))
 
 
 @frappe.whitelist()
 def create_adhoc(data: dict | None = None):
-	return EnvelopeService.create_adhoc(load(data) or {}).as_dict()
+	return public_envelope(EnvelopeService.create_adhoc(load(data) or {}))
 
 
 @frappe.whitelist()
@@ -26,22 +29,40 @@ def get_envelope(name: str):
 	fields = frappe.get_all(
 		"NS Envelope Field",
 		filters={"envelope": name},
-		fields=["name", "field_key", "field_type", "label", "signer_email",
-			"signer_role", "page", "pos_x", "pos_y", "width", "height",
-			"required", "read_only", "value", "filled", "options", "font_size", "repeat_group"],
+		fields=[
+			"name",
+			"field_key",
+			"field_type",
+			"label",
+			"signer_email",
+			"signer_role",
+			"page",
+			"pos_x",
+			"pos_y",
+			"width",
+			"height",
+			"required",
+			"read_only",
+			"value",
+			"filled",
+			"options",
+			"font_size",
+			"repeat_group",
+		],
 		order_by="page asc, creation asc",
 		limit_page_length=0,
 	)
 	return {
-		"envelope": doc.as_dict(),
+		"envelope": public_envelope(doc),
 		"fields": fields,
 		"audit": AuditService(name).list(),
 	}
 
 
 @frappe.whitelist()
-def list_envelopes(status: str | None = None, search: str | None = None,
-		start: int = 0, page_length: int = 20):
+def list_envelopes(
+	status: str | None = None, search: str | None = None, start: int = 0, page_length: int = 20
+):
 	filters = {}
 	if status:
 		filters["status"] = status
@@ -52,8 +73,19 @@ def list_envelopes(status: str | None = None, search: str | None = None,
 		"NS Envelope",
 		filters=filters,
 		or_filters=or_filters,
-		fields=["name", "title", "status", "organization", "routing_type",
-			"progress", "sender_name", "sent_on", "completed_on", "expires_on", "modified"],
+		fields=[
+			"name",
+			"title",
+			"status",
+			"organization",
+			"routing_type",
+			"progress",
+			"sender_name",
+			"sent_on",
+			"completed_on",
+			"expires_on",
+			"modified",
+		],
 		order_by="modified desc",
 		start=int(start),
 		page_length=int(page_length),
@@ -96,15 +128,28 @@ def update_envelope(name: str, data=None):
 	if doc.status != "Draft":
 		frappe.throw(frappe._("Only draft envelopes can be edited."))
 	data = load(data) or {}
+	if data.get("pdf_file") and data["pdf_file"] != doc.source_pdf:
+		from nesscale_sign.services.pdf_service import get_page_count
+		from nesscale_sign.utils.files import read_authorized_pdf
+
+		doc.page_count = get_page_count(read_authorized_pdf(data["pdf_file"]))
+		doc.source_pdf = data["pdf_file"]
 	for field in ("title", "routing_type", "email_subject", "email_message", "message", "expires_on"):
 		if field in data:
 			doc.set(field, data[field])
+	if "source_doctype" in data or "source_name" in data:
+		from nesscale_sign.services.envelope_service import _resolve_source_doc
+
+		source = _resolve_source_doc(data.get("source_doctype"), data.get("source_name"))
+		doc.metadata_json = (
+			json.dumps({"ref_doctype": source.doctype, "ref_name": source.name}) if source else None
+		)
 	if "signers" in data:
 		EnvelopeService._apply_signers(doc, data["signers"], None)
 	doc.save()
 	if "signers" in data:
 		EnvelopeService(name).remap_field_signers()
-	return doc.as_dict()
+	return public_envelope(doc)
 
 
 @frappe.whitelist()
@@ -124,13 +169,13 @@ def save_envelope_fields(name: str, fields=None):
 @frappe.whitelist()
 def send_envelope(name: str):
 	frappe.get_doc("NS Envelope", name).check_permission("write")
-	return EnvelopeService(name).send().as_dict()
+	return public_envelope(EnvelopeService(name).send())
 
 
 @frappe.whitelist()
 def void_envelope(name: str, reason: str | None = None):
 	frappe.get_doc("NS Envelope", name).check_permission("write")
-	return EnvelopeService(name).void(reason).as_dict()
+	return public_envelope(EnvelopeService(name).void(reason))
 
 
 @frappe.whitelist()
@@ -187,3 +232,29 @@ def _stream_private_file(file_url: str, download_name: str):
 	frappe.local.response.filecontent = content
 	frappe.local.response.type = "pdf"
 	frappe.local.response.display_content_as = "attachment"
+
+
+@frappe.whitelist()
+def retry_completion(name: str):
+	doc = frappe.get_doc("NS Envelope", name)
+	doc.check_permission("write")
+	from nesscale_sign.services.finalization import schedule_finalization
+
+	schedule_finalization(name)
+	return {"status": "processing"}
+
+
+@frappe.whitelist()
+def preview_pdf(name: str):
+	doc = frappe.get_doc("NS Envelope", name)
+	doc.check_permission("read")
+	_stream_private_file(doc.signed_pdf if doc.status == "Completed" else doc.source_pdf, f"{doc.name}.pdf")
+
+
+@frappe.whitelist()
+def download_certificate(name: str):
+	doc = frappe.get_doc("NS Envelope", name)
+	doc.check_permission("read")
+	if not doc.certificate_pdf:
+		frappe.throw("The completion record is not ready yet.")
+	_stream_private_file(doc.certificate_pdf, f"{doc.name}-certificate.pdf")

@@ -55,6 +55,14 @@ AUTO_FIELD_TYPES = {"Date Signed"}
 STATIC_FIELD_TYPES = {"Label"}
 
 DEFAULT_SIGNER_PALETTE = [
-	"#2563EB", "#DC2626", "#059669", "#D97706", "#7C3AED",
-	"#DB2777", "#0891B2", "#65A30D", "#EA580C", "#4F46E5",
+	"#2563EB",
+	"#DC2626",
+	"#059669",
+	"#D97706",
+	"#7C3AED",
+	"#DB2777",
+	"#0891B2",
+	"#65A30D",
+	"#EA580C",
+	"#4F46E5",
 ]

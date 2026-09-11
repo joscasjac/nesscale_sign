@@ -22,14 +22,27 @@ class NSEnvelope(Document):
 			self.sender_name = frappe.db.get_value("User", self.sender, "full_name") or self.sender_email
 
 	def validate(self):
+		before = self.get_doc_before_save()
+		if not self.flags.esign_transition and (
+			self.status != "Draft" or (before and before.status != "Draft")
+		):
+			frappe.throw("Sent documents can only change through the signing workflow.")
 		self._assign_signer_colors()
 		self._validate_signing_order()
 		self.recompute_progress()
 
 	def _assign_signer_colors(self):
 		palette = [
-			"#2563EB", "#DC2626", "#059669", "#D97706", "#7C3AED",
-			"#DB2777", "#0891B2", "#65A30D", "#EA580C", "#4F46E5",
+			"#2563EB",
+			"#DC2626",
+			"#059669",
+			"#D97706",
+			"#7C3AED",
+			"#DB2777",
+			"#0891B2",
+			"#65A30D",
+			"#EA580C",
+			"#4F46E5",
 		]
 		for idx, signer in enumerate(self.signers or []):
 			if not signer.color:
@@ -68,3 +81,7 @@ class NSEnvelope(Document):
 			if signer.token == token:
 				return signer
 		return None
+
+	def on_trash(self):
+		if self.status != "Draft":
+			frappe.throw("Sent documents cannot be deleted.")

@@ -109,7 +109,7 @@ class IntegrationService:
 		for row in rows:
 			try:
 				meta = json.loads(row.metadata_json or "{}")
-			except (ValueError, TypeError):
+			except ValueError, TypeError:
 				continue
 			if meta.get("ref_doctype") == doc.doctype and meta.get("ref_name") == doc.name:
 				EnvelopeService(row.name).void(f"Reference {doc.doctype} {doc.name} was {verb}")
@@ -153,9 +153,7 @@ class IntegrationService:
 			},
 		)
 		# Auto-send only when every signer is fully resolved (name + email).
-		all_complete = bool(signers) and all(
-			s.get("signer_email") and s.get("signer_name") for s in signers
-		)
+		all_complete = bool(signers) and all(s.get("signer_email") and s.get("signer_name") for s in signers)
 		if tmpl.trigger_auto_send and all_complete:
 			EnvelopeService(env.name).send()
 

@@ -26,7 +26,9 @@
   "sec_meta",
   "decline_reason",
   "ip_address",
-  "user_agent"
+  "user_agent",
+  "consent_version",
+  "consent_text"
  ],
  "fields": [
   {
@@ -96,7 +98,9 @@
    "fieldname": "token",
    "fieldtype": "Data",
    "label": "Token",
-   "read_only": 1
+   "read_only": 1,
+   "permlevel": 1,
+   "hidden": 1
   },
   {
    "fieldname": "access_count",
@@ -159,6 +163,18 @@
    "fieldname": "user_agent",
    "fieldtype": "Small Text",
    "label": "User Agent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "consent_version",
+   "label": "Consent version",
+   "fieldtype": "Small Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "consent_text",
+   "label": "Consent text",
+   "fieldtype": "Small Text",
    "read_only": 1
   }
  ],

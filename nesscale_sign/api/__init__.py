@@ -18,7 +18,7 @@ def load(value):
 	if isinstance(value, str):
 		try:
 			return json.loads(value)
-		except (ValueError, TypeError):
+		except ValueError, TypeError:
 			return value
 	return value
 

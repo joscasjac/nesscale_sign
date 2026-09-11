@@ -35,12 +35,26 @@ def make_template(title="Test Template", roles=None, fields=None, publish=True):
 	if fields is None:
 		fields = [
 			{
-				"field_type": "Text", "label": "Full Name", "signer_role": "signer",
-				"page": 1, "pos_x": 0.1, "pos_y": 0.3, "width": 0.3, "height": 0.04, "required": 1,
+				"field_type": "Text",
+				"label": "Full Name",
+				"signer_role": "signer",
+				"page": 1,
+				"pos_x": 0.1,
+				"pos_y": 0.3,
+				"width": 0.3,
+				"height": 0.04,
+				"required": 1,
 			},
 			{
-				"field_type": "Signature", "label": "Sign", "signer_role": "signer",
-				"page": 1, "pos_x": 0.1, "pos_y": 0.6, "width": 0.2, "height": 0.06, "required": 1,
+				"field_type": "Signature",
+				"label": "Sign",
+				"signer_role": "signer",
+				"page": 1,
+				"pos_x": 0.1,
+				"pos_y": 0.6,
+				"width": 0.2,
+				"height": 0.06,
+				"required": 1,
 			},
 		]
 	TemplateService(tmpl.name).save_fields(fields)
@@ -60,7 +74,9 @@ def make_envelope(template, signers, routing="Sequential", send=True):
 
 def two_signers_single():
 	"""A single-signer list bound to the default 'signer' role."""
-	return [{"signer_name": "Solo", "signer_email": "solo@test.com", "role_key": "signer", "signing_order": 1}]
+	return [
+		{"signer_name": "Solo", "signer_email": "solo@test.com", "role_key": "signer", "signing_order": 1}
+	]
 
 
 def signature_payload():

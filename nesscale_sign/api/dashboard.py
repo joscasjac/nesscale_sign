@@ -11,8 +11,12 @@ from nesscale_sign.utils.constants import EnvelopeStatus
 @frappe.whitelist()
 def get_stats():
 	statuses = [
-		EnvelopeStatus.DRAFT, EnvelopeStatus.SENT, EnvelopeStatus.IN_PROGRESS,
-		EnvelopeStatus.COMPLETED, EnvelopeStatus.DECLINED, EnvelopeStatus.VOIDED,
+		EnvelopeStatus.DRAFT,
+		EnvelopeStatus.SENT,
+		EnvelopeStatus.IN_PROGRESS,
+		EnvelopeStatus.COMPLETED,
+		EnvelopeStatus.DECLINED,
+		EnvelopeStatus.VOIDED,
 		EnvelopeStatus.EXPIRED,
 	]
 	# Permission-aware: get_list applies the NS Envelope query conditions, so
@@ -40,10 +44,14 @@ def get_stats():
 		(user_email,),
 	)[0][0]
 
-	templates = len(frappe.get_list(
-		"NS Template", filters={"status": "Active"},
-		fields=["name"], limit_page_length=0,
-	))
+	templates = len(
+		frappe.get_list(
+			"NS Template",
+			filters={"status": "Active"},
+			fields=["name"],
+			limit_page_length=0,
+		)
+	)
 	return {
 		"counts": counts,
 		"total": total,
@@ -59,8 +67,7 @@ def get_stats():
 def recent_activity(limit: int = 10):
 	return frappe.get_list(
 		"NS Envelope",
-		fields=["name", "title", "status", "progress", "sender_name",
-			"sent_on", "completed_on", "modified"],
+		fields=["name", "title", "status", "progress", "sender_name", "sent_on", "completed_on", "modified"],
 		order_by="modified desc",
 		page_length=int(limit),
 	)
