@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
+const props = defineProps({ initialName: { type: String, default: "" } });
 const emit = defineEmits(["change"]);
 const uploadError = ref("");
 const canvas = ref(null),
 	mode = ref("Type"),
-	name = ref("");
+	name = ref(props.initialName);
 let drawing = false;
 function ctx() {
 	return canvas.value.getContext("2d");
@@ -83,7 +84,10 @@ async function uploadSignature(event) {
 		URL.revokeObjectURL(url);
 	}
 }
-onMounted(clear);
+onMounted(() => {
+	if (name.value.trim()) type();
+	else clear();
+});
 </script>
 <template>
 	<div class="signature-pad">

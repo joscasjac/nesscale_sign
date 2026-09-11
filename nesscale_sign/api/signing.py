@@ -76,3 +76,18 @@ def download_completed(token: str):
 	frappe.local.response.filecontent = files.read_file_content(svc.envelope.signed_pdf)
 	frappe.local.response.type = "pdf"
 	frappe.local.response.display_content_as = "attachment"
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=120, seconds=60)  # nosemgrep: guest-whitelisted-method — token-authenticated
+def download_certificate(token: str):
+	"""The same signer token grants access to its completed evidence record."""
+	svc = SigningService(token)
+	if svc.envelope.status != "Completed" or not svc.envelope.certificate_pdf:
+		frappe.throw(frappe._("The completion certificate is not available."))
+	from nesscale_sign.utils import files
+
+	frappe.local.response.filename = f"{svc.envelope.name}-certificate.pdf"
+	frappe.local.response.filecontent = files.read_file_content(svc.envelope.certificate_pdf)
+	frappe.local.response.type = "pdf"
+	frappe.local.response.display_content_as = "attachment"

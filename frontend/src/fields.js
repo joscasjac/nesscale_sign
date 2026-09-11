@@ -27,3 +27,11 @@ export function repeatField(field, pageCount, existing, makeId = () => crypto.ra
 	field.repeat_group = group;
 	return copies;
 }
+
+export function nextRequiredField(fields, complete) {
+	return (
+		[...fields]
+			.sort((a, b) => a.page - b.page || a.pos_y - b.pos_y || a.pos_x - b.pos_x)
+			.find((field) => field.required && !complete(field)) || null
+	);
+}

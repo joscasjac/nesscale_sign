@@ -20,7 +20,11 @@ An independently maintained fork of [Nesscale Sign](https://github.com/bhavesh95
 - Optional certificate-based PDF sealing with pyHanko. No signing certificate is included. Sealing is visibly reported as **not configured** until an operator configures one.
 - Full frontend source, a reproducible build, and a loopback-only local preview with fictional data.
 
-![Signing experience with a fictional document](docs/images/signing.png)
+![Guided signature adoption with a fictional document](docs/images/signing-popup.png)
+
+Signing fields open an editor on click. Applying a field automatically advances to the next required field, across pages, then focuses final consent. The final submission always requires **Finish signing**.
+
+[Example completion certificate](docs/examples/completion-certificate.pdf) · [Deployment handoff and sealing setup](docs/DEPLOYMENT.md)
 
 ![Document detail and activity](docs/images/document-detail.png)
 

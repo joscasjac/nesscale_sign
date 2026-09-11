@@ -36,3 +36,5 @@ The caller must be allowed to read the File and write the optional source record
 `signing.submit` is token-scoped and POST-only. Supply values, a valid signature image where required, and `consent: true`. The final signer receives `processing`; poll context/status for completion. The long worker produces PDFs after the signing transaction commits. Failures preserve collected signatures and are visible to the sender.
 
 This fork does not promise a versioned third-party webhook delivery service. Same-site ERP integration uses existing Frappe document triggers and attachment linkage; external consumers can poll the authenticated status endpoint.
+
+Completed signers can download evidence with GET `signing.download_certificate?token=...`. The token is validated and the envelope must be completed.

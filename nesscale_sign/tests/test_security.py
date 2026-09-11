@@ -83,6 +83,7 @@ class TestSigningBoundaries(FrappeTestCase):
 
 		with fitz.open(stream=files.read_file_content(env.certificate_pdf), filetype="pdf") as pdf:
 			text = " ".join(p.get_text() for p in pdf)
+			self.assertGreater(sum(len(p.get_images()) for p in pdf), 0)
 		self.assertIn("Completed", text)
 		self.assertIn("All signers completed", text)
 
@@ -166,3 +167,15 @@ class TestSigningBoundaries(FrappeTestCase):
 			self.template.name, {"signers": two_signers_single(), "expires_on": expires}
 		)
 		self.assertEqual(str(env.expires_on), str(expires))
+
+	def test_certificate_download_requires_completion_and_valid_token(self):
+		from nesscale_sign.api.signing import download_certificate
+
+		with self.assertRaises(frappe.ValidationError):
+			download_certificate(self.token)
+		self._sign()
+		EnvelopeService(self.envelope.name).finalize()
+		download_certificate(self.token)
+		self.assertTrue(frappe.local.response.filecontent.startswith(b"%PDF"))
+		with self.assertRaises(frappe.PermissionError):
+			download_certificate("invalid-certificate-token")

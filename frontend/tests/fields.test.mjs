@@ -19,3 +19,12 @@ test('repeat refuses a layout over the server field limit', () => {
   const f = {page:1};
   assert.throws(() => repeatField(f, 3, Array.from({length:499}, () => ({page:1}))), /500/);
 });
+
+test('guided signing advances across pages and skips completed or optional fields', async () => {
+  const { nextRequiredField } = await import('../src/fields.js');
+  const fields = [{field_key:'later',page:2,pos_y:.1,pos_x:.1,required:1},{field_key:'optional',page:1,pos_y:0,pos_x:0,required:0},{field_key:'first',page:1,pos_y:.2,pos_x:.1,required:1}];
+  assert.equal(nextRequiredField(fields, () => false).field_key, 'first');
+  assert.equal(nextRequiredField(fields, f => f.field_key === 'first').field_key, 'later');
+  assert.equal(nextRequiredField(fields, () => true), null);
+  assert.equal(fields[0].field_key, 'later');
+});

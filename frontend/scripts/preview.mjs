@@ -1,4 +1,5 @@
 // A deliberately separate, loopback-only preview service. Never built or shipped to Frappe.
+import { readFile } from "node:fs/promises";
 import express from "express";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { spawn } from "node:child_process";
@@ -484,6 +485,12 @@ app.all("/api/method/nesscale_sign.api.:module.:method", async (req, res) => {
         documents.get(signId).envelope.status = "Declined";
         result = { status: "declined" };
         break;
+      case "signing.download_certificate": {
+        if (documents.get(signId).envelope.status !== 'Completed') throw Error('The completion certificate is not available.');
+        const certificate = await readFile(new URL('../../docs/examples/completion-certificate.pdf', import.meta.url));
+        res.type('pdf').set('Content-Disposition', 'attachment; filename="fictional-completion-certificate.pdf"').send(certificate);
+        return;
+      }
       case "signing.download_completed": {
         const d = documents.get(signId);
         res

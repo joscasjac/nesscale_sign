@@ -11,15 +11,15 @@ Design notes
 * Values and signatures are drawn directly onto the page content stream. The
   output therefore contains **no AcroForm widgets**: it is inherently flat and
   cannot be re-edited in a PDF form editor.
-* A certificate page is appended summarising signers and the full audit trail,
-  including the audit hash-chain head so the document is self-verifying.
+* A separate completion certificate records signers, signatures and the audit
+  trail. An optional PKI seal provides cryptographic integrity.
 """
 
 import io
+from datetime import UTC
 
 import fitz  # PyMuPDF
 import frappe
-from frappe.utils import format_datetime
 
 from nesscale_sign.utils.constants import SIGNATURE_FIELD_TYPES
 
@@ -141,18 +141,22 @@ def generate_filled_pdf(
 
 
 def build_certificate(envelope: "frappe.Document", audit_rows: list[dict], chain: dict) -> bytes:
-	"""Render a certificate of completion page using ReportLab."""
+	"""Completion evidence with captured signatures; distinct from a PKI seal."""
 	from reportlab.lib import colors
 	from reportlab.lib.pagesizes import A4
 	from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 	from reportlab.lib.units import mm
 	from reportlab.platypus import (
+		Image,
+		KeepTogether,
 		Paragraph,
 		SimpleDocTemplate,
 		Spacer,
 		Table,
 		TableStyle,
 	)
+
+	from nesscale_sign.utils import files
 
 	buffer = io.BytesIO()
 	doc = SimpleDocTemplate(
@@ -165,105 +169,159 @@ def build_certificate(envelope: "frappe.Document", audit_rows: list[dict], chain
 		title="Certificate of Completion",
 	)
 	styles = getSampleStyleSheet()
-	h1 = ParagraphStyle("h1", parent=styles["Heading1"], fontSize=18, textColor=colors.HexColor("#111827"))
-	h2 = ParagraphStyle("h2", parent=styles["Heading2"], fontSize=12, textColor=colors.HexColor("#374151"))
-	normal = ParagraphStyle("n", parent=styles["Normal"], fontSize=9, leading=13)
+	h1 = ParagraphStyle(
+		"certificate-title",
+		parent=styles["Heading1"],
+		fontSize=25,
+		leading=30,
+		textColor=colors.HexColor("#24362d"),
+	)
+	h2 = ParagraphStyle(
+		"certificate-section", parent=styles["Heading2"], fontSize=12, textColor=colors.HexColor("#255b45")
+	)
+	normal = ParagraphStyle(
+		"certificate-body", parent=styles["Normal"], fontSize=9, leading=13, wordWrap="CJK"
+	)
 	small = ParagraphStyle(
-		"s", parent=styles["Normal"], fontSize=7.5, leading=10, textColor=colors.HexColor("#6B7280")
+		"certificate-small", parent=normal, fontSize=7.5, leading=10, textColor=colors.HexColor("#626963")
 	)
 
-	story = [Paragraph("Certificate of Completion", h1), Spacer(1, 6)]
-	story.append(
-		Paragraph(f"Envelope: <b>{frappe.utils.escape_html(envelope.title)}</b> ({envelope.name})", normal)
-	)
-	story.append(Paragraph(f"Status: <b>{envelope.status}</b>", normal))
-	if envelope.completed_on:
-		story.append(Paragraph(f"Completed: {format_datetime(envelope.completed_on)}", normal))
-	story.append(
-		Paragraph(
-			f"Sender: {frappe.utils.escape_html(envelope.sender_name or '')} &lt;{envelope.sender_email or ''}&gt;",
-			normal,
-		)
-	)
-	story.append(Spacer(1, 12))
+	def text(value, style=normal):
+		return Paragraph(frappe.utils.escape_html(str(value or "Not recorded")), style)
 
-	# Signers table
-	story.append(Paragraph("Signers", h2))
-	signer_data = [["Name", "Email", "Status", "Signed On", "IP Address"]]
-	for s in envelope.signers:
-		signer_data.append(
+	def stamp(value):
+		if not value:
+			return "Not recorded"
+		from datetime import timezone
+		from zoneinfo import ZoneInfo
+
+		instant = frappe.utils.get_datetime(value)
+		if instant.tzinfo is None:
+			instant = instant.replace(tzinfo=ZoneInfo(frappe.utils.get_system_timezone()))
+		return instant.astimezone(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+	story = [
+		text("OPEN E-SIGN ERPNext", small),
+		Spacer(1, 9),
+		text("Certificate of Completion", h1),
+		Spacer(1, 10),
+		text(envelope.title, h2),
+		text(f"Reference: {envelope.name}"),
+		text(f"Status: {envelope.status}"),
+		text(f"Sent: {stamp(envelope.sent_on)}"),
+		text(f"Completed: {stamp(envelope.completed_on)}"),
+		text(f"Sender: {envelope.sender_name or ''} <{envelope.sender_email or ''}>"),
+		Spacer(1, 18),
+	]
+	signatures = frappe.get_all(
+		"NS Signature",
+		filters={"envelope": envelope.name},
+		fields=["signer_email", "signature_image", "signature_type"],
+		order_by="creation asc",
+		limit_page_length=0,
+	)
+	by_email = {row.signer_email: row for row in signatures}
+	for signer in envelope.signers:
+		left = [
+			text(signer.signer_name, h2),
+			text(signer.signer_email),
+			Spacer(1, 6),
+			text(f"Status: {signer.status}"),
+			text(f"Viewed: {stamp(signer.viewed_on)}"),
+			text(f"Signed: {stamp(signer.signed_on)}"),
+			text(f"IP address: {signer.ip_address or 'Not recorded'}"),
+			text(
+				f"Access method: {signer.auth_method if signer.auth_method and signer.auth_method != 'None' else 'Email signing link'}",
+				small,
+			),
+		]
+		right = [text("Captured signature", small), Spacer(1, 8)]
+		record = by_email.get(signer.signer_email)
+		if record and record.signature_image:
+			image = Image(io.BytesIO(files.read_file_content(record.signature_image)))
+			scale = min(70 * mm / image.imageWidth, 25 * mm / image.imageHeight)
+			image.drawWidth = image.imageWidth * scale
+			image.drawHeight = image.imageHeight * scale
+			image.hAlign = "LEFT"
+			right.extend([image, Spacer(1, 8), text(f"Entry method: {record.signature_type}", small)])
+		else:
+			right.append(text("No signature image captured.", small))
+		right.extend(
 			[
-				s.signer_name or "",
-				s.signer_email or "",
-				s.status or "",
-				format_datetime(s.signed_on) if s.signed_on else "—",
-				s.ip_address or "—",
+				text(f"Electronic consent: {signer.consent_version or 'Not recorded'}", small),
+				text(signer.consent_text or "Consent text not recorded", small),
 			]
 		)
-	signer_table = Table(signer_data, colWidths=[32 * mm, 45 * mm, 20 * mm, 38 * mm, 35 * mm])
-	signer_table.setStyle(_table_style(colors))
-	story.append(signer_table)
-	story.append(Spacer(1, 14))
-
-	# Audit trail
-	story.append(Paragraph("Audit Trail", h2))
-	audit_data = [["Timestamp", "Action", "Actor", "IP", "Details"]]
-	for row in audit_rows:
-		audit_data.append(
-			[
-				format_datetime(row.get("timestamp")) if row.get("timestamp") else "",
-				row.get("action") or "",
-				row.get("signer_email") or row.get("signer_name") or "system",
-				row.get("ip_address") or "—",
-				(row.get("details") or "")[:60],
-			]
+		block = Table([[left, right]], colWidths=[87 * mm, 87 * mm])
+		block.setStyle(
+			TableStyle(
+				[
+					("VALIGN", (0, 0), (-1, -1), "TOP"),
+					("LINEABOVE", (0, 0), (-1, 0), 0.7, colors.HexColor("#b6c5b8")),
+					("TOPPADDING", (0, 0), (-1, -1), 12),
+					("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+				]
+			)
 		)
-	audit_table = Table(audit_data, colWidths=[34 * mm, 26 * mm, 45 * mm, 28 * mm, 37 * mm], repeatRows=1)
-	audit_table.setStyle(_table_style(colors))
-	story.append(audit_table)
-	story.append(Spacer(1, 14))
-
+		story.extend([KeepTogether([block]), Spacer(1, 10)])
+	story.extend([text("Document integrity", h2)])
 	for label, value in (
 		("Original SHA-256", envelope.source_sha256),
 		("Completed PDF SHA-256", envelope.signed_sha256),
 		("PDF seal", envelope.seal_status),
 	):
-		story.append(Paragraph(f"{label}: {frappe.utils.escape_html(value or 'Not recorded')}", small))
-	chain_state = "Consistent" if chain.get("valid") else "Broken"
+		story.append(text(f"{label}: {value or 'Not recorded'}", small))
 	story.append(
-		Paragraph(
-			f"Audit integrity: <b>{chain_state}</b> &mdash; {chain.get('count', 0)} chained events. "
-			"The application audit chain was checked at completion. Database hashes alone are not an independently trusted digital signature.",
+		text(
+			f"Audit integrity: {'Consistent' if chain.get('valid') else 'Broken'}; {chain.get('count', 0)} chained events.",
 			small,
 		)
 	)
-	story.append(
-		Paragraph(
-			"This certificate was generated by Open E-Sign ERPNext and is an integral part of the signed document.",
-			small,
+	story.extend([Spacer(1, 14), text("Audit Trail", h2)])
+	audit_data = [[text(label, small) for label in ("Time", "Event", "Actor / details")]]
+	for row in audit_rows:
+		audit_data.append(
+			[
+				text(stamp(row.get("timestamp")), small),
+				text(row.get("action"), small),
+				text(
+					f"{row.get('signer_email') or row.get('signer_name') or 'System'}: {row.get('details') or ''}",
+					small,
+				),
+			]
+		)
+	table = Table(audit_data, colWidths=[47 * mm, 32 * mm, 95 * mm], repeatRows=1)
+	table.setStyle(
+		TableStyle(
+			[
+				("VALIGN", (0, 0), (-1, -1), "TOP"),
+				("LINEBELOW", (0, 0), (-1, 0), 0.5, colors.HexColor("#b6c5b8")),
+				("TOPPADDING", (0, 0), (-1, -1), 6),
+				("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+			]
 		)
 	)
-
-	doc.build(story)
-	return buffer.getvalue()
-
-
-def _table_style(colors):
-	from reportlab.platypus import TableStyle
-
-	return TableStyle(
+	story.extend(
 		[
-			("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2563EB")),
-			("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-			("FONTSIZE", (0, 0), (-1, -1), 7.5),
-			("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-			("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#D1D5DB")),
-			("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F3F4F6")]),
-			("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-			("TOPPADDING", (0, 0), (-1, -1), 3),
-			("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+			table,
+			Spacer(1, 14),
+			text(
+				"This completion record describes events recorded by Open E-Sign ERPNext. A signature image is not a cryptographic seal or independent proof of identity. Database audit hashes alone are not an independently trusted digital signature. Location is not inferred from an IP address.",
+				small,
+			),
 		]
 	)
+
+	def footer(canvas, document):
+		canvas.saveState()
+		canvas.setFont("Helvetica", 8)
+		canvas.setFillColor(colors.HexColor("#626963"))
+		canvas.drawString(18 * mm, 10 * mm, "Open E-Sign ERPNext | Completion record")
+		canvas.drawRightString(192 * mm, 10 * mm, f"Page {document.page}")
+		canvas.restoreState()
+
+	doc.build(story, onFirstPage=footer, onLaterPages=footer)
+	return buffer.getvalue()
 
 
 def append_certificate(pdf_bytes: bytes, certificate_bytes: bytes) -> bytes:

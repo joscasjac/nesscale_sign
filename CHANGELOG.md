@@ -20,3 +20,8 @@ Not deployed. Independent security review and production-readiness checks remain
 - Added template editing, duplicate/archive actions, recipient mappings, automation controls, expiry and activity overview.
 - Unified the document-signature logo and home navigation.
 - Fixed read-only prefills and explicit expiry being dropped during creation.
+
+### Guided signing and completion evidence
+- Click document fields to open accessible name/signature editors; automatically advance to the next required field and final consent.
+- Add captured signatures and UTC event timestamps to the completion certificate, with signer download access.
+- Record sealing setup requirements in the deployment handoff; no production changes.

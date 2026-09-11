@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, onBeforeUnmount } from "vue";
+import { ref, onMounted, computed, onBeforeUnmount, nextTick, defineAsyncComponent } from "vue";
 import {
 	FileText,
 	Files,
@@ -20,12 +20,12 @@ import {
 	Menu,
 } from "@lucide/vue";
 import { api, date, downloadUrl, upload } from "./api";
-import PdfPage from "./components/PdfPage.vue";
+const PdfPage = defineAsyncComponent(() => import("./components/PdfPage.vue"));
 import ActivitySummary from "./components/ActivitySummary.vue";
 import TemplateOptions from "./components/TemplateOptions.vue";
 import BrandLogo from "./components/BrandLogo.vue";
-import { fieldTypes, repeatField } from "./fields";
-import SignaturePad from "./components/SignaturePad.vue";
+import { fieldTypes, repeatField, nextRequiredField } from "./fields";
+import SigningFieldDialog from "./components/SigningFieldDialog.vue";
 const theme = ref("light");
 function setTheme(value) {
 	theme.value = value;
@@ -80,6 +80,36 @@ const form = ref({
 	source_doctype: "",
 	source_name: "",
 });
+const activeSigningField = ref(null);
+const signatureTypes = ["Signature", "Initial", "Stamp"];
+function fieldComplete(field) {
+	return signatureTypes.includes(field.field_type)
+		? !!signature.value
+		: !!values.value[field.field_key];
+}
+async function openSigningField(field) {
+	if (
+		!signContext.value?.signer.can_sign ||
+		!field.editable ||
+		["Label", "Date Signed"].includes(field.field_type)
+	)
+		return;
+	page.value = field.page;
+	activeSigningField.value = field;
+}
+function nextSigningField() {
+	const field = nextRequiredField(ownFields.value, fieldComplete);
+	if (field) openSigningField(field);
+	else nextTick(() => document.getElementById("finish-signing-consent")?.focus());
+}
+async function applySigningField(result) {
+	if (signatureTypes.includes(result.field.field_type)) signature.value = result.signature;
+	else values.value[result.field.field_key] = result.value;
+	activeSigningField.value = null;
+	await nextTick();
+	if (requiredRemaining.value) nextSigningField();
+	else nextTick(() => document.getElementById("finish-signing-consent")?.focus());
+}
 let poll;
 const isSigner = computed(() => route.value.startsWith("/sign/"));
 const token = computed(() => decodeURIComponent(route.value.split("/")[2] || ""));
@@ -118,6 +148,11 @@ function goHome() {
 	else go(root);
 }
 function go(path) {
+	activeSigningField.value = null;
+	if (path !== route.value) {
+		signature.value = null;
+		consent.value = false;
+	}
 	if (path === root || path === root + "/templates") {
 		filter.value = "All documents";
 		query.value = "";
@@ -1345,6 +1380,15 @@ onBeforeUnmount(() => {
 					</div>
 				</section>
 				<section v-else-if="isSigner && signContext" class="sign-content">
+					<SigningFieldDialog
+						:field="activeSigningField"
+						:value="activeSigningField ? values[activeSigningField.field_key] : ''"
+						:signature="signature"
+						:signer-name="signContext.signer.name"
+						:signer-email="signContext.signer.email"
+						@close="activeSigningField = null"
+						@save="applySigningField"
+					/>
 					<div class="page-title">
 						<div>
 							<p class="sender-line">
@@ -1373,6 +1417,11 @@ onBeforeUnmount(() => {
 							class="button primary"
 							:href="downloadUrl('signing.download_completed', { token })"
 							><Download :size="16" /> Download PDF</a
+						>
+						<a
+							class="button"
+							:href="downloadUrl('signing.download_certificate', { token })"
+							>Completion certificate</a
 						>
 					</div>
 					<div v-else-if="signContext.signer.status === 'Signed'" class="notice">
@@ -1412,14 +1461,52 @@ onBeforeUnmount(() => {
 								:url="signContext.pdf_url"
 								:page="page"
 								@loaded="pages = $event"
-								><span
+							>
+								<template
 									v-for="f in signContext.fields.filter((f) => f.page === page)"
 									:key="f.field_key"
-									:class="['placed-field', 'sign-preview-field']"
-									:style="position(f)"
-									>{{ values[f.field_key] || f.label }}</span
-								></PdfPage
-							>
+								>
+									<button
+										v-if="
+											f.editable &&
+											signContext.signer.can_sign &&
+											!['Label', 'Date Signed'].includes(f.field_type)
+										"
+										type="button"
+										:class="[
+											'placed-field',
+											'sign-click-field',
+											{ 'field-complete': fieldComplete(f) },
+										]"
+										:style="position(f)"
+										:aria-label="
+											(fieldComplete(f) ? 'Edit ' : 'Complete ') +
+											(f.label || f.field_type)
+										"
+										@click="openSigningField(f)"
+									>
+										<img
+											v-if="
+												signatureTypes.includes(f.field_type) && signature
+											"
+											:src="signature.image"
+											alt="Your adopted signature"
+										/>
+										<span v-else>{{
+											values[f.field_key] ||
+											(signatureTypes.includes(f.field_type)
+												? "Click to sign"
+												: f.label || f.field_type)
+										}}</span>
+									</button>
+									<span
+										v-else
+										class="placed-field sign-preview-field"
+										:style="position(f)"
+										>{{ values[f.field_key] || f.value || f.label }}</span
+									>
+								</template>
+							</PdfPage>
 						</div>
 						<aside class="sign-panel">
 							<h2>Your details</h2>
@@ -1429,68 +1516,61 @@ onBeforeUnmount(() => {
 								}}
 							</p>
 							<form v-if="signContext.signer.can_sign" @submit.prevent="sign">
-								<template v-for="f in ownFields" :key="f.field_key"
-									><label
-										v-if="
-											!['Signature', 'Initial', 'Stamp'].includes(
-												f.field_type,
-											)
-										"
-										>{{ f.label || f.field_type }} {{ f.required ? "*" : ""
-										}}<select
-											v-if="f.field_type === 'Dropdown'"
-											v-model="values[f.field_key]"
-											:required="!!f.required"
-										>
-											<option value="">Select an option</option>
-											<option
-												v-for="o in (f.options || '').split('\n')"
-												:value="o"
-											>
-												{{ o }}
-											</option></select
-										><input
-											v-else-if="f.field_type === 'Checkbox'"
-											type="checkbox"
-											v-model="values[f.field_key]"
-											true-value="1"
-											false-value=""
-											:required="!!f.required" /><input
-											v-else
-											v-model="values[f.field_key]"
-											:required="!!f.required"
-											maxlength="10000" /></label
-								></template>
-								<h3
-									v-if="
-										ownFields.some((f) =>
-											['Signature', 'Initial', 'Stamp'].includes(
-												f.field_type,
-											),
-										)
-									"
+								<p class="sign-instruction">
+									Click a highlighted field on the document, or start here. We’ll
+									guide you through each required field.
+								</p>
+								<button
+									type="button"
+									class="primary full"
+									v-if="requiredRemaining"
+									@click="nextSigningField"
 								>
-									Your signature
-								</h3>
-								<SignaturePad
-									v-if="
-										ownFields.some((f) =>
-											['Signature', 'Initial', 'Stamp'].includes(
-												f.field_type,
-											),
-										)
-									"
-									@change="signature = $event"
-								/><label class="check-label consent"
-									><input type="checkbox" v-model="consent" required /><span>{{
-										signContext.consent_text
-									}}</span></label
+									{{
+										ownFields.some(fieldComplete)
+											? "Next required field"
+											: "Start signing"
+									}}
+									<ArrowUpRight :size="16" />
+								</button>
+								<p role="status" class="sign-progress">
+									{{
+										ownFields.filter((f) => f.required).length -
+										requiredRemaining
+									}}
+									of {{ ownFields.filter((f) => f.required).length }} required
+									fields complete
+								</p>
+								<ol class="sign-field-list">
+									<li v-for="f in ownFields" :key="f.field_key">
+										<button type="button" @click="openSigningField(f)">
+											<span
+												>{{ fieldComplete(f) ? "✓" : "○" }}
+												{{ f.label || f.field_type }}</span
+											><small
+												>Page {{ f.page
+												}}{{ f.required ? "" : " · Optional" }}</small
+											>
+										</button>
+									</li>
+								</ol>
+								<p v-if="!requiredRemaining" class="notice">
+									All required fields are complete. Review the document, then
+									finish signing below.
+								</p>
+								<label class="check-label consent"
+									><input
+										id="finish-signing-consent"
+										type="checkbox"
+										v-model="consent"
+										required
+									/><span>{{ signContext.consent_text }}</span></label
 								><button
 									class="primary full"
 									:disabled="busy || !consent || requiredRemaining > 0"
 								>
 									<Check :size="17" />
-									{{ busy ? "Saving signature…" : "Agree & sign" }}
+									{{ busy ? "Saving signature…" : "Finish signing" }}
 								</button>
 								<p class="sign-footnote">
 									{{

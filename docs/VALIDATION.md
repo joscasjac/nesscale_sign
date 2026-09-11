@@ -5,9 +5,9 @@ This branch is a local-review release. No Frappe Cloud or production ERPNext dep
 ## Passed
 
 - Fresh app installation on an isolated Frappe version-16 site, Python 3.14.5, with outgoing email muted.
-- `bench --site esign.localhost run-tests --app nesscale_sign`: **42 tests passed**. Includes sequential/parallel signing, template workflows, reference-document triggers, token expiry, consent, source tampering, retryable completion, unrelated-user access and audit protections.
+- `bench --site esign.localhost run-tests --app nesscale_sign`: **43 tests passed**. Includes sequential/parallel signing, template workflows, reference-document triggers, token expiry, consent, source tampering, retryable completion, unrelated-user access and audit protections.
 - Optional pyHanko 0.36.2 PDF seal: a disposable self-signed local certificate produced a signature verified as intact, valid and trusted against that explicit test trust root. This does not establish public certificate trust.
-- `npm test`: **8 tests passed** for CSRF/session handling, readable server errors, upload limits and URL/date handling.
+- `npm test`: **9 tests passed** for CSRF/session handling, readable server errors, upload limits and URL/date handling.
 - `npm run build`: successful production assets, approximately 149 KB gzip main JavaScript plus the separately loaded PDF worker.
 - `ruff check nesscale_sign` and `git diff --check`: clean.
 - Frontend dependency audit: no reported vulnerabilities at validation time.
@@ -25,3 +25,7 @@ PDF finalization was exercised directly and through the worker entrypoint; a com
 ## Feature restoration follow-up
 
 Chrome verified dark/light switching, the shared home logo on the signer screen, all field-type controls, uploaded-signature mode, and saving edits back to the same template ID. Added regression coverage for repeat-field grouping/limits, explicit expiry and read-only prefill. Administrative Desk screens remain preserved but are not simulated by the local preview.
+
+## Guided signing and certificate follow-up
+
+Chrome verified direct PDF-field activation, automatically opening the next required field, input focus, signature adoption, final consent focus and explicit completion. The fictional preview exposes both downloads. The new certificate was rendered and visually checked; it includes captured signatures and UTC timestamps. Backend regression tests assert certificate image inclusion and completion/token restrictions for signer downloads. Frontend progression tests cover page order and skipping optional/completed fields. PDF rendering now loads separately from the main application bundle.
