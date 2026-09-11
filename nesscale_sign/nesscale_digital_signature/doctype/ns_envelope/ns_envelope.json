@@ -48,7 +48,10 @@
   "signed_sha256",
   "seal_status",
   "finalization_status",
-  "finalization_error"
+  "finalization_error",
+  "builder_json",
+  "email_template",
+  "email_attachments"
  ],
  "fields": [
   {
@@ -299,6 +302,22 @@
    "label": "Processing error",
    "fieldtype": "Small Text",
    "read_only": 1
+  },
+  {
+   "fieldname": "builder_json",
+   "label": "Document builder",
+   "fieldtype": "Long Text"
+  },
+  {
+   "fieldname": "email_template",
+   "label": "Invitation email template",
+   "fieldtype": "Link",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "email_attachments",
+   "label": "Invitation attachments",
+   "fieldtype": "Long Text"
   }
  ],
  "index_web_pages_for_search": 0,

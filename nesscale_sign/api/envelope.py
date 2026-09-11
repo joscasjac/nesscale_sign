@@ -137,7 +137,17 @@ def update_envelope(name: str, data=None):
 
 		doc.page_count = get_page_count(read_authorized_pdf(data["pdf_file"]))
 		doc.source_pdf = data["pdf_file"]
-	for field in ("title", "routing_type", "email_subject", "email_message", "message", "expires_on"):
+	for field in (
+		"title",
+		"routing_type",
+		"email_subject",
+		"email_message",
+		"message",
+		"expires_on",
+		"builder_json",
+		"email_template",
+		"email_attachments",
+	):
 		if field in data:
 			doc.set(field, data[field])
 	if "source_doctype" in data or "source_name" in data:

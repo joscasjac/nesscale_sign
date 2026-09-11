@@ -1,16 +1,18 @@
 // A deliberately separate, loopback-only preview service. Never built or shipped to Frappe.
 import { readFile } from "node:fs/promises";
 import express from "express";
+import {renderBuilder} from "./builder-preview.mjs";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 const app = express();
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: "12mb" }));
 const timestamp = () => new Date().toISOString();
 let serial = 108;
 const storage = new Map();
 const documents = new Map();
 const templates = new Map();
+const emailTemplates=new Map(), attachmentFiles=new Map();
 async function samplePDF() {
   const pdf = await PDFDocument.create(),
     font = await pdf.embedFont(StandardFonts.Helvetica),
@@ -216,11 +218,11 @@ app.post(
       const begin = b.indexOf(Buffer.from("\r\n\r\n")) + 4;
       const end = b.indexOf(Buffer.from("\r\n--" + boundary), begin);
       const content = b.subarray(begin, end);
-      if (!content.subarray(0, 5).equals(Buffer.from("%PDF-")))
-        throw Error("Choose a PDF.");
+
       const url = "/demo/upload-" + serial++ + ".pdf";
       storage.set(url, content);
-      res.json({ message: { file_url: url } });
+      const name="file-"+serial++;attachmentFiles.set(name,{name,file_name:"Uploaded attachment",file_url:url});
+      res.json({ message: { file_url: url, name } });
     } catch {
       res.status(400).json({ message: "Choose a valid PDF under 15 MB." });
     }
@@ -247,6 +249,10 @@ app.all("/api/method/nesscale_sign.api.:module.:method", async (req, res) => {
           Number(args.start || 0) + Number(args.page_length || 20),
         );
     switch (key) {
+      case "builder.render": {const pdf=await renderBuilder(args.data);const url="/demo/built-"+serial+++".pdf";storage.set(url,pdf);result={file_url:url};break;}
+      case "mail.list_templates": result=[...emailTemplates.values()];break;
+      case "mail.create_template": result={name:args.name,subject:args.subject,body:args.body};emailTemplates.set(args.name,result);break;
+      case "mail.list_attachments": result=JSON.parse(args.names||"[]").map(id=>attachmentFiles.get(id)).filter(Boolean);break;
       case "contacts.search_contacts":
         result = [{name: "demo-alex", full_name: "Alex Morgan", email_id: "alex@example.com"}].filter(c => c.full_name.toLowerCase().includes(String(args.query || "").toLowerCase())); break;
       case "contacts.get_contact_prefill":

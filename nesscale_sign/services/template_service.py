@@ -59,6 +59,7 @@ class TemplateService:
 		doc.title = data.get("title") or _("Untitled Template")
 		doc.organization = data.get("organization") or _default_org()
 		doc.description = data.get("description")
+		doc.builder_json = data.get("builder_json")
 		doc.routing_type = data.get("routing_type") or "Sequential"
 		doc.expiry_days = cint(data.get("expiry_days")) or 30
 		doc.email_subject = data.get("email_subject")

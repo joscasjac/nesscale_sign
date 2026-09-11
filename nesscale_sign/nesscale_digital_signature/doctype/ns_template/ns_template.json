@@ -35,7 +35,8 @@
   "email_message",
   "sec_meta",
   "description",
-  "tags"
+  "tags",
+  "builder_json"
  ],
  "fields": [
   {
@@ -220,6 +221,11 @@
    "label": "Days",
    "default": "1",
    "depends_on": "eval:['Days Before','Days After'].includes(doc.trigger_event)"
+  },
+  {
+   "fieldname": "builder_json",
+   "label": "Document builder",
+   "fieldtype": "Long Text"
   }
  ],
  "index_web_pages_for_search": 0,

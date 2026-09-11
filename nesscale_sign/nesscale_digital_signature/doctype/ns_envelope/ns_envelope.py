@@ -27,6 +27,10 @@ class NSEnvelope(Document):
 			self.status != "Draft" or (before and before.status != "Draft")
 		):
 			frappe.throw("Sent documents can only change through the signing workflow.")
+		if self.status == "Draft":
+			from nesscale_sign.services.mail_options import validate_options
+
+			validate_options(self)
 		self._assign_signer_colors()
 		self._validate_signing_order()
 		self.recompute_progress()

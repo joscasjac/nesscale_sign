@@ -73,6 +73,9 @@ class EnvelopeService:
 		env.page_count = tmpl.page_count
 		env.email_subject = data.get("email_subject") or tmpl.email_subject
 		env.email_message = data.get("email_message") or tmpl.email_message
+		env.builder_json = data.get("builder_json") or tmpl.get("builder_json")
+		env.email_template = data.get("email_template")
+		env.email_attachments = data.get("email_attachments")
 		env.message = data.get("message")
 		env.expires_on = data.get("expires_on")
 		cls._apply_signers(env, data.get("signers") or [], tmpl)
@@ -104,6 +107,9 @@ class EnvelopeService:
 		env.page_count = pdf_service.get_page_count(content)
 		env.email_subject = data.get("email_subject")
 		env.email_message = data.get("email_message")
+		env.builder_json = data.get("builder_json")
+		env.email_template = data.get("email_template")
+		env.email_attachments = data.get("email_attachments")
 		env.message = data.get("message")
 		env.expires_on = data.get("expires_on")
 		source_doc = _resolve_source_doc(data.get("source_doctype"), data.get("source_name"))
@@ -186,6 +192,17 @@ class EnvelopeService:
 		lock_envelope(self.envelope)
 		env = self._doc()
 		self._validate_sendable(env)
+		from nesscale_sign.services.mail_options import attachment_docs, validate_options
+
+		validate_options(env)
+		attached = attachment_docs(env.get("email_attachments"), check_permission=True)
+		snapshots = [
+			files.save_private_file(
+				a["fname"], a["fcontent"], attached_to_doctype="NS Envelope", attached_to_name=env.name
+			).name
+			for a in attached
+		]
+		env.email_attachments = json.dumps(snapshots)
 		content = files.read_authorized_pdf(env.source_pdf)
 		snapshot = files.save_private_file(
 			f"{env.name}-original.pdf", content, attached_to_doctype="NS Envelope", attached_to_name=env.name

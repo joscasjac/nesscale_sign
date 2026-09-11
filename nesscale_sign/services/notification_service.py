@@ -14,6 +14,7 @@ from frappe.email.doctype.email_template.email_template import get_email_templat
 from frappe.utils import format_datetime, get_url, now_datetime
 
 from nesscale_sign.email.seed import TEMPLATE_NAMES
+from nesscale_sign.services.mail_options import attachment_docs, plain_message
 
 
 def signing_url(token: str) -> str:
@@ -37,7 +38,14 @@ class NotificationService:
 		ctx = self._signer_context(signer)
 		rendered = self._render("Invitation", ctx)
 		subject = self.envelope.email_subject or rendered["subject"]
-		self._dispatch(signer.signer_email, subject, rendered["message"], "Invitation", signer.signer_email)
+		body = (
+			plain_message(self.envelope.email_message) if self.envelope.email_message else rendered["message"]
+		)
+		# The invitation must retain its signer-specific link even with custom wording.
+		body += (
+			'<p><a href="' + frappe.utils.escape_html(ctx["sign_url"]) + '">Review and sign document</a></p>'
+		)
+		self._dispatch(signer.signer_email, subject, body, "Invitation", signer.signer_email)
 
 	def send_reminder(self, signer):
 		ctx = self._signer_context(signer)
@@ -75,7 +83,9 @@ class NotificationService:
 	# --------------------------------------------------------------- internals
 	def _render(self, notification_type: str, context: dict) -> dict:
 		"""Render an Email Template, falling back to a minimal body if missing."""
-		template_name = TEMPLATE_NAMES.get(notification_type)
+		template_name = (
+			self.envelope.get("email_template") if notification_type == "Invitation" else None
+		) or TEMPLATE_NAMES.get(notification_type)
 		try:
 			return get_email_template(template_name, context)
 		except frappe.DoesNotExistError:
@@ -107,6 +117,9 @@ class NotificationService:
 				reference_doctype="NS Envelope",
 				reference_name=self.envelope.name,
 				now=False,
+				attachments=attachment_docs(self.envelope.get("email_attachments"))
+				if notification_type == "Invitation"
+				else None,
 			)
 			notification.db_set("status", "Sent")
 			notification.db_set("sent_on", now_datetime())

@@ -11,7 +11,10 @@ An independently maintained fork of [Nesscale Sign](https://github.com/bhavesh95
 ## What it does
 
 - A clear document register, searchable by title and signing status.
-- PDF preparation with recipient roles, drag-to-position fields, and keyboard-editable coordinates and dimensions.
+- Full-width document builder with draggable headings, text, images, tables, dividers and video-link text; page controls, content undo/redo, and contextual properties. Product lists and payments are excluded from this iteration.
+- **New document** offers a choice between building from scratch and uploading an existing PDF. Both use the same canvas and signing-field palette. Uploaded PDF content stays fixed; signing fields remain editable.
+- Drag signing fields directly onto any page. Page reordering keeps fields on their original content. Names, recipient mappings, required/read-only settings and coordinates are editable in the properties panel.
+- Invitation Email Templates, per-document plain-text subject/body overrides, and up to five private attachments totaling 10 MB. A secure signing link is always included; the configured Frappe sending account remains in use.
 - Sequential or parallel signing, email-link access, explicit electronic-signing consent, and typed, drawn, or uploaded signatures.
 - Reusable PDF templates with edit, duplicate, archive and publish actions; existing Frappe document-event automation and recipient mappings.
 - All original field types, repeat-across-pages controls, prefill and read-only values, explicit expiry, an awaiting-my-signature inbox and light/dark appearance.
@@ -19,6 +22,10 @@ An independently maintained fork of [Nesscale Sign](https://github.com/bhavesh95
 - Original-PDF snapshots and SHA-256 fingerprints, protected audit records, serialized signing updates, and retryable PDF completion.
 - Optional certificate-based PDF sealing with pyHanko. No signing certificate is included. Sealing is visibly reported as **not configured** until an operator configures one.
 - Full frontend source, a reproducible build, and a loopback-only local preview with fictional data.
+
+![Full-width document builder with fictional content](docs/images/document-builder.png)
+
+Builder content is stored with drafts and templates. Rendering produces a fixed PDF before sending; text overflow is rejected rather than silently clipped. Builder documents support 20 A4 pages and 200 blocks; PDF uploads retain the existing 100-page limit. Video blocks are link text, not embedded playback. Supporting email attachments are separate from the signed PDF and are copied when sending.
 
 ![Guided signature adoption with a fictional document](docs/images/signing-popup.png)
 

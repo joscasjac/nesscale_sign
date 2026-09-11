@@ -1,5 +1,13 @@
 <script setup>
-import { ref, onMounted, computed, onBeforeUnmount, nextTick, defineAsyncComponent } from "vue";
+import {
+	ref,
+	onMounted,
+	computed,
+	onBeforeUnmount,
+	nextTick,
+	defineAsyncComponent,
+	watch,
+} from "vue";
 import {
 	FileText,
 	Files,
@@ -26,9 +34,67 @@ import TemplateOptions from "./components/TemplateOptions.vue";
 import BrandLogo from "./components/BrandLogo.vue";
 import { fieldTypes, repeatField, nextRequiredField, signingFieldComplete } from "./fields";
 import InlineSigningField from "./components/InlineSigningField.vue";
+import DocumentBuilder from "./components/DocumentBuilder.vue";
+import EmailOptions from "./components/EmailOptions.vue";
 import ContactPicker from "./components/ContactPicker.vue";
 import SigningFieldDialog from "./components/SigningFieldDialog.vue";
 const theme = ref("light");
+const newMenu = ref(false);
+async function createDocument(mode) {
+	newMenu.value = false;
+	await go(root + "/new");
+	builderOpen.value = mode === "build";
+	composeTab.value = mode === "build" ? "Document" : "Settings";
+	builderDirty.value = mode === "build";
+}
+
+const composeTab = ref("Document"),
+	builderOpen = ref(false),
+	builderData = ref({ pages: [{ blocks: [] }] }),
+	builderDirty = ref(false);
+function updateBuilder(data) {
+	builderData.value = data;
+	builderDirty.value = true;
+}
+async function renderBuilder() {
+	if (
+		(!builderOpen.value && !builderDirty.value) ||
+		(!builderDirty.value && form.value.source_pdf)
+	)
+		return;
+	const result = await api("builder.render", { data: builderData.value });
+	form.value.source_pdf = result.file_url;
+	form.value.template = null;
+	form.value.builder_json = JSON.stringify(builderData.value);
+	pdfUrl.value = result.file_url;
+	pages.value = builderData.value.pages.length;
+	page.value = 1;
+	builderDirty.value = false;
+}
+const previewOpen = ref(false),
+	pdfPreview = ref(null);
+watch(previewOpen, async (value) => {
+	if (value) {
+		await nextTick();
+		pdfPreview.value?.showModal();
+	}
+});
+async function previewDocument() {
+	await renderBuilder();
+	previewOpen.value = true;
+}
+function startBuilder() {
+	builderOpen.value = true;
+	composeTab.value = "Document";
+	if (form.value.builder_json && !builderDirty.value) {
+		try {
+			builderData.value = JSON.parse(form.value.builder_json);
+		} catch {
+			builderData.value = { pages: [{ blocks: [] }] };
+		}
+	}
+}
+
 function setTheme(value) {
 	theme.value = value;
 	document.documentElement.dataset.theme = value;
@@ -233,6 +299,11 @@ async function load() {
 				poll = setTimeout(load, 3000);
 		} else if (view.value === "new") {
 			draftId.value = null;
+			builderOpen.value = true;
+			builderDirty.value = false;
+			builderData.value = { pages: [{ blocks: [] }] };
+			builderDirty.value = true;
+			composeTab.value = "Document";
 			editingTemplate.value = null;
 			fields.value = [];
 			pdfUrl.value = "";
@@ -292,6 +363,10 @@ function statusClass(status) {
 async function pickFile(e) {
 	await run(async () => {
 		pdfUrl.value = await upload(e.target.files[0]);
+		builderOpen.value = false;
+		builderDirty.value = false;
+		form.value.builder_json = null;
+		composeTab.value = "Fields";
 		if (!form.value.title) form.value.title = e.target.files[0].name.replace(/\.pdf$/i, "");
 		fields.value = [];
 		delete form.value.template;
@@ -303,7 +378,7 @@ function addField(type) {
 		field_key: crypto.randomUUID(),
 		field_type: type,
 		label: type,
-		signer_role: form.value.signers[0].role_key,
+		signer_role: form.value.signers[0]?.role_key || "",
 		page: page.value,
 		pos_x: 0.12,
 		pos_y: 0.6,
@@ -350,12 +425,14 @@ function position(f) {
 	};
 }
 async function saveDraft() {
-	if (!pdfUrl.value) throw new Error("Upload a PDF to continue.");
-	if (!fields.value.length) throw new Error("Add at least one signing field.");
+	if (builderOpen.value || builderDirty.value) await renderBuilder();
+	if (!pdfUrl.value) throw new Error("Upload a PDF or build a document to continue.");
+
 	if (!form.value.title.trim()) throw new Error("Give this document a title.");
 	const data = {
 		...form.value,
 		pdf_file: form.value.source_pdf || pdfUrl.value,
+		signers: form.value.signers.filter((s) => s.signer_name || s.signer_email),
 		fields: fields.value,
 	};
 	if (!draftId.value) {
@@ -412,12 +489,17 @@ async function useTemplate(name) {
 		}));
 		fields.value = t.fields.map((f) => ({ ...f }));
 		form.value.template = name;
+		builderData.value = JSON.parse(d.builder_json || '{"pages":[{"blocks":[]}]}');
+		builderDirty.value = false;
+		builderOpen.value = !!d.builder_json;
+		composeTab.value = "Document";
 	});
 }
 async function saveTemplate() {
 	await run(async () => {
 		if (!pdfUrl.value || !fields.value.length)
 			throw new Error("Upload a PDF and add fields first.");
+		if (builderOpen.value || builderDirty.value) await renderBuilder();
 		const templateData = { ...form.value };
 		const roles = form.value.signers.map((s) => ({
 			...s,
@@ -443,6 +525,7 @@ async function saveTemplate() {
 				...templateData,
 				title: form.value.title,
 				pdf_file: form.value.source_pdf || pdfUrl.value,
+				signers: form.value.signers.filter((s) => s.signer_name || s.signer_email),
 				signer_roles: form.value.signers.map((s) => ({
 					...s,
 					role_label: s.role_label || s.signer_name || "Signer",
@@ -482,6 +565,9 @@ async function decline() {
 	});
 }
 function editDraft() {
+	builderOpen.value = false;
+	builderDirty.value = false;
+	composeTab.value = "Document";
 	const d = detail.value;
 	history.pushState({}, "", root + "/new");
 	route.value = root + "/new";
@@ -494,6 +580,10 @@ function editDraft() {
 	};
 	fields.value = d.fields.map((f) => ({ ...f }));
 	pdfUrl.value = d.envelope.source_pdf;
+	builderOpen.value = !!d.envelope.builder_json;
+	builderData.value = JSON.parse(d.envelope.builder_json || '{"pages":[{"blocks":[]}]}');
+	if (!form.value.signers.length)
+		form.value.signers = [{ role_key: "signer-1", signer_name: "", signer_email: "" }];
 }
 onMounted(async () => {
 	window.addEventListener("popstate", pop);
@@ -520,14 +610,14 @@ onBeforeUnmount(() => {
 			>Try signing <ArrowUpRight :size="13"
 		/></a>
 	</div>
-	<div :class="['app', { 'signer-app': isSigner }]">
+	<div :class="['app', { 'signer-app': isSigner, 'composer-app': view === 'new' }]">
 		<button
 			v-if="mobile && !isSigner"
 			class="nav-backdrop"
 			aria-label="Close navigation"
 			@click="mobile = false"
 		/>
-		<aside v-if="!isSigner" :class="['sidebar', { open: mobile }]">
+		<aside v-if="!isSigner && view !== 'new'" :class="['sidebar', { open: mobile }]">
 			<BrandLogo @home="goHome" />
 			<button class="text-button mobile-menu" @click="mobile = false">
 				Close navigation
@@ -580,7 +670,7 @@ onBeforeUnmount(() => {
 			</div>
 		</aside>
 		<main>
-			<header class="topbar">
+			<header v-if="view !== 'new'" class="topbar">
 				<button
 					v-if="!isSigner"
 					class="icon-button mobile-menu"
@@ -638,10 +728,33 @@ onBeforeUnmount(() => {
 								}}
 							</p>
 						</div>
-						<button class="primary" @click="go(root + '/new')">
-							<Plus :size="17" />
-							{{ isTemplate ? "Create template" : "New document" }}
-						</button>
+						<div class="new-document-menu" @keydown.esc="newMenu = false">
+							<button
+								class="primary"
+								:aria-expanded="newMenu"
+								@click="newMenu = !newMenu"
+							>
+								<Plus :size="17" />
+								{{ isTemplate ? "Create template" : "New document" }}
+							</button>
+							<div v-if="newMenu" class="new-document-options">
+								<button @click="createDocument('build')">
+									<FileText :size="22" /><span
+										><strong>Create a document</strong
+										><small
+											>Build a proposal or contract from scratch</small
+										></span
+									></button
+								><button @click="createDocument('upload')">
+									<Files :size="22" /><span
+										><strong>Upload an existing PDF</strong
+										><small
+											>Add signing fields to your own document</small
+										></span
+									>
+								</button>
+							</div>
+						</div>
 					</div>
 					<div v-if="!isTemplate && !isPending" class="summary-line">
 						<span
@@ -969,14 +1082,17 @@ onBeforeUnmount(() => {
 					</div>
 				</section>
 				<section v-else-if="view === 'new'" class="content compose">
-					<button class="text-button back" @click="go(root)">
-						<ArrowLeft :size="15" /> Documents
-					</button>
-					<div class="page-title">
-						<div>
-							<h1>{{ editingTemplate ? "Edit template" : "Prepare a document" }}</h1>
-							<p>Choose your PDF, add recipients, then place their fields.</p>
-						</div>
+					<div class="page-title composer-heading">
+						<button class="text-button" @click="go(root)">
+							<ArrowLeft :size="16" /> Back
+						</button>
+						<label class="composer-title"
+							><span class="sr-only">Document title</span
+							><input
+								v-model="form.title"
+								maxlength="140"
+								placeholder="New document"
+						/></label>
 						<div class="button-group">
 							<button
 								v-if="editingTemplate"
@@ -990,15 +1106,15 @@ onBeforeUnmount(() => {
 								:disabled="busy"
 								@click="
 									run(async () => {
-										const name = await saveDraft();
-										go(root + '/document/' + name);
+										await saveDraft();
+										flash('Draft saved');
 									})
 								"
 							>
 								Save draft</button
 							><button
 								class="primary"
-								:disabled="busy || !pdfUrl"
+								:disabled="busy || (!builderOpen && !pdfUrl)"
 								@click="sendDraft"
 								v-if="!editingTemplate"
 							>
@@ -1006,289 +1122,182 @@ onBeforeUnmount(() => {
 							</button>
 						</div>
 					</div>
-					<div class="compose-layout">
-						<aside class="compose-panel">
-							<label
-								>Document title<input
-									v-model="form.title"
-									placeholder="e.g. Service agreement"
-									maxlength="140" /></label
-							><label class="upload-control"
-								><FileText :size="19" />
-								{{ pdfUrl ? "Replace PDF" : "Upload a PDF"
-								}}<input
-									type="file"
-									accept="application/pdf"
-									@change="pickFile"
-									:disabled="busy" /></label
-							><small>PDF · up to 15 MB · 100 pages</small
-							><label v-if="templates.length"
-								>Or use a template<select
-									@change="useTemplate($event.target.value)"
-								>
-									<option value="">Choose a template</option>
-									<option v-for="t in templates" :value="t.name">
-										{{ t.title }}
-									</option>
-								</select></label
-							>
-							<h2>Recipients</h2>
-							<div
-								class="signer-form"
-								v-for="(s, i) in form.signers"
-								:key="s.role_key"
-							>
-								<div class="recipient-title">
-									<span>Recipient {{ i + 1 }}</span
-									><button
-										v-if="form.signers.length > 1"
-										class="icon-button"
-										:aria-label="'Remove recipient ' + (i + 1)"
-										@click="form.signers.splice(i, 1)"
+					<nav class="composer-toolbar" aria-label="Document preparation">
+						<button
+							v-for="tab in [
+								'Document',
+								'Fields',
+								'Recipients',
+								'Email',
+								'Settings',
+							]"
+							:class="{ active: composeTab === tab }"
+							@click="
+								composeTab = tab;
+								builderOpen =
+									tab === 'Document' && (!!form.builder_json || builderDirty);
+							"
+						>
+							{{ tab }}
+						</button>
+						<span class="toolbar-spacer"></span
+						><button
+							:disabled="busy || (!builderOpen && !pdfUrl)"
+							@click="run(previewDocument)"
+						>
+							Preview PDF
+						</button>
+					</nav>
+					<DocumentBuilder
+						:model-value="builderData"
+						:fields="fields"
+						:recipients="form.signers"
+						:active-panel="composeTab"
+						:background-url="builderOpen ? '' : pdfUrl"
+						@update:fields="fields = $event"
+						@update:model-value="updateBuilder"
+						@preview="run(previewDocument)"
+						@page-count="pages = $event"
+					>
+						<template #panel>
+							<EmailOptions v-if="composeTab === 'Email'" v-model="form" />
+							<div v-show="composeTab === 'Settings'">
+								<h2>Document settings</h2>
+								<label class="upload-control"
+									><FileText :size="19" />
+									{{ pdfUrl ? "Replace PDF" : "Upload a PDF"
+									}}<input
+										type="file"
+										accept="application/pdf"
+										@change="pickFile"
+										:disabled="busy" /></label
+								><small>PDF · up to 15 MB · 100 pages</small
+								><label v-if="templates.length"
+									>Or use a template<select
+										@change="useTemplate($event.target.value)"
 									>
-										<Trash2 :size="14" />
-									</button>
-								</div>
-								<ContactPicker @select="prefillContact(s, $event)" />
-								<label
-									>Name<input
-										v-model="s.signer_name"
-										autocomplete="off"
-										placeholder="Full name" /></label
-								><label
-									>Email<input
-										v-model="s.signer_email"
-										type="email"
-										placeholder="name@company.com"
-								/></label>
-							</div>
-							<button
-								class="text-button"
-								@click="
-									form.signers.push({
-										signer_name: '',
-										signer_email: '',
-										role_key: crypto.randomUUID(),
-										signing_order: form.signers.length + 1,
-									})
-								"
-							>
-								<Plus :size="14" /> Add recipient</button
-							><label
-								>ERPNext document type (optional)<input
-									v-model="form.source_doctype"
-									placeholder="For example, Sales Order" /></label
-							><label
-								>Document name<input
-									v-model="form.source_name"
-									placeholder="For example, SAL-ORD-2026-00001" /></label
-							><label
-								>Signing order<select v-model="form.routing_type">
-									<option>Sequential</option>
-									<option>Parallel</option>
-								</select></label
-							><label
-								>Expires on (optional)<input
-									type="datetime-local"
-									v-model="form.expires_on" /></label
-							><label>Email subject<input v-model="form.email_subject" /></label
-							><label
-								>Message to recipients<textarea
-									v-model="form.message"
-									rows="3"
-									placeholder="A short note about this document"
-								/></label
-							><button :disabled="busy || !pdfUrl" @click="saveTemplate">
-								{{
-									editingTemplate
-										? "Save and publish template"
-										: "Save as reusable template"
-								}}
-							</button>
-							<TemplateOptions :form="form" />
-						</aside>
-						<div class="editor-stage">
-							<div class="field-toolbar">
-								<span>Add field</span
-								><button
-									v-for="t in fieldTypes"
-									:disabled="!pdfUrl"
-									@click="addField(t)"
+										<option value="">Choose a template</option>
+										<option v-for="t in templates" :value="t.name">
+											{{ t.title }}
+										</option>
+									</select></label
 								>
-									{{ t }}
+							</div>
+							<div v-show="composeTab === 'Recipients'">
+								<h2>Recipients</h2>
+								<label
+									>Signing order<select v-model="form.routing_type">
+										<option>Sequential</option>
+										<option>Parallel</option>
+									</select></label
+								>
+								<div
+									class="signer-form"
+									v-for="(s, i) in form.signers"
+									:key="s.role_key"
+								>
+									<div class="recipient-title">
+										<span>Recipient {{ i + 1 }}</span
+										><button
+											v-if="form.signers.length > 1"
+											class="icon-button"
+											:aria-label="'Remove recipient ' + (i + 1)"
+											@click="form.signers.splice(i, 1)"
+										>
+											<Trash2 :size="14" />
+										</button>
+									</div>
+									<ContactPicker @select="prefillContact(s, $event)" />
+									<label
+										>Name<input
+											v-model="s.signer_name"
+											autocomplete="off"
+											placeholder="Full name" /></label
+									><label
+										>Email<input
+											v-model="s.signer_email"
+											type="email"
+											placeholder="name@company.com"
+									/></label>
+								</div>
+								<button
+									class="text-button"
+									@click="
+										form.signers.push({
+											signer_name: '',
+											signer_email: '',
+											role_key: crypto.randomUUID(),
+											signing_order: form.signers.length + 1,
+										})
+									"
+								>
+									<Plus :size="14" /> Add recipient
 								</button>
 							</div>
-							<div class="page-control" v-if="pdfUrl">
-								<span>Drag a field to position it</span>
-								<div>
-									<button
-										class="icon-button"
-										:disabled="page <= 1"
-										aria-label="Previous page"
-										@click="page--"
-									>
-										<ChevronLeft :size="16" /></button
-									>{{ page }} / {{ pages
-									}}<button
-										class="icon-button"
-										:disabled="page >= pages"
-										aria-label="Next page"
-										@click="page++"
-									>
-										<ChevronRight :size="16" />
-									</button>
-								</div>
+							<div v-show="composeTab === 'Settings'">
+								<details class="settings-disclosure">
+									<summary>Link to an ERPNext record</summary>
+									<label
+										>ERPNext document type (optional)<input
+											v-model="form.source_doctype"
+											placeholder="For example, Sales Order" /></label
+									><label
+										>Document name<input
+											v-model="form.source_name"
+											placeholder="For example, SAL-ORD-2026-00001"
+									/></label>
+								</details>
+								<label
+									>Expires on (optional)<input
+										type="datetime-local"
+										v-model="form.expires_on" /></label
+								><label
+									>Signing page message<textarea
+										v-model="form.message"
+										rows="3"
+										placeholder="A short note about this document"
+									/></label
+								><button :disabled="busy || !pdfUrl" @click="saveTemplate">
+									{{
+										editingTemplate
+											? "Save and publish template"
+											: "Save as reusable template"
+									}}
+								</button>
+								<TemplateOptions :form="form" />
 							</div>
-							<PdfPage
-								v-if="pdfUrl"
-								:url="pdfUrl"
-								:page="page"
-								@loaded="pages = $event"
-								><button
-									v-for="f in fields.filter((x) => x.page === page)"
-									:key="f.field_key"
-									:class="['placed-field', { selected: selected === f }]"
-									:style="position(f)"
-									@pointerdown="beginDrag($event, f)"
-									@pointermove="moveDrag"
-									@pointerup="drag = null"
-									@pointercancel="drag = null"
-									@click="selected = f"
-								>
-									{{ f.label || f.field_type }}
-								</button></PdfPage
-							>
-							<div v-else class="empty document-placeholder">
-								<FileText :size="40" />
-								<h2>Your document starts here</h2>
+							<div v-if="composeTab === 'Fields'">
+								<h2>Signing fields</h2>
 								<p>
-									Upload a PDF using the panel on the left.<br />Its layout stays
-									exactly as you created it.
+									Select a field above the PDF, then drag it into position. Use
+									the field properties below to choose its recipient.
 								</p>
+								<button @click="composeTab = 'Recipients'">
+									Manage recipients
+								</button>
 							</div>
+						</template>
+					</DocumentBuilder>
+					<dialog
+						ref="pdfPreview"
+						@cancel.prevent="previewOpen = false"
+						v-if="previewOpen"
+						class="pdf-preview-overlay"
+						role="dialog"
+						aria-modal="true"
+						aria-label="PDF preview"
+					>
+						<div class="preview-heading">
+							<h2>PDF preview</h2>
+							<button @click="previewOpen = false">Back to editor</button>
 						</div>
-					</div>
-					<div v-if="selected" class="field-inspector">
-						<strong>Selected field</strong
-						><button :disabled="pages < 2 || busy" @click="repeatSelected">
-							Repeat on all pages</button
-						><button
-							@click="
-								fields.push({
-									...selected,
-									name: undefined,
-									field_key: crypto.randomUUID(),
-									repeat_group: undefined,
-								})
-							"
-						>
-							Duplicate field</button
-						><label
-							>Font size<input
-								type="number"
-								min="6"
-								max="48"
-								v-model.number="selected.font_size" /></label
-						><label>Prefilled value<input v-model="selected.default_value" /></label
-						><label
-							>ERP field mapping<input
-								v-model="selected.mapping_key"
-								placeholder="For example, customer_name" /></label
-						><label class="check-label"
-							><input
-								type="checkbox"
-								v-model="selected.read_only"
-								:true-value="1"
-								:false-value="0"
-							/>Read only</label
-						><label>Label<input v-model="selected.label" /></label
-						><label
-							>Recipient<select v-model="selected.signer_role">
-								<option v-for="s in form.signers" :value="s.role_key">
-									{{ s.signer_name || s.signer_email || "Recipient" }}
-								</option>
-							</select></label
-						><label
-							>Left %<input
-								type="number"
-								min="0"
-								max="95"
-								:value="Math.round(selected.pos_x * 100)"
-								@input="
-									selected.pos_x = Math.max(
-										0,
-										Math.min(
-											1 - selected.width,
-											Number($event.target.value) / 100,
-										),
-									)
-								" /></label
-						><label
-							>Top %<input
-								type="number"
-								min="0"
-								max="95"
-								:value="Math.round(selected.pos_y * 100)"
-								@input="
-									selected.pos_y = Math.max(
-										0,
-										Math.min(
-											1 - selected.height,
-											Number($event.target.value) / 100,
-										),
-									)
-								" /></label
-						><label
-							>Width %<input
-								type="number"
-								min="2"
-								max="100"
-								:value="Math.round(selected.width * 100)"
-								@input="
-									selected.width = Math.max(
-										0.02,
-										Math.min(
-											1 - selected.pos_x,
-											Number($event.target.value) / 100,
-										),
-									)
-								" /></label
-						><label
-							>Height %<input
-								type="number"
-								min="2"
-								max="100"
-								:value="Math.round(selected.height * 100)"
-								@input="
-									selected.height = Math.max(
-										0.02,
-										Math.min(
-											1 - selected.pos_y,
-											Number($event.target.value) / 100,
-										),
-									)
-								" /></label
-						><label v-if="selected.field_type === 'Dropdown'"
-							>Options (one per line)<textarea v-model="selected.options" /></label
-						><label class="check-label"
-							><input
-								type="checkbox"
-								v-model="selected.required"
-								:true-value="1"
-								:false-value="0"
-							/>
-							Required</label
-						><button
-							class="icon-button"
-							aria-label="Delete selected field"
-							@click="
-								fields = fields.filter((f) => f !== selected);
-								selected = null;
-							"
-						>
-							<Trash2 :size="17" />
-						</button>
-					</div>
+						<PdfPage :url="pdfUrl" :page="page" @loaded="pages = $event" />
+						<div class="button-group">
+							<button :disabled="page <= 1" @click="page--">Previous page</button
+							><span>{{ page }} / {{ pages }}</span
+							><button :disabled="page >= pages" @click="page++">Next page</button>
+						</div>
+					</dialog>
 				</section>
 				<section v-else-if="view === 'settings' && settings" class="content settings">
 					<div class="page-title">

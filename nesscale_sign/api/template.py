@@ -37,6 +37,7 @@ def update_template(name: str, data=None):
 		"expiry_days",
 		"email_subject",
 		"email_message",
+		"builder_json",
 		"reminder_enabled",
 		"organization",
 		"tags",
