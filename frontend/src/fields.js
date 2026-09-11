@@ -4,6 +4,7 @@ export const fieldTypes = [
 	"Name",
 	"Email",
 	"Date Signed",
+	"Date",
 	"Text",
 	"Checkbox",
 	"Dropdown",
@@ -34,4 +35,10 @@ export function nextRequiredField(fields, complete) {
 			.sort((a, b) => a.page - b.page || a.pos_y - b.pos_y || a.pos_x - b.pos_x)
 			.find((field) => field.required && !complete(field)) || null
 	);
+}
+
+export function signingFieldComplete(field, values, reviewed, signature) {
+	return ["Signature", "Initial", "Stamp"].includes(field.field_type)
+		? !!signature
+		: !!values[field.field_key] && !!reviewed[field.field_key];
 }

@@ -96,7 +96,7 @@ storage.set("/demo/document.pdf", base);
 const baseFields = [
   {
     field_key: "full-name",
-    field_type: "Text",
+    field_type: "Name",
     label: "Full name",
     page: 1,
     pos_x: 0.1,
@@ -123,6 +123,7 @@ const baseFields = [
     editable: true,
   },
 ];
+baseFields.push({ ...baseFields[0], field_key: "agreement-date", field_type: "Date", label: "Agreement date", pos_x: 0.64, width: 0.26 });
 const titles = [
   "Service agreement — Meridian Works",
   "Photography release — Autumn campaign",
@@ -246,6 +247,11 @@ app.all("/api/method/nesscale_sign.api.:module.:method", async (req, res) => {
           Number(args.start || 0) + Number(args.page_length || 20),
         );
     switch (key) {
+      case "contacts.search_contacts":
+        result = [{name: "demo-alex", full_name: "Alex Morgan", email_id: "alex@example.com"}].filter(c => c.full_name.toLowerCase().includes(String(args.query || "").toLowerCase())); break;
+      case "contacts.get_contact_prefill":
+        if(args.name !== "demo-alex") throw Error("Contact not found");
+        result = {full_name: "Alex Morgan", email_id: "alex@example.com"}; break;
       case "dashboard.get_stats": {
         const counts = {};
         for (const { envelope: d } of documents.values())

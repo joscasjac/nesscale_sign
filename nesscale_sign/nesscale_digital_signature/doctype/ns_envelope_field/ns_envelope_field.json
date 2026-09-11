@@ -53,7 +53,7 @@
    "fieldname": "field_type",
    "fieldtype": "Select",
    "label": "Field Type",
-   "options": "Signature\nInitial\nText\nName\nEmail\nDate\nDate Signed\nNumber\nCheckbox\nDropdown\nRadio\nCompany\nTitle\nStamp\nAttachment\nLabel",
+   "options": "Signature\nInitial\nText\nName\nEmail\nDate\nDate Signed\nDate\nNumber\nCheckbox\nDropdown\nRadio\nCompany\nTitle\nStamp\nAttachment\nLabel",
    "default": "Text",
    "in_list_view": 1
   },

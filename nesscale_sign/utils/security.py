@@ -2,6 +2,7 @@
 
 import hashlib
 import math
+from datetime import date
 
 import frappe
 
@@ -36,6 +37,7 @@ def validate_fields(fields, page_count):
 		"Name",
 		"Email",
 		"Date Signed",
+		"Date",
 		"Text",
 		"Checkbox",
 		"Dropdown",
@@ -69,6 +71,12 @@ def validate_fields(fields, page_count):
 def validate_value(row, value):
 	if isinstance(value, (list, dict)) or len(str(value or "")) > 10000:
 		frappe.throw("Field value is too long or invalid.")
+	if row.get("field_type") == "Date" and value not in (None, ""):
+		try:
+			if not isinstance(value, str) or date.fromisoformat(value).isoformat() != value:
+				raise ValueError
+		except ValueError, TypeError:
+			frappe.throw("Choose a valid date in YYYY-MM-DD format.")
 	if row.get("field_type") == "Dropdown":
 		options = (row.get("options") or "").splitlines()
 		if value not in (None, "") and value not in options:

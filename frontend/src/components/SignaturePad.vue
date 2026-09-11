@@ -6,7 +6,13 @@ const uploadError = ref("");
 const canvas = ref(null),
 	mode = ref("Type"),
 	name = ref(props.initialName);
+const ink = ref("#161b18"),
+	style = ref("Georgia");
 let drawing = false;
+function restyle() {
+	if (mode.value === "Type") type();
+	else clear();
+}
 function ctx() {
 	return canvas.value.getContext("2d");
 }
@@ -18,8 +24,8 @@ function type() {
 	clear();
 	if (!name.value.trim()) return;
 	const c = ctx();
-	c.fillStyle = "#24362d";
-	c.font = "italic 48px Georgia";
+	c.fillStyle = ink.value;
+	c.font = `italic 48px ${style.value}`;
 	c.fillText(name.value, 22, 112, 650);
 	send();
 }
@@ -38,7 +44,7 @@ function move(e) {
 	if (!drawing) return;
 	ctx().lineWidth = 2.4;
 	ctx().lineCap = "round";
-	ctx().strokeStyle = "#24362d";
+	ctx().strokeStyle = ink.value;
 	ctx().lineTo(...point(e));
 	ctx().stroke();
 }
@@ -91,6 +97,22 @@ onMounted(() => {
 </script>
 <template>
 	<div class="signature-pad">
+		<div v-if="mode !== 'Upload'" class="signature-options">
+			<label v-if="mode === 'Type'"
+				>Style<select v-model="style" @change="restyle">
+					<option value="Georgia">Classic</option>
+					<option value="cursive">Handwritten</option>
+					<option value="serif">Simple</option>
+				</select></label
+			>
+			<label
+				>Ink<select v-model="ink" @change="restyle">
+					<option value="#161b18">Black</option>
+					<option value="#174bc2">Blue</option>
+					<option value="#b42d27">Red</option>
+				</select></label
+			>
+		</div>
 		<div class="tabs compact">
 			<button
 				type="button"

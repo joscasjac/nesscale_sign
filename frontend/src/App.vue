@@ -24,7 +24,9 @@ const PdfPage = defineAsyncComponent(() => import("./components/PdfPage.vue"));
 import ActivitySummary from "./components/ActivitySummary.vue";
 import TemplateOptions from "./components/TemplateOptions.vue";
 import BrandLogo from "./components/BrandLogo.vue";
-import { fieldTypes, repeatField, nextRequiredField } from "./fields";
+import { fieldTypes, repeatField, nextRequiredField, signingFieldComplete } from "./fields";
+import InlineSigningField from "./components/InlineSigningField.vue";
+import ContactPicker from "./components/ContactPicker.vue";
 import SigningFieldDialog from "./components/SigningFieldDialog.vue";
 const theme = ref("light");
 function setTheme(value) {
@@ -81,11 +83,10 @@ const form = ref({
 	source_name: "",
 });
 const activeSigningField = ref(null);
+const reviewedFields = ref({});
 const signatureTypes = ["Signature", "Initial", "Stamp"];
 function fieldComplete(field) {
-	return signatureTypes.includes(field.field_type)
-		? !!signature.value
-		: !!values.value[field.field_key];
+	return signingFieldComplete(field, values.value, reviewedFields.value, signature.value);
 }
 async function openSigningField(field) {
 	if (
@@ -96,6 +97,18 @@ async function openSigningField(field) {
 		return;
 	page.value = field.page;
 	activeSigningField.value = field;
+	await nextTick();
+	document
+		.getElementById("sign-field-" + field.field_key)
+		?.scrollIntoView({ block: "center", behavior: "smooth" });
+}
+function continueSigning() {
+	if (activeSigningField.value && !signatureTypes.includes(activeSigningField.value.field_type))
+		document
+			.getElementById("sign-field-" + activeSigningField.value.field_key)
+			?.querySelector("button")
+			?.click();
+	else nextSigningField();
 }
 function nextSigningField() {
 	const field = nextRequiredField(ownFields.value, fieldComplete);
@@ -104,7 +117,10 @@ function nextSigningField() {
 }
 async function applySigningField(result) {
 	if (signatureTypes.includes(result.field.field_type)) signature.value = result.signature;
-	else values.value[result.field.field_key] = result.value;
+	else {
+		values.value[result.field.field_key] = result.value;
+		reviewedFields.value[result.field.field_key] = true;
+	}
 	activeSigningField.value = null;
 	await nextTick();
 	if (requiredRemaining.value) nextSigningField();
@@ -134,15 +150,12 @@ const ownFields = computed(() =>
 	),
 );
 const requiredRemaining = computed(
-	() =>
-		ownFields.value.filter(
-			(f) =>
-				f.required &&
-				(["Signature", "Initial", "Stamp"].includes(f.field_type)
-					? !signature.value
-					: !values.value[f.field_key]),
-		).length,
+	() => ownFields.value.filter((f) => f.required && !fieldComplete(f)).length,
 );
+function prefillContact(signer, contact) {
+	signer.signer_name = contact.full_name;
+	signer.signer_email = contact.email_id;
+}
 function goHome() {
 	if (isSigner.value && window.user === "Guest" && !demo.value) location.assign(root);
 	else go(root);
@@ -195,8 +208,17 @@ async function load() {
 	try {
 		if (isSigner.value) {
 			signContext.value = await api("signing.get_context", { token: token.value });
+			reviewedFields.value = {};
 			values.value = Object.fromEntries(
-				signContext.value.fields.map((f) => [f.field_key, f.value || ""]),
+				signContext.value.fields.map((f) => [
+					f.field_key,
+					f.value ||
+						(f.editable && f.field_type === "Name"
+							? signContext.value.signer.name
+							: f.editable && f.field_type === "Email"
+								? signContext.value.signer.email
+								: ""),
+				]),
 			);
 			if (signContext.value.envelope.finalization_status === "Pending")
 				poll = setTimeout(load, 3000);
@@ -1027,6 +1049,7 @@ onBeforeUnmount(() => {
 										<Trash2 :size="14" />
 									</button>
 								</div>
+								<ContactPicker @select="prefillContact(s, $event)" />
 								<label
 									>Name<input
 										v-model="s.signer_name"
@@ -1381,7 +1404,12 @@ onBeforeUnmount(() => {
 				</section>
 				<section v-else-if="isSigner && signContext" class="sign-content">
 					<SigningFieldDialog
-						:field="activeSigningField"
+						:field="
+							activeSigningField &&
+							signatureTypes.includes(activeSigningField.field_type)
+								? activeSigningField
+								: null
+						"
 						:value="activeSigningField ? values[activeSigningField.field_key] : ''"
 						:signature="signature"
 						:signer-name="signContext.signer.name"
@@ -1466,8 +1494,29 @@ onBeforeUnmount(() => {
 									v-for="f in signContext.fields.filter((f) => f.page === page)"
 									:key="f.field_key"
 								>
-									<button
+									<InlineSigningField
 										v-if="
+											f.editable &&
+											signContext.signer.can_sign &&
+											!['Label', 'Date Signed', ...signatureTypes].includes(
+												f.field_type,
+											)
+										"
+										:id="'sign-field-' + f.field_key"
+										:field="f"
+										:value="values[f.field_key]"
+										:active="activeSigningField?.field_key === f.field_key"
+										:complete="fieldComplete(f)"
+										:style="position(f)"
+										@activate="activeSigningField = f"
+										@edit="
+											values[f.field_key] = $event;
+											reviewedFields[f.field_key] = false;
+										"
+										@save="applySigningField({ field: f, value: $event })"
+									/>
+									<button
+										v-else-if="
 											f.editable &&
 											signContext.signer.can_sign &&
 											!['Label', 'Date Signed'].includes(f.field_type)
@@ -1524,7 +1573,7 @@ onBeforeUnmount(() => {
 									type="button"
 									class="primary full"
 									v-if="requiredRemaining"
-									@click="nextSigningField"
+									@click="continueSigning"
 								>
 									{{
 										ownFields.some(fieldComplete)

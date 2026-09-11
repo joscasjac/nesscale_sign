@@ -28,3 +28,16 @@ test('guided signing advances across pages and skips completed or optional field
   assert.equal(nextRequiredField(fields, () => true), null);
   assert.equal(fields[0].field_key, 'later');
 });
+
+test('prefills need review and never implicitly adopt a signature', async () => {
+ const { signingFieldComplete, nextRequiredField } = await import('../src/fields.js');
+ const name = {field_key:'name',field_type:'Name',required:1,page:1,pos_y:0,pos_x:0};
+ const signature = {...name,field_key:'signature',field_type:'Signature',pos_y:1};
+ const values = {name:'Alex Morgan',signature:'Alex Morgan'};
+ assert.equal(signingFieldComplete(name, values, {}, null), false);
+ assert.equal(signingFieldComplete(name, values, {name:true}, null), true);
+ assert.equal(signingFieldComplete(name, {name:''}, {name:true}, null), false);
+ assert.equal(signingFieldComplete(signature, values, {signature:true}, null), false);
+ assert.equal(nextRequiredField([name,signature], f => signingFieldComplete(f,values,{name:true},null)),signature);
+ assert.ok(fieldTypes.includes('Date'));
+});
