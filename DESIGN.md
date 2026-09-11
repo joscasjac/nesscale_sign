@@ -10,3 +10,6 @@ Canvas #f6f5f1; paper #ffffff; ink #242a27; muted #626963; line #dedfd8; accent 
 
 ## Behavior
 Keyboard-visible focus, native form controls, explicit labels, error recovery, request-in-flight disabling. Tables become a scrollable register on small screens, editor sidebars stack. Signature fields are positioned as percentages against the actual rendered PDF.
+
+## Identity and feature coverage
+One shared document-and-signature mark links home in workspace and signer headers. Light and dark appearances preserve the same hierarchy; PDFs and signature canvases retain white paper. Feature coverage must be checked against docs/FEATURES.md before removing or hiding controls. Advanced settings use labelled disclosure sections or direct native Desk links.

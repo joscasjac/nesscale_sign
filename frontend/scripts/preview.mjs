@@ -252,11 +252,19 @@ app.all("/api/method/nesscale_sign.api.:module.:method", async (req, res) => {
         result = {
           counts,
           total: documents.size,
+          completion_rate: Math.round((counts.Completed || 0) / documents.size * 100),
+          templates: templates.size,
+          awaiting_me: 1,
           completed: counts.Completed || 0,
           in_flight: (counts.Sent || 0) + (counts["In Progress"] || 0),
         };
         break;
       }
+      case "dashboard.throughput":
+        result = [{day: '2026-09-09', count: 1}, {day: '2026-09-10', count: 1}]; break;
+      case "envelope.my_pending_signatures":
+        result = [...documents.values()].filter(d => ['Sent', 'In Progress'].includes(d.envelope.status)).map(d => ({ ...d.envelope, token: 'demo-signer' })).slice(0,1);
+        break;
       case "envelope.list_envelopes":
         result = list(documents, "envelope");
         break;
@@ -384,6 +392,22 @@ app.all("/api/method/nesscale_sign.api.:module.:method", async (req, res) => {
         tmpl.fields = args.fields;
         result = { saved: args.fields.length };
         break;
+      case "template.update_template":
+        Object.assign(tmpl.template, args.data); result = tmpl.template; break;
+      case "template.set_template_pdf":
+        tmpl.template.pdf_file = args.file_url; result = tmpl.template; break;
+      case "template.save_template_roles":
+        tmpl.template.signer_roles = args.roles; result = tmpl.template; break;
+      case "template.archive_template":
+        tmpl.template.status = 'Archived'; result = tmpl.template; break;
+      case "template.duplicate_template": {
+        const name = "NS-TMPL-" + serial++;
+        const copy = structuredClone(tmpl);
+        copy.template.name = name;
+        copy.template.title += ' (copy)';
+        copy.template.status = 'Draft';
+        templates.set(name, copy); result = copy.template; break;
+      }
       case "template.publish_template":
         tmpl.template.status = "Active";
         result = tmpl.template;

@@ -14,3 +14,9 @@
 - Add regression tests and installation/API/security documentation.
 
 Not deployed. Independent security review and production-readiness checks remain required.
+
+### Feature restoration and identity
+- Restored uploaded signatures, dark appearance, all field types, repeat/duplicate fields and signing inbox.
+- Added template editing, duplicate/archive actions, recipient mappings, automation controls, expiry and activity overview.
+- Unified the document-signature logo and home navigation.
+- Fixed read-only prefills and explicit expiry being dropped during creation.

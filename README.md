@@ -12,8 +12,9 @@ An independently maintained fork of [Nesscale Sign](https://github.com/bhavesh95
 
 - A clear document register, searchable by title and signing status.
 - PDF preparation with recipient roles, drag-to-position fields, and keyboard-editable coordinates and dimensions.
-- Sequential or parallel signing, email-link access, explicit electronic-signing consent, and typed/drawn signatures.
-- Reusable PDF templates and existing Frappe document-event automation.
+- Sequential or parallel signing, email-link access, explicit electronic-signing consent, and typed, drawn, or uploaded signatures.
+- Reusable PDF templates with edit, duplicate, archive and publish actions; existing Frappe document-event automation and recipient mappings.
+- All original field types, repeat-across-pages controls, prefill and read-only values, explicit expiry, an awaiting-my-signature inbox and light/dark appearance.
 - Permission-checked APIs; completed PDF and completion record attached to the selected ERP record.
 - Original-PDF snapshots and SHA-256 fingerprints, protected audit records, serialized signing updates, and retryable PDF completion.
 - Optional certificate-based PDF sealing with pyHanko. No signing certificate is included. Sealing is visibly reported as **not configured** until an operator configures one.
@@ -85,3 +86,5 @@ There is no direct Frappe Drive picker yet. Export/upload a PDF from Drive; the 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Keep improvements reusable, document migrations, and test permission boundaries. No production keys, personal documents, or real signer data belong in fixtures or screenshots.
 
 Licensed under [AGPL-3.0](license.txt). Preserve upstream attribution and offer corresponding source to network users of modified versions as required by the license. This fork keeps a visible source link in the app. Branding does not imply endorsement by Nesscale Solutions or Frappe.
+
+See the [upstream feature comparison](docs/FEATURES.md) for where each original capability lives.

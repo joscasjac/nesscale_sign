@@ -21,7 +21,28 @@ import {
 } from "@lucide/vue";
 import { api, date, downloadUrl, upload } from "./api";
 import PdfPage from "./components/PdfPage.vue";
+import ActivitySummary from "./components/ActivitySummary.vue";
+import TemplateOptions from "./components/TemplateOptions.vue";
+import BrandLogo from "./components/BrandLogo.vue";
+import { fieldTypes, repeatField } from "./fields";
 import SignaturePad from "./components/SignaturePad.vue";
+const theme = ref("light");
+function setTheme(value) {
+	theme.value = value;
+	document.documentElement.dataset.theme = value;
+	try {
+		localStorage.setItem("open-esign-theme", value);
+	} catch {}
+}
+try {
+	setTheme(localStorage.getItem("open-esign-theme") || "light");
+} catch {}
+function repeatSelected() {
+	run(async () => {
+		fields.value.push(...repeatField(selected.value, pages.value, fields.value));
+		flash("Field repeated across all pages.");
+	});
+}
 const userInitial = (window.user?.[0] || "W").toUpperCase();
 const root = "/nesscale-sign";
 const route = ref(location.pathname),
@@ -63,6 +84,7 @@ let poll;
 const isSigner = computed(() => route.value.startsWith("/sign/"));
 const token = computed(() => decodeURIComponent(route.value.split("/")[2] || ""));
 const view = computed(() => (isSigner.value ? "sign" : route.value.split("/")[2] || "documents"));
+const isPending = computed(() => view.value === "my-sign");
 const isTemplate = computed(() => view.value === "templates");
 const filteredStatus = computed(
 	() =>
@@ -91,6 +113,10 @@ const requiredRemaining = computed(
 					: !values.value[f.field_key]),
 		).length,
 );
+function goHome() {
+	if (isSigner.value && window.user === "Guest" && !demo.value) location.assign(root);
+	else go(root);
+}
 function go(path) {
 	if (path === root || path === root + "/templates") {
 		filter.value = "All documents";
@@ -150,6 +176,7 @@ async function load() {
 				poll = setTimeout(load, 3000);
 		} else if (view.value === "new") {
 			draftId.value = null;
+			editingTemplate.value = null;
 			fields.value = [];
 			pdfUrl.value = "";
 			form.value = {
@@ -164,7 +191,8 @@ async function load() {
 				status: "Active",
 				page_length: 100,
 			});
-		} else if (view.value === "settings") settings.value = await api("settings.get_readiness");
+		} else if (isPending.value) rows.value = await api("envelope.my_pending_signatures");
+		else if (view.value === "settings") settings.value = await api("settings.get_readiness");
 		else {
 			rows.value = await api(
 				isTemplate.value ? "template.list_templates" : "envelope.list_envelopes",
@@ -293,6 +321,18 @@ async function sendDraft() {
 		go(root + "/document/" + name);
 	});
 }
+const editingTemplate = ref(null);
+async function editTemplate(name) {
+	await go(root + "/new");
+	await useTemplate(name);
+	editingTemplate.value = name;
+}
+async function templateAction(method, name) {
+	await run(async () => {
+		await api("template." + method, { name });
+		await load();
+	});
+}
 async function openTemplate(name) {
 	await go(root + "/new");
 	await useTemplate(name);
@@ -302,9 +342,11 @@ async function useTemplate(name) {
 		const t = await api("template.get_template", { name });
 		const d = t.template;
 		pdfUrl.value = downloadUrl("template.preview_pdf", { name });
+		form.value = { ...form.value, ...d };
 		form.value.title = d.title;
 		form.value.source_pdf = d.pdf_file;
 		form.value.signers = d.signer_roles.map((r, i) => ({
+			...r,
 			signer_name: "",
 			signer_email: "",
 			role_key: r.role_key,
@@ -319,11 +361,33 @@ async function saveTemplate() {
 	await run(async () => {
 		if (!pdfUrl.value || !fields.value.length)
 			throw new Error("Upload a PDF and add fields first.");
+		const templateData = { ...form.value };
+		const roles = form.value.signers.map((s) => ({
+			...s,
+			role_label: s.role_label || s.signer_name || "Signer",
+			role_key: s.role_key,
+			signing_order: s.signing_order,
+		}));
+		if (editingTemplate.value) {
+			const name = editingTemplate.value;
+			await api("template.update_template", { name, data: templateData });
+			await api("template.set_template_pdf", {
+				name,
+				file_url: form.value.source_pdf || pdfUrl.value,
+			});
+			await api("template.save_template_roles", { name, roles });
+			await api("template.save_template_fields", { name, fields: fields.value });
+			await api("template.publish_template", { name });
+			await go(root + "/templates");
+			return;
+		}
 		const d = await api("template.create_template", {
 			data: {
+				...templateData,
 				title: form.value.title,
 				pdf_file: form.value.source_pdf || pdfUrl.value,
 				signer_roles: form.value.signers.map((s) => ({
+					...s,
 					role_label: s.role_label || s.signer_name || "Signer",
 					role_key: s.role_key,
 					signing_order: s.signing_order,
@@ -407,10 +471,7 @@ onBeforeUnmount(() => {
 			@click="mobile = false"
 		/>
 		<aside v-if="!isSigner" :class="['sidebar', { open: mobile }]">
-			<a class="brand" :href="root" @click.prevent="go(root)"
-				><span class="brand-mark"><PenLine :size="23" /></span
-				><span>Open E-Sign<small>for ERPNext</small></span></a
-			>
+			<BrandLogo @home="goHome" />
 			<button class="text-button mobile-menu" @click="mobile = false">
 				Close navigation
 			</button>
@@ -434,9 +495,17 @@ onBeforeUnmount(() => {
 					:href="root + '/settings'"
 					@click.prevent="go(root + '/settings')"
 					><Settings :size="18" /> Settings</a
+				><a
+					:class="{ active: isPending }"
+					:href="root + '/my-sign'"
+					@click.prevent="go(root + '/my-sign')"
+					><PenLine :size="18" /> Awaiting my signature</a
 				>
 			</nav>
 			<div class="sidebar-bottom">
+				<button class="text-button" @click="setTheme(theme === 'dark' ? 'light' : 'dark')">
+					{{ theme === "dark" ? "Light appearance" : "Dark appearance" }}
+				</button>
 				<a href="/desk"><ArrowUpRight :size="16" /> Back to ERPNext</a
 				><a
 					href="https://github.com/joscasjac/nesscale_sign"
@@ -463,13 +532,22 @@ onBeforeUnmount(() => {
 					@click="mobile = !mobile"
 				>
 					<Menu :size="20" /></button
-				><span v-if="isSigner" class="brand compact-brand"
-					><PenLine :size="22" /> Open E-Sign</span
-				><span v-else class="breadcrumb"
+				><BrandLogo v-if="isSigner" compact @home="goHome" /><BrandLogo
+					v-else
+					class="mobile-menu"
+					compact
+					@home="goHome"
+				/><span v-if="!isSigner" class="breadcrumb"
 					>Workspace <span>/</span>
 					{{
 						isTemplate ? "Templates" : view === "settings" ? "Settings" : "Documents"
 					}}</span
+				><button
+					v-if="isSigner"
+					class="text-button"
+					@click="setTheme(theme === 'dark' ? 'light' : 'dark')"
+				>
+					{{ theme === "dark" ? "Light" : "Dark" }} appearance</button
 				><span class="topbar-note">{{
 					isSigner ? "Document signing" : demo ? "Local preview" : "ERPNext workspace"
 				}}</span>
@@ -480,10 +558,21 @@ onBeforeUnmount(() => {
 			<div v-if="notice" role="status" class="notice global-message">{{ notice }}</div>
 			<div v-if="loading" class="loading-state" role="status">Loading your workspace…</div>
 			<template v-else>
-				<section v-if="view === 'documents' || isTemplate" class="register content">
+				<section
+					v-if="view === 'documents' || isTemplate || isPending"
+					class="register content"
+				>
 					<div class="page-title">
 						<div>
-							<h1>{{ isTemplate ? "Templates" : "Documents" }}</h1>
+							<h1>
+								{{
+									isTemplate
+										? "Templates"
+										: isPending
+											? "Awaiting my signature"
+											: "Documents"
+								}}
+							</h1>
 							<p>
 								{{
 									isTemplate
@@ -497,7 +586,7 @@ onBeforeUnmount(() => {
 							{{ isTemplate ? "Create template" : "New document" }}
 						</button>
 					</div>
-					<div v-if="!isTemplate" class="summary-line">
+					<div v-if="!isTemplate && !isPending" class="summary-line">
 						<span
 							><i class="dot waiting" /> {{ stats.in_flight || 0 }} waiting for
 							signatures</span
@@ -505,7 +594,8 @@ onBeforeUnmount(() => {
 							><i class="dot complete" /> {{ stats.completed || 0 }} completed</span
 						><span>{{ stats.counts?.Draft || 0 }} drafts</span>
 					</div>
-					<div class="register-tools">
+					<ActivitySummary v-if="!isTemplate && !isPending" :stats="stats" />
+					<div v-if="!isPending" class="register-tools">
 						<div class="tabs" aria-label="Document status">
 							<button
 								v-for="f in isTemplate
@@ -555,7 +645,12 @@ onBeforeUnmount(() => {
 											@click.prevent="
 												isTemplate
 													? openTemplate(r.name)
-													: go(root + '/document/' + r.name)
+													: go(
+															isPending
+																? '/sign/' +
+																		encodeURIComponent(r.token)
+																: root + '/document/' + r.name,
+														)
 											"
 											><span class="file-icon"><FileText :size="21" /></span
 											><span
@@ -571,13 +666,33 @@ onBeforeUnmount(() => {
 									<td>{{ isTemplate ? r.page_count : r.sender_name || "—" }}</td>
 									<td>{{ date(r.modified) }}</td>
 									<td>
+										<div v-if="isTemplate" class="template-actions">
+											<button @click="editTemplate(r.name)">Edit</button
+											><button
+												@click="
+													templateAction('duplicate_template', r.name)
+												"
+											>
+												Duplicate</button
+											><button
+												v-if="r.status !== 'Archived'"
+												@click="templateAction('archive_template', r.name)"
+											>
+												Archive
+											</button>
+										</div>
 										<button
 											class="icon-button"
 											:aria-label="'Open ' + r.title"
 											@click="
 												isTemplate
 													? openTemplate(r.name)
-													: go(root + '/document/' + r.name)
+													: go(
+															isPending
+																? '/sign/' +
+																		encodeURIComponent(r.token)
+																: root + '/document/' + r.name,
+														)
 											"
 										>
 											<ArrowUpRight :size="18" />
@@ -609,7 +724,7 @@ onBeforeUnmount(() => {
 							</button>
 						</div>
 					</div>
-					<footer class="table-footer">
+					<footer v-if="!isPending" class="table-footer">
 						<span
 							>{{ rows.length ? `${offset + 1}–${offset + rows.length}` : "0" }}
 							{{ isTemplate ? "templates" : "documents" }}</span
@@ -802,11 +917,19 @@ onBeforeUnmount(() => {
 					</button>
 					<div class="page-title">
 						<div>
-							<h1>Prepare a document</h1>
+							<h1>{{ editingTemplate ? "Edit template" : "Prepare a document" }}</h1>
 							<p>Choose your PDF, add recipients, then place their fields.</p>
 						</div>
 						<div class="button-group">
 							<button
+								v-if="editingTemplate"
+								class="primary"
+								:disabled="busy"
+								@click="saveTemplate"
+							>
+								Save and publish template</button
+							><button
+								v-if="!editingTemplate"
 								:disabled="busy"
 								@click="
 									run(async () => {
@@ -820,6 +943,7 @@ onBeforeUnmount(() => {
 								class="primary"
 								:disabled="busy || !pdfUrl"
 								@click="sendDraft"
+								v-if="!editingTemplate"
 							>
 								<Send :size="16" /> Send for signature
 							</button>
@@ -906,27 +1030,30 @@ onBeforeUnmount(() => {
 									<option>Parallel</option>
 								</select></label
 							><label
+								>Expires on (optional)<input
+									type="datetime-local"
+									v-model="form.expires_on" /></label
+							><label>Email subject<input v-model="form.email_subject" /></label
+							><label
 								>Message to recipients<textarea
 									v-model="form.message"
 									rows="3"
 									placeholder="A short note about this document"
 								/></label
 							><button :disabled="busy || !pdfUrl" @click="saveTemplate">
-								Save as reusable template
+								{{
+									editingTemplate
+										? "Save and publish template"
+										: "Save as reusable template"
+								}}
 							</button>
+							<TemplateOptions :form="form" />
 						</aside>
 						<div class="editor-stage">
 							<div class="field-toolbar">
 								<span>Add field</span
 								><button
-									v-for="t in [
-										'Signature',
-										'Initial',
-										'Text',
-										'Date Signed',
-										'Checkbox',
-										'Dropdown',
-									]"
+									v-for="t in fieldTypes"
 									:disabled="!pdfUrl"
 									@click="addField(t)"
 								>
@@ -985,6 +1112,37 @@ onBeforeUnmount(() => {
 					</div>
 					<div v-if="selected" class="field-inspector">
 						<strong>Selected field</strong
+						><button :disabled="pages < 2 || busy" @click="repeatSelected">
+							Repeat on all pages</button
+						><button
+							@click="
+								fields.push({
+									...selected,
+									name: undefined,
+									field_key: crypto.randomUUID(),
+									repeat_group: undefined,
+								})
+							"
+						>
+							Duplicate field</button
+						><label
+							>Font size<input
+								type="number"
+								min="6"
+								max="48"
+								v-model.number="selected.font_size" /></label
+						><label>Prefilled value<input v-model="selected.default_value" /></label
+						><label
+							>ERP field mapping<input
+								v-model="selected.mapping_key"
+								placeholder="For example, customer_name" /></label
+						><label class="check-label"
+							><input
+								type="checkbox"
+								v-model="selected.read_only"
+								:true-value="1"
+								:false-value="0"
+							/>Read only</label
 						><label>Label<input v-model="selected.label" /></label
 						><label
 							>Recipient<select v-model="selected.signer_role">
@@ -1129,6 +1287,42 @@ onBeforeUnmount(() => {
 						</div>
 						<a class="button" href="/desk/ns-template"
 							>Open template settings <ArrowUpRight :size="14"
+						/></a>
+					</div>
+					<div class="settings-row">
+						<div>
+							<h2>Organizations & reminder policies</h2>
+							<p>
+								Manage sender identities, reminder intervals, expiry defaults and
+								organization settings.
+							</p>
+						</div>
+						<a class="button" href="/desk/ns-organization"
+							>Manage organizations <ArrowUpRight :size="14"
+						/></a>
+					</div>
+					<div class="settings-row">
+						<div>
+							<h2>Email templates</h2>
+							<p>
+								Edit the invitations, reminders and completion emails used by the
+								signing workflow.
+							</p>
+						</div>
+						<a class="button" href="/desk/email-template"
+							>Edit email templates <ArrowUpRight :size="14"
+						/></a>
+					</div>
+					<div class="settings-row">
+						<div>
+							<h2>Application settings</h2>
+							<p>
+								Default organization, support address, sender address and public
+								signing URL.
+							</p>
+						</div>
+						<a class="button" href="/desk/ns-settings"
+							>Open application settings <ArrowUpRight :size="14"
 						/></a>
 					</div>
 					<div class="settings-row">

@@ -30,3 +30,7 @@ test('download tokens are encoded and missing dates stay readable', () => {
   assert.equal(date(undefined), '—');
   assert.equal(date('invalid'), '—');
 });
+
+test('calendar dates do not shift to the previous day', () => {
+  assert.equal(date('2026-09-09'), 'Sep 9, 2026');
+});

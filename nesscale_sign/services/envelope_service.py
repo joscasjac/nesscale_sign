@@ -74,6 +74,7 @@ class EnvelopeService:
 		env.email_subject = data.get("email_subject") or tmpl.email_subject
 		env.email_message = data.get("email_message") or tmpl.email_message
 		env.message = data.get("message")
+		env.expires_on = data.get("expires_on")
 		cls._apply_signers(env, data.get("signers") or [], tmpl)
 
 		# Optional reference document (for field prefill + reversal linkage).
@@ -104,6 +105,7 @@ class EnvelopeService:
 		env.email_subject = data.get("email_subject")
 		env.email_message = data.get("email_message")
 		env.message = data.get("message")
+		env.expires_on = data.get("expires_on")
 		source_doc = _resolve_source_doc(data.get("source_doctype"), data.get("source_name"))
 		if source_doc:
 			env.metadata_json = json.dumps({"ref_doctype": source_doc.doctype, "ref_name": source_doc.name})
@@ -154,8 +156,11 @@ class EnvelopeService:
 					row.set(attr, field.get(attr))
 			if not row.field_key:
 				row.field_key = frappe.generate_hash(length=10)
-			if field.get("default_value") and not row.read_only:
+			if field.get("field_type") not in ("Signature", "Initial", "Stamp", "Date Signed") and field.get(
+				"default_value"
+			) not in (None, ""):
 				row.value = field.get("default_value")
+				row.filled = 1
 			mapped = _read_mapped_value(source_doc, field.get("mapping_key"))
 			if mapped not in (None, ""):
 				row.value = mapped

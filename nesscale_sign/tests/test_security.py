@@ -138,3 +138,31 @@ class TestSigningBoundaries(FrappeTestCase):
 			self.assertFalse(frappe.has_permission("NS Audit Log", "create"))
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_readonly_prefill_survives_materialization(self):
+		template = make_template(
+			"Prefill",
+			fields=[
+				{
+					"field_type": "Text",
+					"label": "Reference",
+					"signer_role": "signer",
+					"page": 1,
+					"pos_x": 0.1,
+					"pos_y": 0.1,
+					"width": 0.3,
+					"height": 0.05,
+					"read_only": 1,
+					"default_value": "PO-123",
+				}
+			],
+		)
+		env = make_envelope(template.name, two_signers_single(), send=False)
+		self.assertEqual(frappe.db.get_value("NS Envelope Field", {"envelope": env.name}, "value"), "PO-123")
+
+	def test_explicit_expiry_preserved_on_creation(self):
+		expires = add_days(now_datetime(), 7)
+		env = EnvelopeService.create_from_template(
+			self.template.name, {"signers": two_signers_single(), "expires_on": expires}
+		)
+		self.assertEqual(str(env.expires_on), str(expires))

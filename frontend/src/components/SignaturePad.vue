@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 const emit = defineEmits(["change"]);
+const uploadError = ref("");
 const canvas = ref(null),
 	mode = ref("Type"),
 	name = ref("");
@@ -53,6 +54,35 @@ function send() {
 		image: canvas.value.toDataURL("image/png"),
 	});
 }
+async function uploadSignature(event) {
+	uploadError.value = "";
+	clear();
+	const file = event.target.files?.[0];
+	if (!file) return;
+	if (!["image/png", "image/jpeg"].includes(file.type) || file.size > 2 * 1024 * 1024) {
+		uploadError.value = "Choose a PNG or JPG smaller than 2 MB.";
+		return;
+	}
+	const url = URL.createObjectURL(file);
+	try {
+		const image = new Image();
+		image.src = url;
+		await image.decode();
+		const scale = Math.min(660 / image.width, 150 / image.height);
+		ctx().drawImage(
+			image,
+			(700 - image.width * scale) / 2,
+			(180 - image.height * scale) / 2,
+			image.width * scale,
+			image.height * scale,
+		);
+		send();
+	} catch {
+		uploadError.value = "This image could not be opened. Choose another PNG or JPG.";
+	} finally {
+		URL.revokeObjectURL(url);
+	}
+}
 onMounted(clear);
 </script>
 <template>
@@ -77,7 +107,25 @@ onMounted(clear);
 			>
 				Draw signature
 			</button>
+			<button
+				type="button"
+				:class="{ active: mode === 'Upload' }"
+				@click="
+					mode = 'Upload';
+					clear();
+				"
+			>
+				Upload signature
+			</button>
 		</div>
+		<label v-if="mode === 'Upload'"
+			>Signature image<input
+				type="file"
+				accept="image/png,image/jpeg"
+				@change="uploadSignature"
+			/><small>PNG or JPG, up to 2 MB</small></label
+		>
+		<p v-if="uploadError" role="alert">{{ uploadError }}</p>
 		<label v-if="mode === 'Type'"
 			>Full name<input
 				v-model="name"

@@ -1,11 +1,17 @@
 :root {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-	color: #242a27;
-	background: #f6f5f1;
+	color: var(--ink);
+	background: var(--canvas);
 	font-size: 14px;
 	line-height: 1.5;
 	font-synthesis: none;
+	--canvas: #f6f5f1;
 	--paper: #fff;
+	--panel: #eeefe9;
+	--hover: #f1f2ed;
+	--control: #cdd0c8;
+	--selected: #dde5da;
+	--accent-text: #255b45;
 	--ink: #242a27;
 	--muted: #626963;
 	--line: #dedfd8;
@@ -36,9 +42,9 @@ button,
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
-	border: 1px solid #cdd0c8;
+	border: 1px solid var(--control);
 	border-radius: 4px;
-	background: white;
+	background: var(--paper);
 	color: var(--ink);
 	min-height: 36px;
 	padding: 7px 13px;
@@ -50,7 +56,7 @@ button,
 }
 button:hover,
 .button:hover {
-	background: #f1f2ed;
+	background: var(--hover);
 	border-color: #929b92;
 }
 button:disabled {
@@ -74,8 +80,8 @@ input:not([type="checkbox"]):not([type="file"]),
 select,
 textarea {
 	display: block;
-	background: #fff;
-	border: 1px solid #cdd0c8;
+	background: var(--paper);
+	border: 1px solid var(--control);
 	border-radius: 4px;
 	padding: 9px 10px;
 	width: 100%;
@@ -137,7 +143,7 @@ small {
 .sidebar {
 	width: 220px;
 	flex-shrink: 0;
-	background: #eeefe9;
+	background: var(--panel);
 	border-right: 1px solid var(--line);
 	padding: 30px 18px;
 	display: flex;
@@ -352,7 +358,7 @@ main {
 	outline-offset: 3px;
 }
 .table-wrap {
-	background: white;
+	background: var(--paper);
 	margin-top: 0;
 	overflow-x: auto;
 	border-bottom: 1px solid var(--line);
@@ -532,7 +538,7 @@ tbody tr:hover {
 }
 .pdf-render {
 	position: relative;
-	background: #fff;
+	background: var(--paper);
 	min-height: 160px;
 	width: 100%;
 	margin: auto;
@@ -709,7 +715,7 @@ tbody tr:hover {
 	gap: 16px;
 	align-items: end;
 	padding: 17px;
-	background: #fff;
+	background: var(--paper);
 	border: 1px solid var(--line);
 	margin-top: 20px;
 	flex-wrap: wrap;
@@ -762,7 +768,7 @@ tbody tr:hover {
 	background: #f6f5f1;
 }
 .signer-app .topbar {
-	background: #fff;
+	background: var(--paper);
 }
 .compact-brand {
 	font-size: 17px;
@@ -804,7 +810,7 @@ tbody tr:hover {
 .signature-pad canvas {
 	width: 100%;
 	height: auto;
-	background: #fff;
+	background: var(--paper);
 	border: 1px solid #d4dbce;
 	border-radius: 4px;
 	margin-top: 12px;
@@ -1150,4 +1156,177 @@ textarea:focus-visible {
 	gap: 5px;
 	align-items: center;
 }
-.erp-reference{border-top:1px solid var(--line);padding-top:15px;font-size:12px}.erp-reference summary{cursor:pointer}.erp-reference label{margin:12px 0}
+.erp-reference {
+	border-top: 1px solid var(--line);
+	padding-top: 15px;
+	font-size: 12px;
+}
+.erp-reference summary {
+	cursor: pointer;
+}
+.erp-reference label {
+	margin: 12px 0;
+}
+
+.identity {
+	gap: 10px;
+	padding: 0;
+}
+.identity-symbol {
+	width: 34px;
+	height: 40px;
+	flex: 0 0 auto;
+	color: var(--accent-text);
+}
+.identity-name {
+	font-size: 19px;
+	font-weight: 650;
+	letter-spacing: -0.025em;
+	white-space: nowrap;
+}
+.identity-name small {
+	color: var(--muted);
+	font-size: 11px;
+	font-weight: 450;
+	margin-top: 0;
+}
+.identity-compact .identity-symbol {
+	width: 28px;
+	height: 34px;
+}
+.identity-compact .identity-name {
+	font-size: 18px;
+}
+.identity:hover .identity-symbol {
+	color: var(--ink);
+}
+:root[data-theme="dark"] {
+	color-scheme: dark;
+	--canvas: #171d1a;
+	--paper: #202823;
+	--panel: #1c231f;
+	--ink: #edf1eb;
+	--muted: #b2bcb2;
+	--line: #3b473d;
+	--control: #59675b;
+	--hover: #2d3830;
+	--selected: #324639;
+	--accent-text: #a6d7b5;
+}
+[data-theme="dark"]
+	:is(
+		.topbar,
+		th,
+		.file-icon,
+		.editor-stage,
+		.document-placeholder,
+		.field-inspector,
+		.sign-content,
+		.avatar
+	) {
+	background: var(--panel);
+	color: var(--ink);
+}
+[data-theme="dark"]
+	:is(
+		.sidebar nav a,
+		.sidebar-bottom a,
+		.nav-label,
+		.breadcrumb,
+		.summary-line,
+		.tabs button,
+		.search,
+		th,
+		td,
+		.document-link,
+		.page-control,
+		.table-footer,
+		.topbar-note,
+		.text-button
+	) {
+	color: var(--muted);
+}
+[data-theme="dark"] :is(.sidebar nav a.active, .sidebar nav a:hover, tbody tr:hover) {
+	background: var(--selected);
+	color: var(--ink);
+}
+[data-theme="dark"] :is(td, .workspace-id, .file-icon) {
+	border-color: var(--line);
+}
+[data-theme="dark"] .tabs button.active {
+	color: var(--accent-text);
+	border-bottom-color: var(--accent-text);
+}
+[data-theme="dark"] :is(input, textarea)::placeholder {
+	color: #aab6ab;
+}
+[data-theme="dark"] .signature-pad canvas {
+	background: #fff;
+	color-scheme: light;
+}
+[data-theme="dark"] .primary {
+	color: #fff;
+}
+[data-theme="dark"] a:focus-visible,
+[data-theme="dark"] button:focus-visible {
+	outline-color: #a6d7b5;
+}
+.template-actions {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+.field-inspector {
+	flex-wrap: wrap;
+}
+
+.template-options {
+	border-top: 1px solid var(--line);
+	padding-top: 16px;
+	margin-top: 16px;
+}
+.template-options summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+.template-options label {
+	margin-top: 12px;
+}
+.template-options fieldset {
+	margin: 16px 0;
+	border: 1px solid var(--line);
+	min-width: 0;
+}
+.template-options p {
+	color: var(--muted);
+	font-size: 12px;
+	margin-top: 12px;
+}
+
+.activity-summary {
+	border-block: 1px solid var(--line);
+	margin: 0 0 22px;
+	padding: 12px 0;
+}
+.activity-summary summary {
+	cursor: pointer;
+	font-size: 13px;
+	color: var(--muted);
+}
+.activity-summary dl {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 24px 48px;
+	margin: 20px 0;
+}
+.activity-summary dt {
+	font-size: 12px;
+	color: var(--muted);
+}
+.activity-summary dd {
+	margin: 0;
+	font-size: 22px;
+}
+.activity-summary h2 {
+	margin-bottom: 12px;
+}
