@@ -94,6 +94,26 @@ class TestSigningBoundaries(FrappeTestCase):
 			self.assertEqual(len(completed), len(source) + len(certificate))
 			self.assertEqual(" ".join(p.get_text() for p in completed.pages(len(source))), text)
 
+	def test_completion_email_attaches_final_pdf_for_sender_and_signer(self):
+		self._sign()
+		with patch("frappe.sendmail") as sendmail:
+			EnvelopeService(self.envelope.name).finalize()
+		env = frappe.get_doc("NS Envelope", self.envelope.name)
+		self.assertEqual(
+			{call.kwargs["recipients"][0] for call in sendmail.call_args_list},
+			{env.sender_email, env.signers[0].signer_email},
+		)
+		for call in sendmail.call_args_list:
+			attachments = call.kwargs["attachments"]
+			self.assertEqual(len(attachments), 1)
+			self.assertEqual(attachments[0]["fname"], f"{env.name}-signed.pdf")
+			self.assertEqual(attachments[0]["fcontent"], files.read_file_content(env.signed_pdf))
+			self.assertEqual(digest(attachments[0]["fcontent"]), env.signed_sha256)
+			import fitz
+
+			with fitz.open(stream=attachments[0]["fcontent"], filetype="pdf") as pdf:
+				self.assertIn("All signers completed", pdf[-1].get_text())
+
 	def test_worker_failure_preserves_signatures_and_is_retryable(self):
 		self._sign()
 		with patch(

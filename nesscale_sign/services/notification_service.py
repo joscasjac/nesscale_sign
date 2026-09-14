@@ -146,9 +146,7 @@ class NotificationService:
 				reference_doctype="NS Envelope",
 				reference_name=self.envelope.name,
 				now=False,
-				attachments=attachment_docs(self.envelope.get("email_attachments"))
-				if notification_type == "Invitation"
-				else None,
+				attachments=self._attachments(notification_type),
 			)
 			notification.db_set("status", "Sent")
 			notification.db_set("sent_on", now_datetime())
@@ -159,6 +157,22 @@ class NotificationService:
 				title="Open E-Sign ERPNext: notification failed",
 				message=f"Notification {notification.name} failed: {exc}\n\n{frappe.get_traceback()}",
 			)
+
+	def _attachments(self, notification_type):
+		if notification_type == "Invitation":
+			return attachment_docs(self.envelope.get("email_attachments"))
+		if notification_type == "Completed":
+			from nesscale_sign.utils.files import read_file_content
+
+			if self.envelope.status != "Completed" or not self.envelope.signed_pdf:
+				frappe.throw("The completed PDF is not available to attach.")
+			return [
+				{
+					"fname": f"{self.envelope.name}-signed.pdf",
+					"fcontent": read_file_content(self.envelope.signed_pdf),
+				}
+			]
+		return None
 
 	def _signer_context(self, signer) -> dict:
 		ctx = self._base_context()
