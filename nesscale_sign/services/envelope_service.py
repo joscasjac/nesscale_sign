@@ -226,10 +226,6 @@ class EnvelopeService:
 		env.source_pdf = snapshot.file_url
 		env.source_sha256 = digest(content)
 
-		for signer in env.signers:
-			if not signer.token:
-				signer.token = frappe.generate_hash(length=40)
-
 		if not env.expires_on:
 			days = _expiry_days(env)
 			if days:
@@ -244,6 +240,12 @@ class EnvelopeService:
 		workflow.mark_sent(to_notify)
 		env.flags.esign_transition = True
 		env.save()
+
+		# Tokens are server-owned, permlevel-1 fields. Persist them after the
+		# permission-checked save, which restores protected fields for regular users.
+		for signer in env.signers:
+			if not signer.token:
+				signer.db_set("token", frappe.generate_hash(length=40), update_modified=False)
 
 		notifier = NotificationService(env)
 		for signer in to_notify:

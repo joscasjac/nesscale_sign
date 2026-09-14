@@ -18,6 +18,8 @@ from nesscale_sign.services.mail_options import attachment_docs, plain_message
 
 
 def signing_url(token: str) -> str:
+	if not token or token == "None":
+		frappe.throw("The recipient has no signing token. Repair the document before sending an invitation.")
 	base = frappe.db.get_single_value("NS Settings", "public_base_url") or get_url()
 	return f"{base.rstrip('/')}/sign/{token}"
 

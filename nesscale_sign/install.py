@@ -71,3 +71,25 @@ def before_tests():
 	ensure_settings()
 	seed_emails()
 	frappe.db.commit()  # nosemgrep: frappe-manual-commit — test fixture setup
+
+
+def sync_desktop_icon():
+	"""Retire shipped launcher names after a rebrand, preserving custom shortcuts."""
+	from frappe.desk.doctype.desktop_icon.desktop_icon import create_desktop_icons_from_installed_apps
+
+	create_desktop_icons_from_installed_apps()
+	for label in ("Nesscale Sign", "Open E-Sign ERPNext", "Open E-Sign"):
+		for name in frappe.get_all(
+			"Desktop Icon",
+			filters={
+				"app": "nesscale_sign",
+				"icon_type": "App",
+				"label": label,
+				"standard": 1,
+				"hidden": 0,
+			},
+			pluck="name",
+		):
+			doc = frappe.get_doc("Desktop Icon", name)
+			doc.hidden = 1
+			doc.save(ignore_permissions=True)

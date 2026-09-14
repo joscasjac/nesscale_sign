@@ -186,3 +186,54 @@ class TestSigningBoundaries(FrappeTestCase):
 		self.assertTrue(frappe.local.response.filecontent.startswith(b"%PDF"))
 		with self.assertRaises(frappe.PermissionError):
 			download_certificate("invalid-certificate-token")
+
+
+class TestSenderTokens(FrappeTestCase):
+	def test_regular_sender_gets_persisted_usable_invitation(self):
+		frappe.set_user("Administrator")
+		user = "token-sender@example.test"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Sender",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Nesscale Sign User"}],
+				}
+			).insert()
+		template = make_template("Sender token regression")
+		env = make_envelope(template.name, two_signers_single(), send=False)
+		frappe.db.set_value("NS Envelope", env.name, "sender", user)
+		try:
+			frappe.set_user(user)
+			with patch(
+				"nesscale_sign.services.notification_service.NotificationService._dispatch"
+			) as dispatch:
+				sent = EnvelopeService(env.name).send()
+			self.assertEqual(len(sent.signers[0].token), 40)
+			self.assertIn("/sign/" + sent.signers[0].token, dispatch.call_args.args[2])
+			self.assertNotIn("/sign/None", dispatch.call_args.args[2])
+			self.assertTrue(SigningService(sent.signers[0].token).get_pdf_bytes().startswith(b"%PDF"))
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_repair_preserves_existing_tokens_and_is_idempotent(self):
+		from nesscale_sign.patches.repair_signing_tokens import execute
+
+		frappe.set_user("Administrator")
+		env = make_envelope(make_template("Repair tokens").name, two_signers_single())
+		frappe.db.set_value("NS Envelope Signer", env.signers[0].name, "token", None)
+		execute()
+		env.reload()
+		token = env.signers[0].token
+		self.assertEqual(len(token), 40)
+		execute()
+		env.reload()
+		self.assertEqual(env.signers[0].token, token)
+
+	def test_missing_token_cannot_create_email_link(self):
+		from nesscale_sign.services.notification_service import signing_url
+
+		with self.assertRaises(frappe.ValidationError):
+			signing_url(None)

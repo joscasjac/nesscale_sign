@@ -1,5 +1,5 @@
 app_name = "nesscale_sign"
-app_title = "Open E-Sign"
+app_title = "E-Sign"
 app_publisher = "Open E-Sign contributors"
 app_description = "Electronic signatures for Frappe and ERPNext"
 app_email = ""
@@ -11,7 +11,7 @@ add_to_apps_screen = [
 	{
 		"name": "nesscale_sign",
 		"logo": "/assets/nesscale_sign/images/logo.svg",
-		"title": "Open E-Sign",
+		"title": "E-Sign",
 		"route": "/nesscale-sign",
 		"has_permission": "nesscale_sign.api.permission.has_app_permission",
 	}
@@ -29,6 +29,7 @@ website_route_rules = [
 # Installation
 # ------------------
 after_install = "nesscale_sign.install.after_install"
+after_migrate = "nesscale_sign.install.sync_desktop_icon"
 before_tests = "nesscale_sign.install.before_tests"
 
 # Permissions
