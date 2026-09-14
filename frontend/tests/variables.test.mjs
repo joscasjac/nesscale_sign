@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {activeVariable,variableSuggestions,resolveVariables,documentVariables} from '../src/variables.js';
+test('variable suggestions follow the cursor and stop after closing braces',()=>{assert.deepEqual(activeVariable('Dear {{con'),{start:5,query:'con'});assert.equal(activeVariable('{{contact.name}}'),null);assert.equal(activeVariable('{{new\nline'),null);assert.deepEqual(activeVariable('{{old}} {{new'),{start:8,query:'new'});});
+test('values are literal and unresolved tokens are not silently removed',()=>{const variables=[{key:'custom.project',value:'<script> & {{literal}}'}];assert.equal(resolveVariables('For {{ custom.project }}',variables),'For <script> & {{literal}}');assert.equal(resolveVariables('{{missing}}',variables),'{{missing}}');assert.equal(variableSuggestions(variables,'PROJECT').length,1);});
+test('primary contact changes built-in variables without changing other recipients',()=>{const data={primaryRecipient:'b',variables:[{key:'custom.project',value:'Example'}]};const form={title:'Agreement',signers:[{role_key:'a',signer_name:'Alex'},{role_key:'b',signer_name:'Sam'}]};assert.equal(documentVariables(data,form).find(v=>v.key==='contact.name').value,'Sam');assert.equal(form.signers[0].signer_name,'Alex');});

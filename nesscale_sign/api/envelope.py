@@ -147,6 +147,11 @@ def update_envelope(name: str, data=None):
 		"builder_json",
 		"email_template",
 		"email_attachments",
+		"email_from_name",
+		"email_mode",
+		"email_from_account",
+		"completion_redirect_url",
+		"completion_redirect_target",
 	):
 		if field in data:
 			doc.set(field, data[field])
@@ -271,3 +276,72 @@ def download_certificate(name: str):
 	if not doc.certificate_pdf:
 		frappe.throw("The completion record is not ready yet.")
 	_stream_private_file(doc.certificate_pdf, f"{doc.name}-certificate.pdf")
+
+
+@frappe.whitelist()
+def revise_unsigned(name):
+	"""Withdraw unsigned links and create an editable revision; retain the original audit."""
+	from nesscale_sign.services.audit_service import AuditService
+	from nesscale_sign.services.envelope_service import EnvelopeService
+	from nesscale_sign.utils.constants import AuditAction
+	from nesscale_sign.utils.security import lock_envelope
+
+	doc = frappe.get_doc("NS Envelope", name)
+	doc.check_permission("write")
+	frappe.has_permission("NS Envelope", "create", throw=True)
+	lock_envelope(name)
+	doc.reload()
+	if doc.status not in ("Sent", "In Progress") or any(s.status == "Signed" for s in doc.signers):
+		frappe.throw("Only a sent document with no signatures can be revised.")
+	data = {
+		key: doc.get(key)
+		for key in (
+			"title",
+			"organization",
+			"routing_type",
+			"email_subject",
+			"email_message",
+			"builder_json",
+			"email_template",
+			"email_attachments",
+			"email_from_name",
+			"email_mode",
+			"email_from_account",
+			"completion_redirect_url",
+			"completion_redirect_target",
+			"message",
+			"expires_on",
+		)
+	}
+	reference = frappe.parse_json(doc.metadata_json or "{}")
+	data["source_doctype"] = reference.get("ref_doctype")
+	data["source_name"] = reference.get("ref_name")
+	data["pdf_file"] = doc.source_pdf
+	data["signers"] = [
+		{
+			"signer_name": s.signer_name,
+			"signer_email": s.signer_email,
+			"role_key": s.role_key,
+			"role_label": s.role_label,
+			"signing_order": s.signing_order,
+		}
+		for s in doc.signers
+	]
+	data["fields"] = frappe.get_all("NS Envelope Field", filters={"envelope": name}, fields=["*"])
+	for field in data["fields"]:
+		if field.get("value") not in (None, "") and field.get("field_type") not in (
+			"Signature",
+			"Initial",
+			"Stamp",
+			"Date Signed",
+		):
+			field["default_value"] = field["value"]
+	revision = EnvelopeService.create_adhoc(data)
+	doc.status = "Voided"
+	doc.flags.esign_transition = True
+	for signer in doc.signers:
+		signer.token = None
+	doc.save()
+	AuditService(name).log(AuditAction.VOIDED, details="Withdrawn for unsigned revision " + revision.name)
+	AuditService(revision.name).log(AuditAction.CREATED, details="Unsigned revision of " + name)
+	return {"name": revision.name}

@@ -35,34 +35,61 @@ import BrandLogo from "./components/BrandLogo.vue";
 import { fieldTypes, repeatField, nextRequiredField, signingFieldComplete } from "./fields";
 import InlineSigningField from "./components/InlineSigningField.vue";
 import DocumentBuilder from "./components/DocumentBuilder.vue";
+import PdfUploadDialog from "./components/PdfUploadDialog.vue";
+import RecipientPanel from "./components/RecipientPanel.vue";
+import EditorButton from "./components/EditorButton.vue";
+import { documentVariables } from "./variables";
 import EmailOptions from "./components/EmailOptions.vue";
 import ContactPicker from "./components/ContactPicker.vue";
 import SigningFieldDialog from "./components/SigningFieldDialog.vue";
+import FinalSigningDialog from "./components/FinalSigningDialog.vue";
 const theme = ref("light");
 const newMenu = ref(false);
+const uploadOpen = ref(false);
+const uploadTemplate = ref(false);
+const creatingTemplate = computed(() => route.value.endsWith("/new-template"));
+const templateEditor = computed(() => creatingTemplate.value || !!editingTemplate.value);
 async function createDocument(mode) {
+	const template = isTemplate.value;
+	uploadTemplate.value = template;
 	newMenu.value = false;
-	await go(root + "/new");
+	if (mode !== "build") {
+		uploadOpen.value = true;
+		return;
+	}
+	await go(root + (template ? "/new-template" : "/new"));
 	builderOpen.value = mode === "build";
 	composeTab.value = mode === "build" ? "Document" : "Settings";
 	builderDirty.value = mode === "build";
 }
 
+const builderRef = ref(null);
+const availableVariables = computed(() => documentVariables(builderData.value, form.value));
 const composeTab = ref("Document"),
 	builderOpen = ref(false),
-	builderData = ref({ pages: [{ blocks: [] }] }),
+	builderData = ref({
+		layout: "flow",
+		createdDate: new Date().toISOString().slice(0, 10),
+		refNumber: crypto.randomUUID().slice(0, 8).toUpperCase(),
+		pages: [{ blocks: [] }],
+	}),
 	builderDirty = ref(false);
 function updateBuilder(data) {
 	builderData.value = data;
 	builderDirty.value = true;
 }
 async function renderBuilder() {
+	await builderRef.value?.prepare();
+	form.value.builder_json = JSON.stringify(builderData.value);
 	if (
-		(!builderOpen.value && !builderDirty.value) ||
+		(!builderOpen.value && !builderData.value.pages.some((p) => p.blocks.length)) ||
 		(!builderDirty.value && form.value.source_pdf)
 	)
 		return;
-	const result = await api("builder.render", { data: builderData.value });
+	const result = await api("builder.render", {
+		data: builderData.value,
+		source_pdf: builderData.value.imported ? builderData.value.sourcePdf : undefined,
+	});
 	form.value.source_pdf = result.file_url;
 	form.value.template = null;
 	form.value.builder_json = JSON.stringify(builderData.value);
@@ -90,7 +117,12 @@ function startBuilder() {
 		try {
 			builderData.value = JSON.parse(form.value.builder_json);
 		} catch {
-			builderData.value = { pages: [{ blocks: [] }] };
+			builderData.value = {
+				layout: "flow",
+				createdDate: new Date().toISOString().slice(0, 10),
+				refNumber: crypto.randomUUID().slice(0, 8).toUpperCase(),
+				pages: [{ blocks: [] }],
+			};
 		}
 	}
 }
@@ -141,20 +173,26 @@ const demo = ref(false),
 	pdfUrl = ref(""),
 	draftId = ref(null);
 const form = ref({
-	title: "",
-	signers: [{ signer_name: "", signer_email: "", role_key: "signer-1", signing_order: 1 }],
+	title: "New Document",
+	signers: [],
 	routing_type: "Sequential",
 	message: "",
 	source_doctype: "",
 	source_name: "",
 });
 const activeSigningField = ref(null);
+const finalReviewOpen = ref(false);
+function openFinalReview() {
+	if (!requiredRemaining.value && signContext.value?.signer.can_sign)
+		finalReviewOpen.value = true;
+}
 const reviewedFields = ref({});
 const signatureTypes = ["Signature", "Initial", "Stamp"];
 function fieldComplete(field) {
 	return signingFieldComplete(field, values.value, reviewedFields.value, signature.value);
 }
 async function openSigningField(field) {
+	finalReviewOpen.value = false;
 	if (
 		!signContext.value?.signer.can_sign ||
 		!field.editable ||
@@ -179,9 +217,10 @@ function continueSigning() {
 function nextSigningField() {
 	const field = nextRequiredField(ownFields.value, fieldComplete);
 	if (field) openSigningField(field);
-	else nextTick(() => document.getElementById("finish-signing-consent")?.focus());
+	else openFinalReview();
 }
 async function applySigningField(result) {
+	consent.value = false;
 	if (signatureTypes.includes(result.field.field_type)) signature.value = result.signature;
 	else {
 		values.value[result.field.field_key] = result.value;
@@ -190,12 +229,12 @@ async function applySigningField(result) {
 	activeSigningField.value = null;
 	await nextTick();
 	if (requiredRemaining.value) nextSigningField();
-	else nextTick(() => document.getElementById("finish-signing-consent")?.focus());
+	else openFinalReview();
 }
 let poll;
 const isSigner = computed(() => route.value.startsWith("/sign/"));
 const token = computed(() => decodeURIComponent(route.value.split("/")[2] || ""));
-const view = computed(() => (isSigner.value ? "sign" : route.value.split("/")[2] || "documents"));
+const view = computed(() => (isSigner.value ? "sign" : creatingTemplate.value ? "new" : route.value.split("/")[2] || "documents"));
 const isPending = computed(() => view.value === "my-sign");
 const isTemplate = computed(() => view.value === "templates");
 const filteredStatus = computed(
@@ -301,17 +340,20 @@ async function load() {
 			draftId.value = null;
 			builderOpen.value = true;
 			builderDirty.value = false;
-			builderData.value = { pages: [{ blocks: [] }] };
+			builderData.value = {
+				layout: "flow",
+				createdDate: new Date().toISOString().slice(0, 10),
+				refNumber: crypto.randomUUID().slice(0, 8).toUpperCase(),
+				pages: [{ blocks: [] }],
+			};
 			builderDirty.value = true;
 			composeTab.value = "Document";
 			editingTemplate.value = null;
 			fields.value = [];
 			pdfUrl.value = "";
 			form.value = {
-				title: "",
-				signers: [
-					{ signer_name: "", signer_email: "", role_key: "signer-1", signing_order: 1 },
-				],
+				title: creatingTemplate.value ? "New Template" : "New Document",
+				signers: [],
 				routing_type: "Sequential",
 				message: "",
 			};
@@ -360,17 +402,40 @@ function statusClass(status) {
 		}[status] || "draft"
 	);
 }
+async function acceptUpload(result) {
+	await go(root + (uploadTemplate.value ? "/new-template" : "/new"));
+	pdfUrl.value = result.file_url;
+	form.value.source_pdf = result.file_url;
+	form.value.title = result.title;
+	builderData.value = {
+		...builderData.value,
+		imported: true,
+		sourcePdf: result.file_url,
+		pages: Array.from({ length: result.page_count }, () => ({ blocks: [] })),
+	};
+	builderOpen.value = false;
+	builderDirty.value = false;
+	pages.value = result.page_count;
+	composeTab.value = "Document";
+	uploadOpen.value = false;
+}
 async function pickFile(e) {
 	await run(async () => {
 		pdfUrl.value = await upload(e.target.files[0]);
 		builderOpen.value = false;
 		builderDirty.value = false;
 		form.value.builder_json = null;
-		composeTab.value = "Fields";
+		composeTab.value = "Document";
 		if (!form.value.title) form.value.title = e.target.files[0].name.replace(/\.pdf$/i, "");
 		fields.value = [];
 		delete form.value.template;
-		delete form.value.source_pdf;
+		form.value.source_pdf = pdfUrl.value;
+		builderData.value = {
+			...builderData.value,
+			imported: true,
+			sourcePdf: pdfUrl.value,
+			pages: [{ blocks: [] }],
+		};
 	});
 }
 function addField(type) {
@@ -425,7 +490,7 @@ function position(f) {
 	};
 }
 async function saveDraft() {
-	if (builderOpen.value || builderDirty.value) await renderBuilder();
+	await renderBuilder();
 	if (!pdfUrl.value) throw new Error("Upload a PDF or build a document to continue.");
 
 	if (!form.value.title.trim()) throw new Error("Give this document a title.");
@@ -491,15 +556,15 @@ async function useTemplate(name) {
 		form.value.template = name;
 		builderData.value = JSON.parse(d.builder_json || '{"pages":[{"blocks":[]}]}');
 		builderDirty.value = false;
-		builderOpen.value = !!d.builder_json;
+		builderOpen.value = !!d.builder_json && !builderData.value.imported;
 		composeTab.value = "Document";
 	});
 }
 async function saveTemplate() {
 	await run(async () => {
+		await renderBuilder();
 		if (!pdfUrl.value || !fields.value.length)
-			throw new Error("Upload a PDF and add fields first.");
-		if (builderOpen.value || builderDirty.value) await renderBuilder();
+			throw new Error("Create a document or upload a PDF, then add fields first.");
 		const templateData = { ...form.value };
 		const roles = form.value.signers.map((s) => ({
 			...s,
@@ -554,7 +619,15 @@ async function sign() {
 			signature: signature.value,
 			consent: consent.value,
 		});
+		finalReviewOpen.value = false;
 		await load();
+		const url = signContext.value?.envelope.completion_redirect_url;
+		if (
+			url &&
+			/^https:\/\//.test(url) &&
+			signContext.value.envelope.completion_redirect_target !== "New tab"
+		)
+			location.assign(url);
 	});
 }
 async function decline() {
@@ -562,6 +635,17 @@ async function decline() {
 		await api("signing.decline", { token: token.value, reason: reason.value });
 		signContext.value = null;
 		flash("You declined this document. The sender will be notified.");
+	});
+}
+async function reviseUnsigned() {
+	await run(async () => {
+		const result = await api("envelope.revise_unsigned", { name: detail.value.envelope.name });
+		await go(root + "/document/" + result.name);
+		await load();
+		editDraft();
+		flash(
+			"An editable revision is ready. Previous signing links are inactive; send again when ready.",
+		);
 	});
 }
 function editDraft() {
@@ -580,7 +664,8 @@ function editDraft() {
 	};
 	fields.value = d.fields.map((f) => ({ ...f }));
 	pdfUrl.value = d.envelope.source_pdf;
-	builderOpen.value = !!d.envelope.builder_json;
+	builderOpen.value =
+		!!d.envelope.builder_json && !JSON.parse(d.envelope.builder_json || "{}").imported;
 	builderData.value = JSON.parse(d.envelope.builder_json || '{"pages":[{"blocks":[]}]}');
 	if (!form.value.signers.length)
 		form.value.signers = [{ role_key: "signer-1", signer_name: "", signer_email: "" }];
@@ -604,6 +689,11 @@ onBeforeUnmount(() => {
 });
 </script>
 <template>
+	<PdfUploadDialog
+		v-if="uploadOpen"
+		@close="uploadOpen = false"
+		@uploaded="run(() => acceptUpload($event))"
+	/>
 	<div v-if="demo" class="preview-banner">
 		Local design preview · fictional documents · no email is sent
 		<a href="/sign/demo-signer" @click.prevent="go('/sign/demo-signer')"
@@ -740,7 +830,7 @@ onBeforeUnmount(() => {
 							<div v-if="newMenu" class="new-document-options">
 								<button @click="createDocument('build')">
 									<FileText :size="22" /><span
-										><strong>Create a document</strong
+										><strong>{{ isTemplate ? "Create a template" : "Create a document" }}</strong
 										><small
 											>Build a proposal or contract from scratch</small
 										></span
@@ -889,7 +979,7 @@ onBeforeUnmount(() => {
 										: "Upload an existing PDF and choose who needs to sign."
 								}}
 							</p>
-							<button @click="query ? ((query = ''), search()) : go(root + '/new')">
+							<button @click="query ? ((query = ''), search()) : createDocument('build')">
 								{{ query ? "Clear search" : "Add a document" }}
 							</button>
 						</div>
@@ -945,6 +1035,16 @@ onBeforeUnmount(() => {
 						>
 					</div>
 					<div class="document-actions">
+						<button
+							v-if="
+								['Sent', 'In Progress'].includes(detail.envelope.status) &&
+								!detail.envelope.signers.some((s) => s.status === 'Signed')
+							"
+							:disabled="busy"
+							@click="reviseUnsigned"
+						>
+							Edit unsigned document
+						</button>
 						<template v-if="detail.envelope.status === 'Draft'"
 							><button @click="editDraft">Edit document</button
 							><button
@@ -1094,15 +1194,21 @@ onBeforeUnmount(() => {
 								placeholder="New document"
 						/></label>
 						<div class="button-group">
+							<EditorButton
+								label="Preview PDF"
+								icon="Eye"
+								:disabled="busy || (!builderOpen && !pdfUrl)"
+								@click="run(previewDocument)"
+							/>
 							<button
-								v-if="editingTemplate"
+								v-if="templateEditor"
 								class="primary"
 								:disabled="busy"
 								@click="saveTemplate"
 							>
 								Save and publish template</button
 							><button
-								v-if="!editingTemplate"
+								v-if="!templateEditor"
 								:disabled="busy"
 								@click="
 									run(async () => {
@@ -1116,124 +1222,62 @@ onBeforeUnmount(() => {
 								class="primary"
 								:disabled="busy || (!builderOpen && !pdfUrl)"
 								@click="sendDraft"
-								v-if="!editingTemplate"
+								v-if="!templateEditor"
 							>
 								<Send :size="16" /> Send for signature
 							</button>
 						</div>
 					</div>
-					<nav class="composer-toolbar" aria-label="Document preparation">
-						<button
-							v-for="tab in [
-								'Document',
-								'Fields',
-								'Recipients',
-								'Email',
-								'Settings',
-							]"
-							:class="{ active: composeTab === tab }"
-							@click="
-								composeTab = tab;
-								builderOpen =
-									tab === 'Document' && (!!form.builder_json || builderDirty);
-							"
-						>
-							{{ tab }}
-						</button>
-						<span class="toolbar-spacer"></span
-						><button
-							:disabled="busy || (!builderOpen && !pdfUrl)"
-							@click="run(previewDocument)"
-						>
-							Preview PDF
-						</button>
-					</nav>
 					<DocumentBuilder
+						ref="builderRef"
+						:variables="availableVariables"
+						@update:active-panel="composeTab = $event"
 						:model-value="builderData"
 						:fields="fields"
 						:recipients="form.signers"
 						:active-panel="composeTab"
-						:background-url="builderOpen ? '' : pdfUrl"
+						:background-url="builderOpen ? '' : builderData.sourcePdf || pdfUrl"
 						@update:fields="fields = $event"
 						@update:model-value="updateBuilder"
 						@preview="run(previewDocument)"
 						@page-count="pages = $event"
 					>
 						<template #panel>
-							<EmailOptions v-if="composeTab === 'Email'" v-model="form" />
 							<div v-show="composeTab === 'Settings'">
 								<h2>Document settings</h2>
-								<label class="upload-control"
-									><FileText :size="19" />
-									{{ pdfUrl ? "Replace PDF" : "Upload a PDF"
-									}}<input
-										type="file"
-										accept="application/pdf"
-										@change="pickFile"
-										:disabled="busy" /></label
-								><small>PDF · up to 15 MB · 100 pages</small
-								><label v-if="templates.length"
-									>Or use a template<select
-										@change="useTemplate($event.target.value)"
-									>
-										<option value="">Choose a template</option>
-										<option v-for="t in templates" :value="t.name">
-											{{ t.title }}
-										</option>
-									</select></label
-								>
-							</div>
-							<div v-show="composeTab === 'Recipients'">
-								<h2>Recipients</h2>
-								<label
-									>Signing order<select v-model="form.routing_type">
-										<option>Sequential</option>
-										<option>Parallel</option>
-									</select></label
-								>
-								<div
-									class="signer-form"
-									v-for="(s, i) in form.signers"
-									:key="s.role_key"
-								>
-									<div class="recipient-title">
-										<span>Recipient {{ i + 1 }}</span
-										><button
-											v-if="form.signers.length > 1"
-											class="icon-button"
-											:aria-label="'Remove recipient ' + (i + 1)"
-											@click="form.signers.splice(i, 1)"
+								<EmailOptions v-model="form" :variables="availableVariables" />
+								<details class="settings-disclosure">
+									<summary>Document source</summary>
+									<label class="upload-control"
+										><FileText :size="19" />
+										{{ pdfUrl ? "Replace PDF" : "Upload a PDF"
+										}}<input
+											type="file"
+											accept="application/pdf"
+											@change="pickFile"
+											:disabled="busy" /></label
+									><small>PDF · up to 15 MB · 100 pages</small
+									><label v-if="templates.length"
+										>Or use a template<select
+											@change="useTemplate($event.target.value)"
 										>
-											<Trash2 :size="14" />
-										</button>
-									</div>
-									<ContactPicker @select="prefillContact(s, $event)" />
-									<label
-										>Name<input
-											v-model="s.signer_name"
-											autocomplete="off"
-											placeholder="Full name" /></label
-									><label
-										>Email<input
-											v-model="s.signer_email"
-											type="email"
-											placeholder="name@company.com"
-									/></label>
-								</div>
-								<button
-									class="text-button"
-									@click="
-										form.signers.push({
-											signer_name: '',
-											signer_email: '',
-											role_key: crypto.randomUUID(),
-											signing_order: form.signers.length + 1,
-										})
-									"
-								>
-									<Plus :size="14" /> Add recipient
-								</button>
+											<option value="">Choose a template</option>
+											<option v-for="t in templates" :value="t.name">
+												{{ t.title }}
+											</option>
+										</select></label
+									>
+								</details>
 							</div>
+							<RecipientPanel
+								:fields="fields"
+								v-if="composeTab === 'Recipients'"
+								v-model="form"
+								:primary="builderData.primaryRecipient"
+								@update:primary="
+									updateBuilder({ ...builderData, primaryRecipient: $event })
+								"
+							/>
 							<div v-show="composeTab === 'Settings'">
 								<details class="settings-disclosure">
 									<summary>Link to an ERPNext record</summary>
@@ -1257,7 +1301,10 @@ onBeforeUnmount(() => {
 										rows="3"
 										placeholder="A short note about this document"
 									/></label
-								><button :disabled="busy || !pdfUrl" @click="saveTemplate">
+								><button
+									:disabled="busy || (!builderOpen && !pdfUrl)"
+									@click="saveTemplate"
+								>
 									{{
 										editingTemplate
 											? "Save and publish template"
@@ -1265,16 +1312,6 @@ onBeforeUnmount(() => {
 									}}
 								</button>
 								<TemplateOptions :form="form" />
-							</div>
-							<div v-if="composeTab === 'Fields'">
-								<h2>Signing fields</h2>
-								<p>
-									Select a field above the PDF, then drag it into position. Use
-									the field properties below to choose its recipient.
-								</p>
-								<button @click="composeTab = 'Recipients'">
-									Manage recipients
-								</button>
 							</div>
 						</template>
 					</DocumentBuilder>
@@ -1376,9 +1413,7 @@ onBeforeUnmount(() => {
 								signing workflow.
 							</p>
 						</div>
-						<a class="button" href="/desk/email-template"
-							>Edit email templates <ArrowUpRight :size="14"
-						/></a>
+						<a class="button" href="/desk/email-template">Edit email templates <ArrowUpRight :size="14" /></a>
 					</div>
 					<div class="settings-row">
 						<div>
@@ -1412,6 +1447,15 @@ onBeforeUnmount(() => {
 					</div>
 				</section>
 				<section v-else-if="isSigner && signContext" class="sign-content">
+					<FinalSigningDialog
+						:open="finalReviewOpen"
+						v-model:consent="consent"
+						:consent-text="signContext.consent_text"
+						:busy="busy"
+						:error="error"
+						@close="finalReviewOpen = false"
+						@submit="sign"
+					/>
 					<SigningFieldDialog
 						:field="
 							activeSigningField &&
@@ -1448,6 +1492,18 @@ onBeforeUnmount(() => {
 						<Check :size="28" />
 						<div>
 							<h2>All signed. You’re done.</h2>
+							<a
+								v-if="signContext.envelope.completion_redirect_url"
+								:href="signContext.envelope.completion_redirect_url"
+								:target="
+									signContext.envelope.completion_redirect_target === 'New tab'
+										? '_blank'
+										: '_self'
+								"
+								rel="noopener noreferrer"
+								class="button"
+								>Continue</a
+							>
 							<p>A copy is ready for your records.</p>
 						</div>
 						<a
@@ -1463,6 +1519,17 @@ onBeforeUnmount(() => {
 					</div>
 					<div v-else-if="signContext.signer.status === 'Signed'" class="notice">
 						Your signature is saved.
+						<a
+							v-if="signContext.envelope.completion_redirect_url"
+							:href="signContext.envelope.completion_redirect_url"
+							:target="
+								signContext.envelope.completion_redirect_target === 'New tab'
+									? '_blank'
+									: '_self'
+							"
+							rel="noopener noreferrer"
+							>Continue</a
+						>
 						{{
 							signContext.envelope.finalization_status === "Pending"
 								? "We’re preparing the final document."
@@ -1614,21 +1681,15 @@ onBeforeUnmount(() => {
 								</ol>
 								<p v-if="!requiredRemaining" class="notice">
 									All required fields are complete. Review the document, then
-									finish signing below.
+									confirm your consent to finish.
 								</p>
-								<label class="check-label consent"
-									><input
-										id="finish-signing-consent"
-										type="checkbox"
-										v-model="consent"
-										required
-									/><span>{{ signContext.consent_text }}</span></label
-								><button
+								<button
+									type="button"
+									v-if="!requiredRemaining"
 									class="primary full"
-									:disabled="busy || !consent || requiredRemaining > 0"
+									@click="openFinalReview"
 								>
-									<Check :size="17" />
-									{{ busy ? "Saving signature…" : "Finish signing" }}
+									Review and finish
 								</button>
 								<p class="sign-footnote">
 									{{

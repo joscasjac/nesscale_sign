@@ -104,3 +104,151 @@ class TestBuilderMail(FrappeTestCase):
 			NotificationService(env).send_invitation(env.signers[0])
 			self.assertIn(env.title, send.call_args.kwargs["subject"])
 			self.assertIn(env.signers[0].signer_name, send.call_args.kwargs["message"])
+
+	def test_rich_content_variables_and_padding_render_as_literals(self):
+		data = {
+			"resolvedVariables": [{"key": "custom.project", "value": "Alpha & Beta"}],
+			"pages": [
+				{
+					"blocks": [
+						{
+							"type": "Text",
+							"text": "Project {{custom.project}}",
+							"html": "<b>Project</b> {{custom.project}}",
+							"x": 40,
+							"y": 40,
+							"width": 500,
+							"height": 100,
+							"padding": 10,
+							"font_size": 16,
+							"line_height": 1.5,
+						}
+					]
+				}
+			],
+		}
+		with fitz.open(stream=render_document(data), filetype="pdf") as pdf:
+			self.assertIn("Project Alpha & Beta", pdf[0].get_text())
+			self.assertNotIn("{{", pdf[0].get_text())
+		data["resolvedVariables"] = []
+		with self.assertRaises(frappe.ValidationError):
+			render_document(data)
+
+	def test_removed_video_blocks_and_bad_padding_are_rejected(self):
+		base = {"type": "Text", "text": "Review", "x": 40, "y": 40, "width": 500, "height": 100}
+		for change in ({"type": "Video link"}, {"padding": float("nan")}, {"padding": 80}):
+			with self.assertRaises(frappe.ValidationError):
+				render_document({"pages": [{"blocks": [{**base, **change}]}]})
+
+	def test_document_settings_reject_unsafe_redirects_and_sender_injection(self):
+		from nesscale_sign.services.mail_options import validate_document_settings
+
+		for url in ("javascript:alert(1)", "http://example.test", "https://user:pass@example.test"):
+			with self.assertRaises(frappe.ValidationError):
+				validate_document_settings(frappe._dict(completion_redirect_url=url))
+		with self.assertRaises(frappe.ValidationError):
+			validate_document_settings(frappe._dict(email_from_name="Sender\nBcc: other@example.test"))
+		validate_document_settings(
+			frappe._dict(
+				completion_redirect_url="https://example.test/thanks", completion_redirect_target="New tab"
+			)
+		)
+
+	def test_rich_variables_cross_formatting_and_lists_keep_numbering(self):
+		from nesscale_sign.services.document_variables import rich_paragraph
+
+		markup = rich_paragraph(
+			"<b>{{custom.</b>project}}<ol><li>First</li><li>Second</li></ol>",
+			{"custom.project": "Alpha & Beta"},
+		)
+		self.assertIn("Alpha &amp; Beta", markup)
+		self.assertNotIn("{{", markup)
+		self.assertIn("1. First", markup)
+		self.assertIn("2. Second", markup)
+
+	def test_default_heading_paragraph_and_multiline_table_render(self):
+		data = {
+			"pages": [
+				{
+					"blocks": [
+						{
+							"type": "Text",
+							"text": "Heading\nAdd text to your document.",
+							"html": "<h2>Heading</h2><p>Add text to your document.</p>",
+							"x": 38,
+							"y": 46,
+							"width": 519,
+							"height": 94,
+							"padding": 10,
+							"font_size": 16,
+							"line_height": 1.5,
+						},
+						{
+							"type": "Table",
+							"text": "",
+							"cells": [["One\nTwo", "Three"], ["Four", "Five"]],
+							"x": 38,
+							"y": 160,
+							"width": 519,
+							"height": 150,
+							"padding": 10,
+							"font_size": 16,
+							"line_height": 1.5,
+						},
+					]
+				}
+			]
+		}
+		with fitz.open(stream=render_document(data), filetype="pdf") as pdf:
+			self.assertIn("Heading", pdf[0].get_text())
+			self.assertIn("Two", pdf[0].get_text())
+
+	def test_unsigned_revision_invalidates_links_and_keeps_original(self):
+		from nesscale_sign.api.envelope import revise_unsigned
+		from nesscale_sign.services.envelope_service import EnvelopeService
+		from nesscale_sign.services.signing_service import SigningService
+
+		env = make_envelope(make_template("Revision test").name, two_signers_single(), send=False)
+		with patch("frappe.sendmail"):
+			env = EnvelopeService(env.name).send()
+		token = env.signers[0].token
+		result = revise_unsigned(env.name)
+		self.assertEqual(frappe.get_doc("NS Envelope", result["name"]).status, "Draft")
+		self.assertEqual(frappe.get_doc("NS Envelope", env.name).status, "Voided")
+		with self.assertRaises(frappe.PermissionError):
+			SigningService(token)
+
+	def test_pdf_combination_and_landscape_overlay_preserve_original(self):
+		from nesscale_sign.api.builder import combine_pdfs, render
+		from nesscale_sign.utils.files import read_file_content
+
+		original = fitz.open()
+		page = original.new_page(width=842, height=595)
+		page.insert_text((300, 300), "Original landscape content")
+		file = save_private_file("landscape.pdf", original.tobytes())
+		original.close()
+		combined = combine_pdfs([file.file_url, file.file_url])
+		self.assertEqual(combined["page_count"], 2)
+		data = {
+			"pages": [
+				{
+					"blocks": [
+						{
+							"type": "Text",
+							"text": "Added content",
+							"x": 38,
+							"y": 32,
+							"width": 519,
+							"height": 60,
+							"padding": 10,
+							"font_size": 16,
+						}
+					]
+				}
+			]
+		}
+		result = render(data, source_pdf=file.file_url)
+		with fitz.open(stream=read_file_content(result["file_url"]), filetype="pdf") as pdf:
+			self.assertEqual(round(pdf[0].rect.width), 842)
+			self.assertIn("Original landscape content", pdf[0].get_text())
+			self.assertIn("Added content", pdf[0].get_text())

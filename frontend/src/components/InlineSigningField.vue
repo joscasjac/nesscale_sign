@@ -18,6 +18,10 @@ watch(
 	},
 	{ immediate: true },
 );
+async function commitChange() {
+	await nextTick();
+	if (input.value?.validity.valid && !props.complete) save();
+}
 function save() {
 	if (input.value?.reportValidity()) emit("save", props.value);
 }
@@ -38,7 +42,10 @@ function save() {
 			:aria-label="field.label || field.field_type"
 			:required="!!field.required"
 			@focus="$emit('activate')"
-			@change="$emit('edit', $event.target.value)"
+			@change="
+				$emit('edit', $event.target.value);
+				commitChange();
+			"
 			@keydown.enter.prevent="save"
 		>
 			<option value="">Choose…</option>
@@ -78,6 +85,7 @@ function save() {
 						: $event.target.value,
 				)
 			"
+			@change="commitChange"
 			@keydown.enter.prevent="save"
 		/>
 		<button v-if="active" type="button" class="field-next-guide" @click="save">

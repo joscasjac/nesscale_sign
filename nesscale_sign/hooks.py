@@ -81,3 +81,6 @@ for _dt in ("NS Envelope Field", "NS Signature", "NS Audit Log", "NS Signing Ses
 	has_permission[_dt] = "nesscale_sign.permissions.ns_permissions.related_has_permission"
 for _dt in ("NS Template Field", "NS Template Version"):
 	has_permission[_dt] = "nesscale_sign.permissions.ns_permissions.template_child_has_permission"
+
+# Optional Frappe Assistant Core plugin discovery (requires fac_plugins hook support).
+fac_plugins = ["nesscale_sign.mcp.fac_plugin"]

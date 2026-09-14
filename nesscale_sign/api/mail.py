@@ -38,3 +38,12 @@ def list_attachments(names="[]"):
 		{"name": name, "file_name": frappe.db.get_value("File", name, "file_name")}
 		for name in json.loads(names)
 	]
+
+
+@frappe.whitelist()
+def list_senders():
+	if not frappe.has_permission("Email Account", "read"):
+		return []
+	return frappe.get_list(
+		"Email Account", filters={"enable_outgoing": 1}, fields=["name", "email_id"], limit_page_length=100
+	)

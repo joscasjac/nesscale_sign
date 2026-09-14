@@ -1,3 +1,4 @@
+const demoContacts=[{name:"demo-alex",full_name:"Alex Morgan",email_id:"alex@example.test"},{name:"demo-sam",full_name:"Sam Rivera",email_id:"sam@example.test"}];
 // A deliberately separate, loopback-only preview service. Never built or shipped to Frappe.
 import { readFile } from "node:fs/promises";
 import express from "express";
@@ -249,15 +250,17 @@ app.all("/api/method/nesscale_sign.api.:module.:method", async (req, res) => {
           Number(args.start || 0) + Number(args.page_length || 20),
         );
     switch (key) {
-      case "builder.render": {const pdf=await renderBuilder(args.data);const url="/demo/built-"+serial+++".pdf";storage.set(url,pdf);result={file_url:url};break;}
+      case "builder.combine_pdfs": {const doc=await PDFDocument.create();for(const url of args.urls){const source=await PDFDocument.load(storage.get(url)||base);for(const p of await doc.copyPages(source,source.getPageIndices()))doc.addPage(p);}const url='/demo/combined-'+serial+++'.pdf';storage.set(url,Buffer.from(await doc.save()));result={file_url:url,page_count:doc.getPageCount()};break;}
+      case "builder.render": {let pdf=await renderBuilder(args.data);if(args.source_pdf){const source=await PDFDocument.load(storage.get(args.source_pdf)||base);const overlays=await source.embedPdf(pdf);overlays.forEach((p,i)=>{if(args.data.pages[i]?.blocks.length){const sheet=source.getPage(i);sheet.drawPage(p,{x:0,y:0,width:sheet.getWidth(),height:sheet.getHeight()});}});pdf=Buffer.from(await source.save());}const url="/demo/built-"+serial+++".pdf";storage.set(url,pdf);result={file_url:url};break;}
+      case "mail.list_senders": result=[{name:"Demo sender",email_id:"documents@example.test"}];break;
       case "mail.list_templates": result=[...emailTemplates.values()];break;
       case "mail.create_template": result={name:args.name,subject:args.subject,body:args.body};emailTemplates.set(args.name,result);break;
       case "mail.list_attachments": result=JSON.parse(args.names||"[]").map(id=>attachmentFiles.get(id)).filter(Boolean);break;
+      case "contacts.create_contact": {result={name:'demo-contact-'+serial++,full_name:args.full_name,email_id:args.email_id};demoContacts.push(result);break;}
       case "contacts.search_contacts":
-        result = [{name: "demo-alex", full_name: "Alex Morgan", email_id: "alex@example.com"}].filter(c => c.full_name.toLowerCase().includes(String(args.query || "").toLowerCase())); break;
+        result = demoContacts.filter(c => c.full_name.toLowerCase().includes(String(args.query || "").toLowerCase())); break;
       case "contacts.get_contact_prefill":
-        if(args.name !== "demo-alex") throw Error("Contact not found");
-        result = {full_name: "Alex Morgan", email_id: "alex@example.com"}; break;
+        result=demoContacts.find(c=>c.name===args.name);if(!result)throw Error("Contact not found"); break;
       case "dashboard.get_stats": {
         const counts = {};
         for (const { envelope: d } of documents.values())
@@ -284,6 +287,7 @@ app.all("/api/method/nesscale_sign.api.:module.:method", async (req, res) => {
       case "template.list_templates":
         result = list(templates, "template");
         break;
+      case "envelope.revise_unsigned": {const original=documents.get(args.name);if(!original||!['Sent','In Progress'].includes(original.envelope.status)||original.envelope.signers.some(s=>s.status==='Signed'))throw Error('This document cannot be revised');const copy=structuredClone(original);copy.envelope.name='NS-ENV-2026-'+String(serial++).padStart(5,'0');copy.envelope.status='Draft';copy.envelope.signers.forEach(s=>{s.status='Pending';s.token=null;});original.envelope.status='Voided';documents.set(copy.envelope.name,copy);result={name:copy.envelope.name};break;}
       case "envelope.get_envelope":
         if (!doc) throw Error("Document not found.");
         result = doc;
@@ -479,6 +483,8 @@ app.all("/api/method/nesscale_sign.api.:module.:method", async (req, res) => {
               font,
             });
         }
+        const certificate = await PDFDocument.load(await readFile(new URL('../../docs/examples/completion-certificate.pdf', import.meta.url)));
+        for (const page of await pdf.copyPages(certificate, certificate.getPageIndices())) pdf.addPage(page);
         const url = "/demo/completed-" + serial++ + ".pdf";
         storage.set(url, Buffer.from(await pdf.save()));
         d.envelope.signed_pdf = url;

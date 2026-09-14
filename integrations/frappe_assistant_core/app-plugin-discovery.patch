@@ -1,0 +1,99 @@
+diff --git a/frappe_assistant_core/utils/plugin_manager.py b/frappe_assistant_core/utils/plugin_manager.py
+index 4d730bd..967197a 100644
+--- a/frappe_assistant_core/utils/plugin_manager.py
++++ b/frappe_assistant_core/utils/plugin_manager.py
+@@ -54,6 +54,7 @@ class PluginInfo:
+     state: PluginState
+     tools: List[str]
+     error_message: Optional[str] = None
++    module_path: Optional[str] = None
+ 
+ 
+ @dataclass
+@@ -133,8 +134,31 @@ class PluginDiscovery:
+                         error_message=str(e),
+                     )
+ 
++        # Installed apps may expose plugins without writing into this app's package.
++        # Hook paths are trusted installed Python code, never request parameters.
++        for package in frappe.get_hooks("fac_plugins"):
++            try:
++                info = self._plugin_from_module(package)
++                if info:
++                    if info.name in plugins:
++                        raise ValueError(f"Duplicate plugin name: {info.name}")
++                    plugins[info.name] = info
++            except Exception as exc:
++                self.logger.error(f"Failed to discover app plugin {package}: {exc}")
+         return plugins
+ 
++    def _plugin_from_module(self, package):
++        module = importlib.import_module(f"{package}.plugin")
++        for attr_name in dir(module):
++            attr = getattr(module, attr_name)
++            if isinstance(attr, type) and issubclass(attr, BasePlugin) and attr is not BasePlugin:
++                plugin = attr()
++                info = plugin.get_info()
++                return PluginInfo(name=info["name"], display_name=info.get("display_name", info["name"]),
++                    description=info.get("description", ""), version=info.get("version", "1.0.0"),
++                    state=PluginState.DISCOVERED, tools=plugin.get_tools(), module_path=package)
++        return None
++
+     def _discover_plugin(self, plugin_dir: Path) -> Optional[PluginInfo]:
+         """Discover a single plugin"""
+         plugin_file = plugin_dir / PluginConfig.DISCOVERY_PATTERN
+@@ -468,7 +492,8 @@ class PluginManager:
+         for tool_name in plugin_info.tools:
+             try:
+                 # Import tool module
+-                module_name = f"{PluginConfig.PLUGIN_BASE_PATH}.{plugin_name}.tools.{tool_name}"
++                package = plugin_info.module_path or f"{PluginConfig.PLUGIN_BASE_PATH}.{plugin_name}"
++                module_name = f"{package}.tools.{tool_name}"
+                 module = importlib.import_module(module_name)
+ 
+                 # Find tool class
+diff --git a/frappe_assistant_core/tests/test_app_plugin_discovery.py b/frappe_assistant_core/tests/test_app_plugin_discovery.py
+new file mode 100644
+index 0000000..8004c41
+--- /dev/null
++++ b/frappe_assistant_core/tests/test_app_plugin_discovery.py
+@@ -0,0 +1,39 @@
++"""Installed apps can provide plugins without modifying the connector package."""
++import logging
++import unittest
++from types import SimpleNamespace
++from unittest.mock import patch
++
++from frappe_assistant_core.plugins.base_plugin import BasePlugin
++from frappe_assistant_core.utils.plugin_manager import PluginDiscovery
++
++
++class AppPlugin(BasePlugin):
++    def get_info(self):
++        return {"name": "example_app", "display_name": "Example", "version": "1.0"}
++
++    def get_tools(self):
++        return ["example_tool"]
++
++    def validate_environment(self):
++        return True, None
++
++
++class TestAppPluginDiscovery(unittest.TestCase):
++    @patch("frappe.logger", return_value=logging.getLogger("test"))
++    def test_hook_preserves_module_path_and_tools(self, logger):
++        discovery = PluginDiscovery()
++        with patch("frappe.get_hooks", return_value=["example_app.assistant"]), patch.object(
++            discovery, "_discover_plugin", return_value=None
++        ), patch("importlib.import_module", return_value=SimpleNamespace(AppPlugin=AppPlugin)):
++            plugins = discovery.discover_plugins()
++        self.assertEqual(plugins["example_app"].module_path, "example_app.assistant")
++        self.assertEqual(plugins["example_app"].tools, ["example_tool"])
++
++    @patch("frappe.logger", return_value=logging.getLogger("test"))
++    def test_broken_app_plugin_does_not_break_discovery(self, logger):
++        discovery = PluginDiscovery()
++        with patch("frappe.get_hooks", return_value=["missing.assistant"]), patch.object(
++            discovery, "_discover_plugin", return_value=None
++        ), patch("importlib.import_module", side_effect=ImportError("missing")):
++            self.assertEqual(discovery.discover_plugins(), {})

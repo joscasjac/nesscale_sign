@@ -76,6 +76,14 @@ class EnvelopeService:
 		env.builder_json = data.get("builder_json") or tmpl.get("builder_json")
 		env.email_template = data.get("email_template")
 		env.email_attachments = data.get("email_attachments")
+		for option in (
+			"email_from_name",
+			"email_mode",
+			"email_from_account",
+			"completion_redirect_url",
+			"completion_redirect_target",
+		):
+			env.set(option, data.get(option))
 		env.message = data.get("message")
 		env.expires_on = data.get("expires_on")
 		cls._apply_signers(env, data.get("signers") or [], tmpl)
@@ -110,6 +118,14 @@ class EnvelopeService:
 		env.builder_json = data.get("builder_json")
 		env.email_template = data.get("email_template")
 		env.email_attachments = data.get("email_attachments")
+		for option in (
+			"email_from_name",
+			"email_mode",
+			"email_from_account",
+			"completion_redirect_url",
+			"completion_redirect_target",
+		):
+			env.set(option, data.get(option))
 		env.message = data.get("message")
 		env.expires_on = data.get("expires_on")
 		source_doc = _resolve_source_doc(data.get("source_doctype"), data.get("source_name"))
@@ -153,7 +169,7 @@ class EnvelopeService:
 
 		for field in source_fields:
 			role_key = (field.get("signer_role") or "").lower()
-			signer_email = role_to_email.get(role_key) or default_email
+			signer_email = role_to_email.get(role_key) if role_key else default_email
 			row = frappe.new_doc("NS Envelope Field")
 			row.envelope = env.name
 			row.signer_email = signer_email
@@ -184,7 +200,7 @@ class EnvelopeService:
 		for f in frappe.get_all(
 			"NS Envelope Field", filters={"envelope": env.name}, fields=["name", "signer_role"]
 		):
-			email = role_to_email.get((f.signer_role or "").lower()) or default_email
+			email = role_to_email.get((f.signer_role or "").lower()) if f.signer_role else default_email
 			frappe.db.set_value("NS Envelope Field", f.name, "signer_email", email, update_modified=False)
 
 	# --------------------------------------------------------------- send
@@ -251,6 +267,17 @@ class EnvelopeService:
 			frappe.utils.validate_email_address(signer.signer_email, throw=True)
 			if signer.auth_method not in (None, "", "None"):
 				frappe.throw(_("Only email-link authentication is currently supported."))
+
+		roles = {(s.role_key or "").lower() for s in env.signers}
+		for field in frappe.get_all(
+			"NS Envelope Field",
+			filters={"envelope": env.name},
+			fields=["signer_role", "signer_email", "field_type"],
+		):
+			if field.signer_role and field.signer_role.lower() not in roles:
+				frappe.throw(_("Reassign fields belonging to a removed recipient before sending."))
+			if field.field_type != "Label" and field.signer_email not in seen:
+				frappe.throw(_("Assign every signing field to a recipient before sending."))
 
 	# --------------------------------------------------------------- resend
 	def resend(self, signer_email: str) -> "frappe.Document":
@@ -327,18 +354,20 @@ class EnvelopeService:
 
 		from nesscale_sign.services.seal_service import seal_pdf
 
-		filled, env.seal_status = seal_pdf(filled)
-		env.signed_sha256 = digest(filled)
 		env.status = EnvelopeStatus.COMPLETED
 		env.completed_on = now_datetime()
 		env.finalization_status = "Complete"
 		env.finalization_error = None
-		AuditService(env.name).log(AuditAction.GENERATED, details=f"PDF SHA-256: {env.signed_sha256}")
 		AuditService(env.name).log(AuditAction.COMPLETED, details="All signers completed")
 		chain = AuditService(env.name).verify()
 		if not chain["valid"]:
 			frappe.throw(_("Audit integrity check failed. Completion was stopped."))
-		certificate = pdf_service.build_certificate(env, AuditService(env.name).list(), chain)
+		certificate = pdf_service.build_certificate(env, AuditService(env.name).list(), chain, embedded=True)
+		# Append before sealing: rewriting a sealed PDF would invalidate its signature.
+		filled = pdf_service.append_certificate(filled, certificate)
+		filled, env.seal_status = seal_pdf(filled)
+		env.signed_sha256 = digest(filled)
+		AuditService(env.name).log(AuditAction.GENERATED, details=f"PDF SHA-256: {env.signed_sha256}")
 		certificate, _certificate_seal_status = seal_pdf(certificate)
 		for field, suffix, content in (
 			("signed_pdf", "signed", filled),

@@ -35,11 +35,20 @@ class NotificationService:
 
 	# --------------------------------------------------------------- public
 	def send_invitation(self, signer):
+		from nesscale_sign.services.document_variables import envelope_values, merge_text
+
+		values = envelope_values(self.envelope)
 		ctx = self._signer_context(signer)
 		rendered = self._render("Invitation", ctx)
-		subject = self.envelope.email_subject or rendered["subject"]
+		subject = (
+			merge_text(self.envelope.email_subject, values)
+			if self.envelope.email_subject
+			else rendered["subject"]
+		)
 		body = (
-			plain_message(self.envelope.email_message) if self.envelope.email_message else rendered["message"]
+			plain_message(merge_text(self.envelope.email_message, values))
+			if self.envelope.email_message
+			else rendered["message"]
 		)
 		# The invitation must retain its signer-specific link even with custom wording.
 		body += (
@@ -110,7 +119,25 @@ class NotificationService:
 		notification.flags.ignore_permissions = True
 		notification.insert(ignore_permissions=True)
 		try:
+			sender = None
+			if notification_type == "Invitation" and (
+				self.envelope.get("email_from_account") or self.envelope.get("email_from_name")
+			):
+				from email.utils import formataddr
+
+				account_name = self.envelope.get("email_from_account") or frappe.db.get_value(
+					"Email Account", {"enable_outgoing": 1, "default_outgoing": 1}, "name"
+				)
+				if account_name:
+					account = frappe.get_doc("Email Account", account_name)
+					if not account.enable_outgoing:
+						frappe.throw("The selected sending account is no longer enabled.")
+					sender = formataddr(
+						(self.envelope.get("email_from_name") or account.name, account.email_id)
+					)
+
 			frappe.sendmail(
+				sender=sender,
 				recipients=[recipient],
 				subject=subject,
 				message=message,

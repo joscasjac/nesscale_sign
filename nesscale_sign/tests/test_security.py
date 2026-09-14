@@ -86,6 +86,13 @@ class TestSigningBoundaries(FrappeTestCase):
 			self.assertGreater(sum(len(p.get_images()) for p in pdf), 0)
 		self.assertIn("Completed", text)
 		self.assertIn("All signers completed", text)
+		with (
+			fitz.open(stream=files.read_file_content(env.source_pdf), filetype="pdf") as source,
+			fitz.open(stream=files.read_file_content(env.signed_pdf), filetype="pdf") as completed,
+			fitz.open(stream=files.read_file_content(env.certificate_pdf), filetype="pdf") as certificate,
+		):
+			self.assertEqual(len(completed), len(source) + len(certificate))
+			self.assertEqual(" ".join(p.get_text() for p in completed.pages(len(source))), text)
 
 	def test_worker_failure_preserves_signatures_and_is_retryable(self):
 		self._sign()

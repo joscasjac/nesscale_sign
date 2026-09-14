@@ -85,6 +85,10 @@ class SigningService:
 				"routing_type": self.envelope.routing_type,
 				"finalization_status": self.envelope.finalization_status,
 				"seal_status": self.envelope.seal_status,
+				"completion_redirect_url": self.envelope.get("completion_redirect_url")
+				if self.signer.status == SignerStatus.SIGNED
+				else None,
+				"completion_redirect_target": self.envelope.get("completion_redirect_target"),
 			},
 			"signer": {
 				"name": self.signer.signer_name,

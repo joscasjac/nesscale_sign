@@ -11,8 +11,8 @@ Design notes
 * Values and signatures are drawn directly onto the page content stream. The
   output therefore contains **no AcroForm widgets**: it is inherently flat and
   cannot be re-edited in a PDF form editor.
-* A separate completion certificate records signers, signatures and the audit
-  trail. An optional PKI seal provides cryptographic integrity.
+* Completion certificate pages record signers, signatures and the audit trail.
+  They are appended before the optional PKI seal protects the complete PDF.
 """
 
 import io
@@ -140,7 +140,9 @@ def generate_filled_pdf(
 		doc.close()
 
 
-def build_certificate(envelope: "frappe.Document", audit_rows: list[dict], chain: dict) -> bytes:
+def build_certificate(
+	envelope: "frappe.Document", audit_rows: list[dict], chain: dict, *, embedded: bool = False
+) -> bytes:
 	"""Completion evidence with captured signatures; distinct from a PKI seal."""
 	from reportlab.lib import colors
 	from reportlab.lib.pagesizes import A4
@@ -265,11 +267,19 @@ def build_certificate(envelope: "frappe.Document", audit_rows: list[dict], chain
 		)
 		story.extend([KeepTogether([block]), Spacer(1, 10)])
 	story.extend([text("Document integrity", h2)])
-	for label, value in (
-		("Original SHA-256", envelope.source_sha256),
-		("Completed PDF SHA-256", envelope.signed_sha256),
-		("PDF seal", envelope.seal_status),
-	):
+	integrity = [("Original SHA-256", envelope.source_sha256)]
+	if not embedded:
+		integrity.extend(
+			[("Completed PDF SHA-256", envelope.signed_sha256), ("PDF seal", envelope.seal_status)]
+		)
+	else:
+		story.append(
+			text(
+				"The completed PDF includes this certificate. Its final SHA-256 and seal status are recorded in the document record after generation; a PDF cannot contain its own final hash.",
+				small,
+			)
+		)
+	for label, value in integrity:
 		story.append(text(f"{label}: {value or 'Not recorded'}", small))
 	story.append(
 		text(

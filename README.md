@@ -11,8 +11,8 @@ An independently maintained fork of [Nesscale Sign](https://github.com/bhavesh95
 ## What it does
 
 - A clear document register, searchable by title and signing status.
-- Full-width document builder with draggable headings, text, images, tables, dividers and video-link text; page controls, content undo/redo, and contextual properties. Product lists and payments are excluded from this iteration.
-- **New document** offers a choice between building from scratch and uploading an existing PDF. Both use the same canvas and signing-field palette. Uploaded PDF content stays fixed; signing fields remain editable.
+- Full-width document builder with structured text, image, table and divider blocks; inline editing, page controls, undo/redo and contextual properties. Video, product lists and payments are excluded from this iteration.
+- **New document** offers a choice between building from scratch and uploading an existing PDF. PDF upload opens a reorderable file dialog. Both paths use the same builder and field palette. Uploaded PDF content stays fixed; you can add signing fields and regular content blocks.
 - Drag signing fields directly onto any page. Page reordering keeps fields on their original content. Names, recipient mappings, required/read-only settings and coordinates are editable in the properties panel.
 - Invitation Email Templates, per-document plain-text subject/body overrides, and up to five private attachments totaling 10 MB. A secure signing link is always included; the configured Frappe sending account remains in use.
 - Sequential or parallel signing, email-link access, explicit electronic-signing consent, and typed, drawn, or uploaded signatures.
@@ -20,12 +20,13 @@ An independently maintained fork of [Nesscale Sign](https://github.com/bhavesh95
 - All original field types, repeat-across-pages controls, prefill and read-only values, explicit expiry, an awaiting-my-signature inbox and light/dark appearance.
 - Permission-checked APIs; completed PDF and completion record attached to the selected ERP record.
 - Original-PDF snapshots and SHA-256 fingerprints, protected audit records, serialized signing updates, and retryable PDF completion.
+- Completed PDFs include the completion certificate as their final pages. The complete document is sealed when configured; a separate certificate download remains available.
 - Optional certificate-based PDF sealing with pyHanko. No signing certificate is included. Sealing is visibly reported as **not configured** until an operator configures one.
 - Full frontend source, a reproducible build, and a loopback-only local preview with fictional data.
 
 ![Full-width document builder with fictional content](docs/images/document-builder.png)
 
-Builder content is stored with drafts and templates. Rendering produces a fixed PDF before sending; text overflow is rejected rather than silently clipped. Builder documents support 20 A4 pages and 200 blocks; PDF uploads retain the existing 100-page limit. Video blocks are link text, not embedded playback. Supporting email attachments are separate from the signed PDF and are copied when sending.
+Builder content is stored with drafts and templates. Rendering produces a fixed PDF before sending; text overflow is rejected rather than silently clipped. Builder documents support 20 A4 pages and 200 blocks; PDF uploads retain the existing 100-page limit. Text starts with a heading and paragraph, with Heading 1–5 formatting. Tables are editable in place: Enter moves down or adds a row; Shift+Enter inserts a line break. Document and contact variables have an insertion picker, `{{` suggestions, and a filled preview. Supporting email attachments are separate from the signed PDF and are copied when sending.
 
 ![Guided signature adoption with a fictional document](docs/images/signing-popup.png)
 
@@ -105,3 +106,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Keep improvements reusable, document mig
 Licensed under [AGPL-3.0](license.txt). Preserve upstream attribution and offer corresponding source to network users of modified versions as required by the license. This fork keeps a visible source link in the app. Branding does not imply endorsement by Nesscale Solutions or Frappe.
 
 See the [upstream feature comparison](docs/FEATURES.md) for where each original capability lives.
+
+Email settings offer a template or Custom wording. Templates hide the subject and body controls; Custom shows both. From name can be changed independently of the sending account. Unsigned sent documents can be revised into a new draft; previous signing links are invalidated and the revision must be sent again. Documents with a completed signature cannot be revised.
+
+## Assistant connector tools
+
+Open E-Sign includes nine permission-checked document tools for Frappe Assistant Core. They create and edit drafts, use templates, inspect status, send invitations and revise unsigned documents. See [connector integration](integrations/frappe_assistant_core/README.md) for the required connector discovery patch, enablement and deployment checks.

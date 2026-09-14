@@ -13,3 +13,7 @@ Keyboard-visible focus, native form controls, explicit labels, error recovery, r
 
 ## Identity and feature coverage
 One shared document-and-signature mark links home in workspace and signer headers. Light and dark appearances preserve the same hierarchy; PDFs and signature canvases retain white paper. Feature coverage must be checked against docs/FEATURES.md before removing or hiding controls. Advanced settings use labelled disclosure sections or direct native Desk links.
+
+## Document builder
+
+Use a full-width white and cool-gray editor with one icon toolbar and hover labels. Keep Pages, Variables, Recipients and Settings in the top toolbar. One card library contains blocks and fillable fields. Created content follows a stacked block layout with visible insertion positions; imported PDFs retain their original page layout. Text and table cells edit inline; properties hold spacing and appearance. Text starts with a heading and paragraph. Table actions distinguish rows from columns and addition from deletion; Enter advances down a column or creates a row, while Shift+Enter stays inside the cell. New documents start with the actual title “New Document.” Email templates hide custom subject/body controls, and selecting Custom reveals them.

@@ -51,7 +51,12 @@
   "finalization_error",
   "builder_json",
   "email_template",
-  "email_attachments"
+  "email_attachments",
+  "email_from_name",
+  "email_from_account",
+  "completion_redirect_url",
+  "completion_redirect_target",
+  "email_mode"
  ],
  "fields": [
   {
@@ -318,6 +323,35 @@
    "fieldname": "email_attachments",
    "label": "Invitation attachments",
    "fieldtype": "Long Text"
+  },
+  {
+   "fieldname": "email_from_name",
+   "fieldtype": "Data",
+   "label": "From Name"
+  },
+  {
+   "fieldname": "email_from_account",
+   "fieldtype": "Link",
+   "options": "Email Account",
+   "label": "From Email Account"
+  },
+  {
+   "fieldname": "completion_redirect_url",
+   "fieldtype": "Data",
+   "label": "Completion URL"
+  },
+  {
+   "fieldname": "completion_redirect_target",
+   "fieldtype": "Select",
+   "options": "Same tab\nNew tab",
+   "label": "Completion URL Target",
+   "default": "Same tab"
+  },
+  {
+   "fieldname": "email_mode",
+   "fieldtype": "Select",
+   "options": "template\ncustom",
+   "label": "Email Wording Mode"
   }
  ],
  "index_web_pages_for_search": 0,

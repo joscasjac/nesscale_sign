@@ -35,6 +35,7 @@ def attachment_docs(value, check_permission=False):
 
 
 def validate_options(doc):
+	validate_document_settings(doc)
 	if len(doc.email_subject or "") > 200 or any(c in (doc.email_subject or "") for c in "\r\n"):
 		frappe.throw("Use a one-line email subject under 200 characters.")
 	if len(doc.email_message or "") > 20000:
@@ -44,3 +45,28 @@ def validate_options(doc):
 	attachment_docs(doc.get("email_attachments"), check_permission=True)
 	if doc.get("builder_json") and len(doc.builder_json) > 10_000_000:
 		frappe.throw("Document content is too large.")
+
+
+def validate_document_settings(doc):
+	from urllib.parse import urlsplit
+
+	url = doc.get("completion_redirect_url") or ""
+	if url:
+		parsed = urlsplit(url)
+		if (
+			parsed.scheme != "https"
+			or not parsed.hostname
+			or parsed.username
+			or parsed.password
+			or len(url) > 2000
+		):
+			frappe.throw("Use a full HTTPS completion URL without credentials.")
+	if doc.get("completion_redirect_target") not in (None, "", "Same tab", "New tab"):
+		frappe.throw("Choose a valid completion link target.")
+	if any(c in (doc.get("email_from_name") or "") for c in "\r\n<>"):
+		frappe.throw("Use a plain sender name.")
+	if doc.get("email_from_account"):
+		account = frappe.get_doc("Email Account", doc.email_from_account)
+		account.check_permission("read")
+		if not account.enable_outgoing:
+			frappe.throw("Choose an enabled outgoing Email Account.")
