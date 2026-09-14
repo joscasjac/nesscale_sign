@@ -59,7 +59,7 @@ def ensure_settings():
 	if not settings.default_organization and frappe.db.exists("NS Organization", "Default Organization"):
 		settings.default_organization = "Default Organization"
 	if not settings.signing_brand_name:
-		settings.signing_brand_name = "Nesscale Sign"
+		settings.signing_brand_name = "Open E-Sign"
 	settings.flags.ignore_permissions = True
 	settings.save(ignore_permissions=True)
 

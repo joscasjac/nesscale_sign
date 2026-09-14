@@ -1,8 +1,8 @@
 app_name = "nesscale_sign"
-app_title = "Open E-Sign ERPNext"
-app_publisher = "Nesscale Solutions Pvt Ltd"
+app_title = "Open E-Sign"
+app_publisher = "Open E-Sign contributors"
 app_description = "Electronic signatures for Frappe and ERPNext"
-app_email = "info@nesscale.com"
+app_email = ""
 app_license = "AGPLv3"
 
 # Apps screen
@@ -11,7 +11,7 @@ add_to_apps_screen = [
 	{
 		"name": "nesscale_sign",
 		"logo": "/assets/nesscale_sign/images/logo.svg",
-		"title": "Open E-Sign ERPNext",
+		"title": "Open E-Sign",
 		"route": "/nesscale-sign",
 		"has_permission": "nesscale_sign.api.permission.has_app_permission",
 	}

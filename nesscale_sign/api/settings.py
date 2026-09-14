@@ -7,7 +7,7 @@ import frappe
 from nesscale_sign.api import load, require_manager
 
 # NOTE: brand/white-label fields (e.g. signing_brand_name) are intentionally
-# excluded for now — branding is fixed to "Nesscale Sign". They will return with
+# excluded for now — branding is fixed to "Open E-Sign". They will return with
 # the white-label plan so customers can set their own brand/logo.
 SETTINGS_FIELDS = (
 	"default_organization",

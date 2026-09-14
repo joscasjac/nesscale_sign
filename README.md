@@ -1,50 +1,67 @@
-# Open E-Sign ERPNext
+<div align="center">
+  <img src="nesscale_sign/public/images/logo.svg" alt="Open E-Sign" width="64" />
+  <h1>Open E-Sign</h1>
+  <p><strong>Build. Send. Sign. Keep the record.</strong></p>
+  <p>An open-source document builder and electronic-signature workspace for Frappe and ERPNext.</p>
+  <p>
+    <a href="#getting-started">Get started</a> ·
+    <a href="docs/API.md">API</a> ·
+    <a href="integrations/frappe_assistant_core/README.md">Assistant tools</a> ·
+    <a href="docs/SECURITY.md">Security</a> ·
+    <a href="license.txt">AGPL-3.0</a>
+  </p>
+</div>
 
-A document-first signing workspace for Frappe 16 and ERPNext. Prepare an existing PDF, choose recipients, place fields, and keep the completed files with your ERP records.
+![Open E-Sign structured document builder](docs/images/document-builder.png)
 
-An independently maintained fork of [Nesscale Sign](https://github.com/bhavesh95863/nesscale_sign) by Nesscale Solutions. AGPL-3.0. The internal app name remains `nesscale_sign` for compatibility.
+Create a document from blocks or upload a PDF. Add recipients and fillable fields, send it for signature, and download the completed document with its completion certificate included.
 
-**Status: local-review release. Not deployed to production.** This is not a claim of DocuSign parity, legal certification, qualified signatures, or independently audited security. Read [security and deployment prerequisites](docs/SECURITY.md) before using real contracts.
+Open E-Sign is an independently maintained fork with its own builder, guided signing experience and assistant integration. It runs inside your Frappe site and uses your configured outgoing email account. Screenshots below use fictional local-preview data.
 
-![Document register with fictional demo records](docs/images/documents.png)
+## One workspace, from draft to completion
 
-## What it does
+| Prepare | Send and sign | Keep the record |
+| --- | --- | --- |
+| Structured text, images, tables and dividers | Sequential or parallel recipients | Signed PDF with certificate pages appended |
+| Upload and rearrange existing PDFs | Type, draw or upload a signature | Original-document SHA-256 and audit trail |
+| Reusable document templates | Guided required fields and explicit final consent | Completion artifacts attached to ERP records |
+| Document variables and `{{` suggestions | Email templates or custom wording | Optional certificate-based PDF sealing |
 
-- A clear document register, searchable by title and signing status.
-- Full-width document builder with structured text, image, table and divider blocks; inline editing, page controls, undo/redo and contextual properties. Video, product lists and payments are excluded from this iteration.
-- **New document** offers a choice between building from scratch and uploading an existing PDF. PDF upload opens a reorderable file dialog. Both paths use the same builder and field palette. Uploaded PDF content stays fixed; you can add signing fields and regular content blocks.
-- Drag signing fields directly onto any page. Page reordering keeps fields on their original content. Names, recipient mappings, required/read-only settings and coordinates are editable in the properties panel.
-- Invitation Email Templates, per-document plain-text subject/body overrides, and up to five private attachments totaling 10 MB. A secure signing link is always included; the configured Frappe sending account remains in use.
-- Sequential or parallel signing, email-link access, explicit electronic-signing consent, and typed, drawn, or uploaded signatures.
-- Reusable PDF templates with edit, duplicate, archive and publish actions; existing Frappe document-event automation and recipient mappings.
-- All original field types, repeat-across-pages controls, prefill and read-only values, explicit expiry, an awaiting-my-signature inbox and light/dark appearance.
-- Permission-checked APIs; completed PDF and completion record attached to the selected ERP record.
-- Original-PDF snapshots and SHA-256 fingerprints, protected audit records, serialized signing updates, and retryable PDF completion.
-- Completed PDFs include the completion certificate as their final pages. The complete document is sealed when configured; a separate certificate download remains available.
-- Optional certificate-based PDF sealing with pyHanko. No signing certificate is included. Sealing is visibly reported as **not configured** until an operator configures one.
-- Full frontend source, a reproducible build, and a loopback-only local preview with fictional data.
+### Build documents with structure
 
-![Full-width document builder with fictional content](docs/images/document-builder.png)
+The full-width builder keeps pages, elements, recipients and properties together. Edit text and table cells directly in the document. Use Heading 1–5, paragraph formatting, colours and spacing controls. Drag blocks to reorder them; place fillable fields on imported PDFs.
 
-Builder content is stored with drafts and templates. Rendering produces a fixed PDF before sending; text overflow is rejected rather than silently clipped. Builder documents support 20 A4 pages and 200 blocks; PDF uploads retain the existing 100-page limit. Text starts with a heading and paragraph, with Heading 1–5 formatting. Tables are editable in place: Enter moves down or adds a row; Shift+Enter inserts a line break. Document and contact variables have an insertion picker, `{{` suggestions, and a filled preview. Supporting email attachments are separate from the signed PDF and are copied when sending.
+- Start from a blank document, an existing PDF, or a reusable template.
+- Insert contact and document variables with the toolbar or by typing `{{`.
+- Preview resolved variables before sending.
+- Create, edit, duplicate, publish and archive templates.
+- Revise a sent document while no recipient has signed. Revising invalidates the previous links and creates a new draft to send.
 
-![Guided signature adoption with a fictional document](docs/images/signing-popup.png)
+### See what needs attention
 
-Names, emails, text, dates, checkboxes and dropdowns are edited directly on the PDF. A highlighted **Next** guide (or Enter) confirms the current field and advances across pages. Signature fields open a popup with type, draw and upload options, signature styles and black/blue/red ink. Final consent and **Finish signing** remain explicit.
+![Document dashboard with fictional records](docs/images/documents.png)
 
-During preparation, **Fill from a contact** searches Contacts permitted by the current Frappe user and copies the selected name and primary email into a recipient. Name and Email fields prefill from that recipient without overwriting existing field values. Each prefilled required field must still be reviewed. This is a snapshot, not a live contact link; phone, company and address mapping are not included. Guest signing links cannot query Contacts.
+Search documents and filter by signing status. Open a record to review recipients, progress, activity and downloads. The **Awaiting my signature** view brings your own pending documents together.
 
-**Date** is an editable calendar field. **Date Signed** remains generated by the server when signing completes.
+### Guide every signer to the finish
 
-![Inline fields and the Next guide](docs/images/signing-inline.png)
+![Guided signing with fields directly on the document](docs/images/signing-inline.png)
 
-[Example completion certificate](docs/examples/completion-certificate.pdf) · [Deployment handoff and sealing setup](docs/DEPLOYMENT.md)
+Signers review highlighted fields directly on the PDF. Required prefills still need review. After the last required field is completed, the final review opens automatically; consent and **Finish signing** remain explicit.
 
-![Document detail and activity](docs/images/document-detail.png)
+![Type, draw or upload a signature](docs/images/signing-popup.png)
 
-## Try the design locally
+### Keep the certificate with the document
 
-Node 22.12+ (Node 24 recommended):
+Every newly completed PDF includes its completion certificate as the final pages. A separate certificate download is also available. When a service seal is configured, the document and certificate pages are combined **before** sealing.
+
+The app captures signing events, consent and an audit trail. A completion certificate is not the same as a cryptographic signature. Sealing is optional and requires your own certificate configuration. See [security and sealing](docs/SECURITY.md) and the [sample completion certificate](docs/examples/completion-certificate.pdf).
+
+## Getting started
+
+### Try the local demo
+
+Use **Node 22.12+**, preferably Node 24:
 
 ```sh
 git clone --branch codex/open-esign https://github.com/joscasjac/nesscale_sign.git
@@ -53,27 +70,51 @@ npm ci
 npm run preview:local
 ```
 
-Open **http://127.0.0.1:4173/nesscale-sign**. Use **Try signing** in the preview banner to sign a fictional document and download a generated sample PDF.
+Open [the local preview](http://127.0.0.1:4173/nesscale-sign). **Try signing** opens a fictional document.
 
-This preview uses a separate in-memory server at `127.0.0.1:4174`. It does not connect to ERPNext, send emails, provide cryptographic seals, or persist data after restart. It demonstrates the actual frontend with a simulated API; it is not a substitute for the Frappe backend tests. Desk-only settings require a real Frappe site. The preview service is excluded from the production build.
+The demo uses an in-memory API on port 4174. It sends no email, connects to no ERPNext site, and resets when restarted. Frappe Desk settings are available on an installed site, not in this preview.
 
-## Install on a test Frappe site
+### Install on Frappe
 
-Requires **Frappe 16, Python 3.14+, Node 24**, MariaDB, Redis and working Frappe workers/scheduler. ERPNext is optional for standalone signing; record links require the referenced DocType to be installed.
+Requires **Frappe 16, Python 3.14+, Node 24**, MariaDB, Redis and running Frappe workers/scheduler. ERPNext is optional for standalone signing; linked ERP records require the corresponding app to be installed.
 
 ```sh
 cd /path/to/frappe-bench
 bench get-app --branch codex/open-esign https://github.com/joscasjac/nesscale_sign.git
-bench --site YOUR_TEST_SITE install-app nesscale_sign
-bench --site YOUR_TEST_SITE migrate
+bench --site YOUR_SITE install-app nesscale_sign
+bench --site YOUR_SITE migrate
 bench build --app nesscale_sign
 ```
 
-Open `/nesscale-sign`. Assign `Nesscale Sign User` or `Nesscale Sign Manager` roles in Frappe. Configure an outgoing **Email Account** for invitations. The app does not supply an email service.
+Open `/nesscale-sign`. Assign `Nesscale Sign User` or `Nesscale Sign Manager` and configure an outgoing **Email Account**. Manage application settings and Email Templates in Frappe Desk.
 
-The built frontend is committed for installation on Frappe Cloud; frontend source lives in `frontend/`. Installing requires a bench deployment and a site install. **Do not deploy this local-review branch to a live site without testing and explicit approval.**
+**Frappe Cloud:** add this repository and the `codex/open-esign` branch to your bench, deploy it, then install the app on your site. Built frontend assets are committed in the repository. Test upgrades on a separate site and follow the [deployment guide](docs/DEPLOYMENT.md).
 
-## Build and test
+The internal package name, route and existing role names remain compatible with the original app. The product name is **Open E-Sign**; do not rename the Python package or database DocTypes during installation.
+
+## Assistant tools and API
+
+Nine permission-checked tools integrate with Frappe Assistant Core:
+
+- Inspect the builder format, templates and documents.
+- Create a draft from content, a PDF, or a template.
+- Update drafts, send invitations, and revise unsigned documents.
+
+Draft creation does not send email. Signature submission remains with the signer. The connector requires the app-discovery patch and enablement described in the [integration guide](integrations/frappe_assistant_core/README.md); installing this app alone does not enable the tools in an existing connector.
+
+For direct integration, see [API examples](docs/API.md).
+
+## Current scope
+
+- Builder documents: up to 20 A4 pages and 200 blocks. Text overflow is rejected rather than clipped.
+- PDF uploads: up to 10 files, 15 MB total and 100 pages.
+- Supporting email attachments: up to 5 files and 10 MB total.
+- Contact selection uses the current Frappe user's permissions. Prefilled recipient details are snapshots.
+- No payment collection, product catalogue or video blocks in this iteration.
+- No direct Frappe Drive picker; export a PDF and upload it.
+- Email-link signing verifies possession of the link. It does not provide independent identity verification or qualified electronic signatures.
+
+## Development
 
 ```sh
 cd frontend
@@ -82,33 +123,19 @@ npm run build
 npm test
 ```
 
-The build writes `nesscale_sign/public/frontend/` and the Frappe HTML entrypoint. Never hand-edit compiled assets.
+The build generates `nesscale_sign/public/frontend/` and the Frappe HTML entrypoint. Edit source files rather than compiled assets.
 
-On an isolated Frappe site (tests create records):
+Run backend tests on an isolated site—they create records:
 
 ```sh
 bench --site YOUR_TEST_SITE set-config allow_tests true
 bench --site YOUR_TEST_SITE run-tests --app nesscale_sign
 ```
 
-See [API examples](docs/API.md), [security configuration](docs/SECURITY.md), [local validation notes](docs/VALIDATION.md), and [changes](CHANGELOG.md).
+[Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md) · [Validation notes](docs/VALIDATION.md) · [Feature comparison](docs/FEATURES.md)
 
-## Existing documents and Drive
+## License and attribution
 
-Document authoring remains in your existing tools. Upload the finished PDF or use a saved template. Optionally enter the source DocType and record name when preparing a document. The sender must have write access to that record. Final PDFs and completion records are attached there.
+Open E-Sign is maintained independently from [Nesscale Sign](https://github.com/bhavesh95863/nesscale_sign), originally created by Nesscale Solutions. Thank you to the upstream contributors for the foundation.
 
-There is no direct Frappe Drive picker yet. Export/upload a PDF from Drive; the signing app freezes its own copy when sending, so later edits to the working document cannot change the agreement being signed.
-
-## Contributing and license
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). Keep improvements reusable, document migrations, and test permission boundaries. No production keys, personal documents, or real signer data belong in fixtures or screenshots.
-
-Licensed under [AGPL-3.0](license.txt). Preserve upstream attribution and offer corresponding source to network users of modified versions as required by the license. This fork keeps a visible source link in the app. Branding does not imply endorsement by Nesscale Solutions or Frappe.
-
-See the [upstream feature comparison](docs/FEATURES.md) for where each original capability lives.
-
-Email settings offer a template or Custom wording. Templates hide the subject and body controls; Custom shows both. From name can be changed independently of the sending account. Unsigned sent documents can be revised into a new draft; previous signing links are invalidated and the revision must be sent again. Documents with a completed signature cannot be revised.
-
-## Assistant connector tools
-
-Open E-Sign includes nine permission-checked document tools for Frappe Assistant Core. They create and edit drafts, use templates, inspect status, send invitations and revise unsigned documents. See [connector integration](integrations/frappe_assistant_core/README.md) for the required connector discovery patch, enablement and deployment checks.
+Licensed under [AGPL-3.0](license.txt). Preserve copyright notices and provide corresponding source to users of modified network services as required by the license. The app includes a visible source link. This fork is not endorsed by Nesscale Solutions or Frappe.

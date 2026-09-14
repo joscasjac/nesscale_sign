@@ -3,7 +3,7 @@ name = "nesscale_sign"
 authors = [
     { name = "Nesscale Solutions Pvt Ltd", email = "info@nesscale.com"}
 ]
-description = "Nesscale Digital Signature For the frappe"
+description = "Open E-Sign: document building and electronic signatures for Frappe and ERPNext"
 requires-python = ">=3.14"
 readme = "README.md"
 license = { file = "license.txt" }
