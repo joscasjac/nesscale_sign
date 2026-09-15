@@ -31,6 +31,30 @@ class TestSigningBoundaries(FrappeTestCase):
 		with self.assertRaises(frappe.PermissionError):
 			SigningService(self.token).get_context()
 
+	def test_email_authentication_can_send_and_open_signing_link(self):
+		for method in ("Email", "None"):
+			with self.subTest(auth_method=method):
+				signers = two_signers_single()
+				signers[0]["auth_method"] = method
+				env = make_envelope(self.template.name, signers, send=False)
+				with patch("frappe.sendmail"):
+					env = EnvelopeService(env.name).send()
+				self.assertEqual(env.status, "Sent")
+				self.assertTrue(env.signers[0].token)
+				SigningService(env.signers[0].token).get_context()
+
+	def test_unsupported_authentication_still_blocks_send(self):
+		for method in ("SMS", "OTP", "Password"):
+			with self.subTest(auth_method=method):
+				env = make_envelope(self.template.name, two_signers_single(), send=False)
+				# Simulate a legacy/imported value that bypassed Select validation.
+				frappe.db.set_value("NS Envelope Signer", env.signers[0].name, "auth_method", method)
+				with patch("frappe.sendmail") as mail:
+					with self.assertRaisesRegex(frappe.ValidationError, "Only email-link"):
+						EnvelopeService(env.name).send()
+					mail.assert_not_called()
+				self.assertEqual(env.reload().status, "Draft")
+
 	def test_voided_token_cannot_read(self):
 		EnvelopeService(self.envelope.name).void("Test cancellation")
 		with self.assertRaises(frappe.PermissionError):

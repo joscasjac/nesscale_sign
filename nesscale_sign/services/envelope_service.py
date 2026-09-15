@@ -267,7 +267,8 @@ class EnvelopeService:
 			if not signer.signer_email:
 				frappe.throw(_("Every signer needs an email address."))
 			frappe.utils.validate_email_address(signer.signer_email, throw=True)
-			if signer.auth_method not in (None, "", "None"):
+			# Email is the explicit schema option; None is its legacy default.
+			if signer.auth_method not in (None, "", "None", "Email"):
 				frappe.throw(_("Only email-link authentication is currently supported."))
 
 		roles = {(s.role_key or "").lower() for s in env.signers}
