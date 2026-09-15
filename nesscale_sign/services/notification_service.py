@@ -10,7 +10,6 @@ can be customised from Desk without code changes. Every send is recorded as an
 """
 
 import frappe
-from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils import format_datetime, get_url, now_datetime
 
 from nesscale_sign.email.seed import TEMPLATE_NAMES
@@ -98,7 +97,11 @@ class NotificationService:
 			self.envelope.get("email_template") if notification_type == "Invitation" else None
 		) or TEMPLATE_NAMES.get(notification_type)
 		try:
-			return get_email_template(template_name, context)
+			# The sender's template access is checked when saving the draft.
+			# Notifications also run during token-authenticated Guest signing;
+			# render the stored template internally without exposing the Desk API.
+			template = frappe.get_doc("Email Template", template_name)
+			return template.get_formatted_email(context)
 		except frappe.DoesNotExistError:
 			title = context.get("title") or self.envelope.title
 			return {

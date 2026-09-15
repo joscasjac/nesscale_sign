@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 """Workflow & signing tests: sequential/parallel routing, completion, decline."""
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -57,6 +59,29 @@ class TestSequentialWorkflow(FrappeTestCase):
 		statuses = {s.role_key: s.status for s in env.signers}
 		self.assertEqual(statuses["first"], "Sent")
 		self.assertEqual(statuses["second"], "Pending")
+
+	def test_guest_signing_queues_next_invitation_without_template_access(self):
+		from frappe.email.doctype.email_template.email_template import get_email_template
+
+		from nesscale_sign.email.seed import TEMPLATE_NAMES
+
+		env = make_envelope(self.tmpl.name, two_signers(), routing="Sequential")
+		token = env.get_signer("alice@test.com").token
+		try:
+			frappe.set_user("Guest")
+			with self.assertRaises(frappe.PermissionError):
+				get_email_template(TEMPLATE_NAMES["Invitation"], {})
+			with patch("frappe.sendmail") as mail:
+				result = SigningService(token).submit({}, signature_payload(), consent=True)
+				self.assertEqual(result["status"], "signed")
+				self.assertEqual(mail.call_args.kwargs["recipients"], ["bob@test.com"])
+				self.assertIn("/sign/", mail.call_args.kwargs["message"])
+			self.assertEqual(frappe.session.user, "Guest")
+		finally:
+			frappe.set_user("Administrator")
+		env.reload()
+		self.assertEqual(env.get_signer("alice@test.com").status, "Signed")
+		self.assertEqual(env.get_signer("bob@test.com").status, "Sent")
 
 	def test_second_signer_cannot_sign_before_first(self):
 		env = make_envelope(self.tmpl.name, two_signers(), routing="Sequential")
