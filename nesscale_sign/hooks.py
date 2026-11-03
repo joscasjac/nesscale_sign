@@ -29,7 +29,7 @@ website_route_rules = [
 # Installation
 # ------------------
 after_install = "nesscale_sign.install.after_install"
-after_migrate = "nesscale_sign.install.sync_desktop_icon"
+after_migrate = ["nesscale_sign.install.sync_desktop_icon", "nesscale_sign.mcp.install.sync_tool_metadata"]
 before_tests = "nesscale_sign.install.before_tests"
 
 # Permissions

@@ -224,3 +224,35 @@ def test_fac_adapter_discovery_rollback_and_log_redaction():
 			adapter.execute({"content_base64": "confidential"})
 		assert "confidential" not in str(error.value)
 		frappe.db.rollback.assert_called_with(save_point="esign_tool")
+
+
+def test_metadata_sync_preserves_admin_access_and_category_override():
+	from nesscale_sign.mcp.install import sync_tool_metadata
+
+	frappe.get_installed_apps = lambda: ["frappe", "nesscale_sign", "frappe_assistant_core"]
+	frappe.db.table_exists.return_value = True
+	frappe.db.exists.return_value = True
+	doc = types.SimpleNamespace(source_app="nesscale_sign", category_override=True)
+	frappe.get_doc.return_value = doc
+	sync_tool_metadata()
+	for call in frappe.db.set_value.call_args_list:
+		assert set(call.args[2]) == {"description", "auto_detected_category"}
+	frappe.db.set_value.reset_mock()
+	doc.category_override = False
+	sync_tool_metadata()
+	categories = {call.args[1]: call.args[2]["tool_category"] for call in frappe.db.set_value.call_args_list}
+	assert categories["esign_workflow_guide"] == "read_only"
+	assert categories["esign_send_document"] == "read_write"
+
+
+def test_every_forwarded_target_accepts_its_schema_arguments():
+	import ast
+
+	for target, _, schema, _ in EXTENSIONS.values():
+		module, method = target.rsplit(".", 1)
+		tree = ast.parse((ROOT / "nesscale_sign" / (module.replace(".", "/") + ".py")).read_text())
+		function = next(
+			node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == method
+		)
+		if not function.args.kwarg:
+			assert set(schema["properties"]) <= {arg.arg for arg in function.args.args}, target
