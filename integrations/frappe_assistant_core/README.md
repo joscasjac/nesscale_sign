@@ -58,9 +58,9 @@ The authoritative schemas and action allowlist are in `nesscale_sign/mcp/catalog
 
 ## AI discovery
 
-The app publishes the `erpnext-signable-documents` FAC skill through `assistant_skills`, linked to `esign_workflow_guide`. The read-only guide exposes the same instructions to clients that do not consume MCP skill resources. Create/send tool descriptions include ordinary task language (contracts, NDAs, signable documents, electronic signatures) so tool search can find them without knowing the app's name.
+The app publishes the `erpnext-signable-documents` FAC skill through `assistant_skills`, linked to `esign_workflow_guide`. FAC exposes it as an MCP resource, and the read-only guide exposes the same instructions as a tool for clients that do not consume resources. The guide, upload, create and send tool descriptions use ordinary task language and point to the guide. These descriptions travel with the MCP server to Claude, Codex and other compatible clients; users do not need to install a local skill to access them.
 
-For consistent routing across chats, put the following preference into the AI client's project/custom instructions (server resources are not automatically consumed by every client):
+An optional client-level preference can improve routing when the client does not automatically read MCP resources or choose the guide tool:
 
 > For signable documents, contracts, NDAs and signature requests, use our connected ERPNext Nesscale Sign/Open E-Sign MCP workflow by default. Discover `esign_workflow_guide` first. Create and verify the ERPNext draft and return its real link. If these tools are unavailable, report the connector/tool-discovery blocker instead of silently using another signing service or returning only a local file. Respect an explicit request for a different app or a text-only draft. Send invitations only when my instruction authorizes sending to those recipients.
 

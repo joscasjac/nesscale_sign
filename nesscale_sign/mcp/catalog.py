@@ -175,7 +175,7 @@ def add(name, target, description, schema=None, read=False):
 add(
 	"upload_pdf",
 	"mcp.files.upload_pdf",
-	"Upload a private PDF from base64 bytes (max 15 MiB, 100 pages). No remote URLs. Does not send. Use returned file_url in create_draft or template tools.",
+	"Upload a private PDF to make it signable in ERPNext from base64 bytes (max 15 MiB, 100 pages). Start with esign_workflow_guide for the full workflow. No remote URLs. Does not send. Use returned file_url in esign_create_draft or template tools, then add recipient fields.",
 	obj(
 		{"file_name": STRING, "content_base64": {"type": "string", "minLength": 1, "maxLength": 20971520}},
 		["file_name", "content_base64"],
@@ -499,6 +499,6 @@ DESTRUCTIVE_TOOLS = {
 add(
 	"workflow_guide",
 	"mcp.actions.workflow_guide",
-	"Start here for ERPNext signable documents, contracts, NDAs, contractor agreements, PDF uploads and sending for electronic signature. Explains the Nesscale Sign/Open E-Sign MCP workflow and available actions; returns instructions only, never creates or sends.",
+	"Start here for any ERPNext e-signature task: make a PDF signable, draft a contract, NDA or contractor agreement, assign signers and fields, send for signature, or track completion. Returns the full Nesscale Sign/Open E-Sign workflow and tool catalog. Read-only; never creates or sends.",
 	read=True,
 )
