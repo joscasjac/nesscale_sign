@@ -10,7 +10,7 @@ license = { file = "license.txt" }
 dynamic = ["version"]
 dependencies = [
     # "frappe~=16.0.0" # Installed and managed by bench.
-    "PyMuPDF>=1.24",
+    "PyMuPDF>=1.24,<2",
     "reportlab>=4.0",
     "pypdf>=4.0",
     "Pillow>=10.0",

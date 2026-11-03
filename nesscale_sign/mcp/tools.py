@@ -8,34 +8,20 @@ import frappe
 from jsonschema import ValidationError, validate
 
 from nesscale_sign.api import builder, envelope, template
+from nesscale_sign.mcp.catalog import (
+	CONTENT,
+	DATA,
+	DESTRUCTIVE_TOOLS,
+	EXTENSIONS,
+	EXTERNAL_TOOLS,
+	FIELDS,
+	MANAGER_TOOLS,
+	NAME,
+	PAGING,
+	STRING,
+	obj,
+)
 from nesscale_sign.utils.security import lock_envelope
-
-
-def obj(properties, required=()):
-	return {
-		"type": "object",
-		"properties": properties,
-		"required": list(required),
-		"additionalProperties": False,
-	}
-
-
-STRING = {"type": "string", "minLength": 1}
-NAME = {"name": STRING}
-DATA = {
-	"type": "object",
-	"description": "Envelope options: title, signers (role_key, signer_name, signer_email), routing_type, email_mode, email_template, email_subject, email_message, email_from_name, email_from_account, email_attachments, expires_on, source_doctype and source_name. Never set status or signing tokens.",
-}
-CONTENT = {
-	"type": "object",
-	"description": "Builder JSON: pages[].blocks[] with id, type (Text/Heading/Image/Table/Divider/Field), x,y,width,height in PDF points on 595x842 A4 pages; text or sanitized html, font_size, padding. Field blocks refer to field_key. resolvedVariables is an array of {key,value}. Call esign_builder_guide first.",
-}
-FIELDS = {
-	"type": "array",
-	"maxItems": 500,
-	"items": {"type": "object"},
-	"description": "Signing fields with field_key, field_type, signer_role matching a recipient role_key, page (1-based), pos_x,pos_y,width,height (fractions 0..1), required, default_value and mapping_key. Replaces all fields when updating.",
-}
 
 TOOLS = {
 	"esign_builder_guide": (
@@ -71,7 +57,7 @@ TOOLS = {
 		True,
 	),
 	"esign_create_draft": (
-		"Create an editable draft, never send. Supply exactly one of content, pdf_file or template_name. Select real contacts with the ERPNext contact tools first. This creates a new document each time; do not blindly retry after an uncertain response—look up the draft first.",
+		"Create a signable ERPNext document, contract, NDA or contractor agreement as an editable Nesscale Sign/Open E-Sign draft; never send. Supply exactly one of content, pdf_file or template_name. Select real contacts with the ERPNext contact tools first. This creates a new document each time; do not blindly retry after an uncertain response—look up the draft first.",
 		obj(
 			{"data": DATA, "content": CONTENT, "pdf_file": STRING, "template_name": STRING, "fields": FIELDS},
 			["data"],
@@ -80,11 +66,24 @@ TOOLS = {
 	),
 	"esign_update_draft": (
 		"Update only an existing Draft. Read it first. Optional content regenerates its PDF; fields replaces all signing fields. Never edit a document after a signature.",
-		obj({**NAME, "data": DATA, "content": CONTENT, "fields": FIELDS}, ["name", "data"]),
+		obj(
+			{
+				**NAME,
+				"data": obj(
+					{
+						**{k: v for k, v in DATA["properties"].items() if k != "organization"},
+						"pdf_file": STRING,
+					}
+				),
+				"content": CONTENT,
+				"fields": FIELDS,
+			},
+			["name", "data"],
+		),
 		False,
 	),
 	"esign_send_document": (
-		"Send a reviewed draft for signature ONLY when the user explicitly authorizes sending to its recipients. This queues invitation emails. Repeating for an already-sent document does not resend invitations.",
+		"Send a reviewed ERPNext contract, NDA or document for electronic signature through Nesscale Sign/Open E-Sign ONLY when the user explicitly authorizes sending to its recipients. This queues invitation emails. Repeating for an already-sent document does not resend invitations.",
 		obj(NAME, ["name"]),
 		False,
 	),
@@ -96,6 +95,10 @@ TOOLS = {
 }
 
 
+TOOLS.update({name: (desc, schema, read) for name, (_, desc, schema, read) in EXTENSIONS.items()})
+TOOLS["esign_list_templates"] = (TOOLS["esign_list_templates"][0], obj(PAGING), True)
+
+
 def definitions():
 	return [
 		{
@@ -104,9 +107,9 @@ def definitions():
 			"inputSchema": schema,
 			"annotations": {
 				"readOnlyHint": read,
-				"destructiveHint": name in ("esign_update_draft", "esign_revise_unsigned"),
+				"destructiveHint": name in DESTRUCTIVE_TOOLS,
 				"idempotentHint": read or name == "esign_send_document",
-				"openWorldHint": name == "esign_send_document",
+				"openWorldHint": name in EXTERNAL_TOOLS,
 			},
 		}
 		for name, (desc, schema, read) in TOOLS.items()
@@ -148,12 +151,7 @@ def execute(name, arguments):
 		frappe.has_permission("NS Envelope", "read", throw=True)
 		return guide()
 	if name == "esign_list_templates":
-		return frappe.get_list(
-			"NS Template",
-			fields=["name", "title", "status"],
-			filters={"title": ["like", "%" + args.get("search", "") + "%"]},
-			limit_page_length=100,
-		)
+		return template.list_templates(**args)
 	if name == "esign_get_template":
 		return template.get_template(**args)
 	if name == "esign_list_documents":
@@ -203,18 +201,30 @@ def execute(name, arguments):
 		if doc.status in ("Sent", "In Progress", "Completed"):
 			return {"name": doc.name, "status": doc.status, "already_sent": True}
 		return with_url(envelope.send_envelope(doc.name))
-	return with_url(envelope.revise_unsigned(**args))
+	if name == "esign_revise_unsigned":
+		return with_url(envelope.revise_unsigned(**args))
+	if name in EXTENSIONS:
+		from importlib import import_module
+
+		from nesscale_sign.api import require_manager
+
+		if name in MANAGER_TOOLS:
+			require_manager()
+		path = EXTENSIONS[name][0]
+		module, method = path.rsplit(".", 1)
+		return getattr(import_module("nesscale_sign." + module), method)(**args)
+	frappe.throw("Unknown e-sign tool.")
 
 
 def guide():
 	return {
 		"workflow": [
-			"Read an existing template or prepare content and select ERPNext contacts.",
+			"Read an existing template, upload a PDF, or prepare builder content; select ERPNext contacts using esign_search_contacts.",
 			"Create a draft; inspect its editor_url and PDF before sending.",
 			"Send only on user instruction. Never create signatures or change signature status through record updates.",
 		],
 		"geometry": "Content uses PDF points from the top-left on 595x842 A4 pages. All blocks must fit; text overflow is rejected. Field coordinates use fractions of page dimensions. Imported PDFs require content.imported=true and sourcePdf to reference an authorized private file.",
-		"limits": "20 created pages, 200 content blocks, 500 signing fields. Use the existing PDF upload UI to upload files, then pass their private file URL.",
+		"limits": "20 created pages, 200 content blocks, 500 signing fields. Use esign_upload_pdf (base64, max 15 MiB/100 pages), then pass its private file_url. Downloads use bounded base64 chunks; decode chunks separately. Use esign_upload_image for PNG/JPEG builder assets.",
 		"variables": "resolvedVariables: [{key:'contact.name',value:'Actual selected contact name'}]. Write {{contact.name}} in text. Missing referenced values are errors. Supply real values from readable records; do not invent contact details.",
 		"example": {
 			"data": {

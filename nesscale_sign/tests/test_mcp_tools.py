@@ -79,3 +79,110 @@ class TestMCPTools(FrappeTestCase):
 		tools = {s["name"]: s for s in definitions()}
 		self.assertTrue(tools["esign_get_document"]["annotations"]["readOnlyHint"])
 		self.assertFalse(tools["esign_send_document"]["annotations"]["readOnlyHint"])
+
+	def test_upload_inspect_and_download_pdf_chunks(self):
+		import base64
+		import hashlib
+
+		with fitz.open() as pdf:
+			pdf.new_page(width=595, height=842)
+			content = pdf.tobytes()
+		result = execute(
+			"esign_upload_pdf",
+			{"file_name": "mcp-test.pdf", "content_base64": base64.b64encode(content).decode()},
+		)
+		self.assertTrue(result["file_url"].startswith("/private/files/"))
+		self.assertEqual(result["sha256"], hashlib.sha256(content).hexdigest())
+		self.assertEqual(execute("esign_inspect_pdf", {"file_url": result["file_url"]})["page_count"], 1)
+		chunks = []
+		offset = 0
+		while True:
+			chunk = execute(
+				"esign_download_file",
+				{"file_url": result["file_url"], "offset": offset, "length": 97, "include_content": True},
+			)
+			chunks.append(base64.b64decode(chunk["content_base64"]))
+			if chunk["eof"]:
+				break
+			offset = chunk["next_offset"]
+		self.assertEqual(b"".join(chunks), content)
+
+	def test_pdf_upload_rejects_paths_invalid_bytes_and_encrypted_pdf(self):
+		import base64
+
+		for file_name, payload in [("../escape.pdf", "YQ=="), ("invalid.pdf", "!"), ("text.pdf", "YQ==")]:
+			with self.assertRaises(frappe.ValidationError):
+				execute("esign_upload_pdf", {"file_name": file_name, "content_base64": payload})
+		with fitz.open() as pdf:
+			pdf.new_page()
+			content = pdf.tobytes(encryption=fitz.PDF_ENCRYPT_AES_256, user_pw="test-password")
+		with self.assertRaises(frappe.ValidationError):
+			execute(
+				"esign_upload_pdf",
+				{"file_name": "encrypted.pdf", "content_base64": base64.b64encode(content).decode()},
+			)
+
+	def test_nested_lifecycle_and_signature_inputs_are_rejected(self):
+		for data in (
+			{"status": "Completed"},
+			{"signers": [{"signer_name": "Test", "signer_email": "test@example.test", "token": "forged"}]},
+		):
+			with self.assertRaises(frappe.ValidationError):
+				execute("esign_create_draft", {"data": data, "pdf_file": "/private/files/test.pdf"})
+
+	def test_template_lifecycle_through_mcp(self):
+		source = make_template()
+		created = execute(
+			"esign_create_template",
+			{
+				"data": {
+					"title": "MCP lifecycle",
+					"pdf_file": source.pdf_file,
+					"signer_roles": [{"role_key": "client", "role_label": "Client"}],
+				}
+			},
+		)
+		name = created["name"]
+		execute("esign_save_template_fields", {"name": name, "fields": guide()["example"]["fields"]})
+		published = execute("esign_publish_template", {"name": name})
+		self.assertEqual(published["status"], "Active")
+		self.assertEqual(published["version_count"], 1)
+		copy = execute("esign_duplicate_template", {"name": name})
+		self.assertEqual(copy["status"], "Draft")
+		self.assertEqual(execute("esign_archive_template", {"name": name})["status"], "Archived")
+
+	def test_file_permissions_checked_before_reading_bytes(self):
+		from unittest.mock import MagicMock
+
+		from nesscale_sign.mcp import files
+
+		doc = MagicMock()
+		doc.check_permission.side_effect = frappe.PermissionError
+		with (
+			patch.object(frappe.db, "get_value", return_value="private-file"),
+			patch("frappe.get_doc", return_value=doc),
+			patch.object(files, "read_file_content") as read,
+		):
+			with self.assertRaises(frappe.PermissionError):
+				execute(
+					"esign_download_file", {"file_url": "/private/files/secret.pdf", "include_content": True}
+				)
+			read.assert_not_called()
+
+	def test_signing_inbox_does_not_return_bearer_token(self):
+		with patch(
+			"nesscale_sign.api.envelope.my_pending_signatures",
+			return_value=[{"name": "ENV-TEST", "token": "secret-token"}],
+		):
+			result = execute("esign_my_pending_signatures", {})
+		self.assertNotIn("secret-token", json.dumps(result))
+
+	def test_all_registered_schemas_and_native_hooks(self):
+		from jsonschema import Draft7Validator
+
+		from nesscale_sign import hooks
+
+		registered = {path.split(".")[-2] for path in hooks.assistant_tools}
+		self.assertEqual(registered, {spec["name"] for spec in definitions()})
+		for spec in definitions():
+			Draft7Validator.check_schema(spec["inputSchema"])
