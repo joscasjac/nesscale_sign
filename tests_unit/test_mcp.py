@@ -68,6 +68,16 @@ def test_schemas_hooks_and_example():
 	Draft7Validator(tools.TOOLS["esign_create_draft"][1]).validate(tools.guide()["example"])
 
 
+def test_primary_mcp_actions_discover_workflow_guide():
+	for name in (
+		"esign_builder_guide",
+		"esign_upload_pdf",
+		"esign_create_draft",
+		"esign_send_document",
+	):
+		assert "esign_workflow_guide" in tools.TOOLS[name][0]
+
+
 @pytest.mark.parametrize("name", list(tools.TOOLS))
 def test_all_tools_reject_guest(name):
 	frappe.session.user = "Guest"

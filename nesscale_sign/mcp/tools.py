@@ -25,7 +25,7 @@ from nesscale_sign.utils.security import lock_envelope
 
 TOOLS = {
 	"esign_builder_guide": (
-		"Read the document builder format and workflow before creating a document. No changes.",
+		"Read the document builder format before creating a document. For the full ERPNext e-sign workflow, start with esign_workflow_guide. No changes.",
 		obj({}),
 		True,
 	),
@@ -57,7 +57,7 @@ TOOLS = {
 		True,
 	),
 	"esign_create_draft": (
-		"Create a signable ERPNext document, contract, NDA or contractor agreement as an editable Nesscale Sign/Open E-Sign draft; never send. Supply exactly one of content, pdf_file or template_name. Select real contacts with the ERPNext contact tools first. This creates a new document each time; do not blindly retry after an uncertain response—look up the draft first.",
+		"Create a signable ERPNext document, contract, NDA or contractor agreement as an editable Nesscale Sign/Open E-Sign draft; never send. For the complete workflow, read esign_workflow_guide first. Supply exactly one of content, pdf_file or template_name. Select real contacts with the ERPNext contact tools first. This creates a new document each time; do not blindly retry after an uncertain response—look up the draft first.",
 		obj(
 			{"data": DATA, "content": CONTENT, "pdf_file": STRING, "template_name": STRING, "fields": FIELDS},
 			["data"],
@@ -83,7 +83,7 @@ TOOLS = {
 		False,
 	),
 	"esign_send_document": (
-		"Send a reviewed ERPNext contract, NDA or document for electronic signature through Nesscale Sign/Open E-Sign ONLY when the user explicitly authorizes sending to its recipients. This queues invitation emails. Repeating for an already-sent document does not resend invitations.",
+		"Send a reviewed ERPNext contract, NDA or document for electronic signature through Nesscale Sign/Open E-Sign ONLY when the user explicitly authorizes sending to its recipients. Read esign_workflow_guide for the complete workflow, and verify the draft with esign_get_document before sending. This queues invitation emails. Repeating for an already-sent document does not resend invitations.",
 		obj(NAME, ["name"]),
 		False,
 	),
