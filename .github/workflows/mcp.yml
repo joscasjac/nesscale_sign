@@ -1,0 +1,16 @@
+name: MCP adapter
+on:
+  pull_request:
+  push:
+    branches: [codex/open-esign, codex/complete-esign-mcp]
+jobs:
+  adapter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - run: pip install 'pymupdf>=1.24,<2' pillow 'jsonschema>=4,<5' pytest 'ruff==0.14.10'
+      - run: python -m pytest tests_unit -q
+      - run: ruff check nesscale_sign/mcp nesscale_sign/hooks.py nesscale_sign/tests/test_mcp_tools.py tests_unit

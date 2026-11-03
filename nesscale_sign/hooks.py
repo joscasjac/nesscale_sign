@@ -29,7 +29,7 @@ website_route_rules = [
 # Installation
 # ------------------
 after_install = "nesscale_sign.install.after_install"
-after_migrate = "nesscale_sign.install.sync_desktop_icon"
+after_migrate = ["nesscale_sign.install.sync_desktop_icon", "nesscale_sign.mcp.install.sync_tool_metadata"]
 before_tests = "nesscale_sign.install.before_tests"
 
 # Permissions
@@ -83,5 +83,76 @@ for _dt in ("NS Envelope Field", "NS Signature", "NS Audit Log", "NS Signing Ses
 for _dt in ("NS Template Field", "NS Template Version"):
 	has_permission[_dt] = "nesscale_sign.permissions.ns_permissions.template_child_has_permission"
 
-# Optional Frappe Assistant Core plugin discovery (requires fac_plugins hook support).
-fac_plugins = ["nesscale_sign.mcp.fac_plugin"]
+# Frappe Assistant Core native custom-tools discovery; no connector fork required.
+assistant_tools = [
+	"nesscale_sign.mcp.fac_plugin.tools.esign_archive_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_builder_guide.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_combine_pdfs.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_create_contact.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_create_draft.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_create_email_account.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_create_mail_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_create_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_delete_draft.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_delete_email_account.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_download_document.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_download_file.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_duplicate_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_email_services.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_get_audit.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_get_contact.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_get_doctype_fields.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_get_document.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_get_email_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_get_readiness.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_get_settings.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_get_stats.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_get_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_inspect_pdf.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_list_attachments.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_list_documents.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_list_email_accounts.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_list_email_templates.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_list_mail_templates.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_list_organizations.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_list_senders.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_list_templates.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_my_pending_signatures.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_preview_email_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_publish_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_recent_activity.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_remind_document.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_render_pdf.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_resend_invitation.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_restore_email_defaults.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_retry_completion.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_revise_unsigned.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_save_document_fields.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_save_email_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_save_organization.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_save_template_fields.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_save_template_roles.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_search_contacts.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_search_doctypes.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_send_document.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_set_template_pdf.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_throughput.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_trigger_events.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_update_draft.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_update_email_account.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_update_settings.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_update_template.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_upload_image.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_upload_pdf.Tool",
+	"nesscale_sign.mcp.fac_plugin.tools.esign_void_document.Tool",
+]
+
+
+assistant_tools.append("nesscale_sign.mcp.fac_plugin.tools.esign_workflow_guide.Tool")
+assistant_skills = [
+	{
+		"app": "nesscale_sign",
+		"manifest": "mcp/skills/manifest.json",
+		"content_dir": "mcp/skills",
+	}
+]

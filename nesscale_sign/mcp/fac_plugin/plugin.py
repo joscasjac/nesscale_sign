@@ -9,22 +9,14 @@ class OpenESignPlugin(BasePlugin):
 			"name": "open_esign",
 			"display_name": "Open E-Sign",
 			"description": "Build and manage signing documents",
-			"version": "1.0.0",
+			"version": "2.0.0",
 			"dependencies": ["nesscale_sign"],
 		}
 
 	def get_tools(self):
-		return [
-			"esign_builder_guide",
-			"esign_list_templates",
-			"esign_get_template",
-			"esign_list_documents",
-			"esign_get_document",
-			"esign_create_draft",
-			"esign_update_draft",
-			"esign_send_document",
-			"esign_revise_unsigned",
-		]
+		from nesscale_sign.mcp.tools import TOOLS
+
+		return list(TOOLS)
 
 	def validate_environment(self):
 		return True, None

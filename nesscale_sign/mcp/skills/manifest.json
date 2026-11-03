@@ -1,0 +1,12 @@
+[
+  {
+    "skill_id": "erpnext-signable-documents",
+    "title": "ERPNext Signable Documents, Contracts and NDAs",
+    "description": "Create signable contracts, NDAs and contractor agreements; upload PDFs, assign signature fields, send for signature and track completion inside ERPNext using Nesscale Sign/Open E-Sign MCP.",
+    "skill_type": "Tool Usage",
+    "linked_tool": "esign_workflow_guide",
+    "status": "Published",
+    "visibility": "Public",
+    "content_file": "erpnext-signable-documents/SKILL.md"
+  }
+]
