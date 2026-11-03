@@ -64,7 +64,7 @@ The app captures signing events, consent and an audit trail. A completion certif
 Use **Node 22.12+**, preferably Node 24:
 
 ```sh
-git clone --branch codex/open-esign https://github.com/joscasjac/nesscale_sign.git
+git clone --branch main https://github.com/joscasjac/nesscale_sign.git
 cd nesscale_sign/frontend
 npm ci
 npm run preview:local
@@ -80,7 +80,7 @@ Requires **Frappe 16, Python 3.14+, Node 24**, MariaDB, Redis and running Frappe
 
 ```sh
 cd /path/to/frappe-bench
-bench get-app --branch codex/open-esign https://github.com/joscasjac/nesscale_sign.git
+bench get-app --branch main https://github.com/joscasjac/nesscale_sign.git
 bench --site YOUR_SITE install-app nesscale_sign
 bench --site YOUR_SITE migrate
 bench build --app nesscale_sign
@@ -88,7 +88,7 @@ bench build --app nesscale_sign
 
 Open `/nesscale-sign`. Assign `Nesscale Sign User` or `Nesscale Sign Manager` and configure an outgoing **Email Account**. Manage application settings and Email Templates in Frappe Desk.
 
-**Frappe Cloud:** add this repository and the `codex/open-esign` branch to your bench, deploy it, then install the app on your site. Built frontend assets are committed in the repository. Test upgrades on a separate site and follow the [deployment guide](docs/DEPLOYMENT.md).
+**Frappe Cloud:** add this repository and the `main` branch to your bench, deploy it, then install the app on your site. Built frontend assets are committed in the repository. Test upgrades on a separate site and follow the [deployment guide](docs/DEPLOYMENT.md).
 
 The internal package name, route and existing role names remain compatible with the original app. The product name is **Open E-Sign**; do not rename the Python package or database DocTypes during installation.
 

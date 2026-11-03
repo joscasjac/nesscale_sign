@@ -2,7 +2,7 @@ name: MCP adapter
 on:
   pull_request:
   push:
-    branches: [codex/open-esign, codex/complete-esign-mcp]
+    branches: [main]
 jobs:
   adapter:
     runs-on: ubuntu-latest
