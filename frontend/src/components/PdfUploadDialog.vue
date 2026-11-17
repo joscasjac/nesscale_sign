@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import EditorButton from "./EditorButton.vue";
 import { upload, api } from "../api";
+import { __ } from "../translation";
 const emit = defineEmits(["close", "uploaded"]);
 const dialog = ref(null),
 	files = ref([]),
@@ -12,14 +13,14 @@ function add(list) {
 	error.value = "";
 	const incoming = [...list];
 	if (incoming.some((f) => !f.name.toLowerCase().endsWith(".pdf"))) {
-		error.value = "Only PDF files are supported.";
+		error.value = __("Only PDF files are supported.");
 		return;
 	}
 	if (
 		files.value.length + incoming.length > 10 ||
 		[...files.value, ...incoming].reduce((n, f) => n + f.size, 0) > 15 * 1024 * 1024
 	) {
-		error.value = "Choose up to 10 PDFs totaling 15 MB or less.";
+		error.value = __("Choose up to 10 PDFs totaling 15 MB or less.");
 		return;
 	}
 	files.value.push(...incoming);
@@ -46,19 +47,19 @@ async function submit() {
 <template>
 	<dialog ref="dialog" class="pdf-upload-dialog" @cancel.prevent="!busy && emit('close')">
 		<div class="dialog-heading">
-			<h2>Upload files</h2>
-			<EditorButton label="Close upload" icon="X" :disabled="busy" @click="emit('close')" />
+			<h2>{{ __("Upload files") }}</h2>
+			<EditorButton :label="__('Close upload')" icon="X" :disabled="busy" @click="emit('close')" />
 		</div>
-		<p>Upload and rearrange files for this document.</p>
+		<p>{{ __("Upload and rearrange files for this document.") }}</p>
 		<label
 			class="pdf-drop-zone"
 			@dragover.prevent
 			@drop.prevent="add($event.dataTransfer.files)"
-			><span class="upload-symbol">↑</span><span>Click or drag files here to upload</span
-			><small>PDF · up to 10 files · 15 MB total · 100 pages</small
+			><span class="upload-symbol">↑</span><span>{{ __("Click or drag files here to upload") }}</span
+			><small>{{ __("PDF · up to 10 files · 15 MB total · 100 pages") }}</small
 			><input
 				class="visually-hidden-file"
-				aria-label="Choose PDF files"
+				:aria-label="__('Choose PDF files')"
 				type="file"
 				multiple
 				accept="application/pdf"
@@ -74,7 +75,7 @@ async function submit() {
 			@drop.prevent="move(Number($event.dataTransfer.getData('text/plain')), i)"
 		>
 			<EditorButton
-				label="Move PDF up"
+				:label="__('Move PDF up')"
 				icon="ArrowUp"
 				:disabled="i === 0 || busy"
 				@click="move(i, i - 1)"
@@ -84,7 +85,7 @@ async function submit() {
 				><small>{{ Math.round(file.size / 1024) }} KB</small>
 			</div>
 			<EditorButton
-				:label="'Remove ' + file.name"
+				:label="__('Remove {0}', [file.name])"
 				icon="Trash2"
 				:disabled="busy"
 				@click="files.splice(i, 1)"
@@ -92,9 +93,9 @@ async function submit() {
 		</div>
 		<p v-if="error" class="error" role="alert">{{ error }}</p>
 		<footer>
-			<button :disabled="busy" @click="emit('close')">Cancel</button
+			<button :disabled="busy" @click="emit('close')">{{ __("Cancel") }}</button
 			><button class="primary" :disabled="busy || !files.length" @click="submit">
-				{{ busy ? "Uploading…" : "Upload" }}
+				{{ busy ? __("Uploading…") : __("Upload") }}
 			</button>
 		</footer>
 	</dialog>

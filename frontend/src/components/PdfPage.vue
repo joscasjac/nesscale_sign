@@ -1,6 +1,7 @@
 <script setup>
 import { ref, shallowRef, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { acquirePdf } from "../pdf-cache";
+import { __ } from "../translation";
 const props = defineProps({ url: String, page: { type: Number, default: 1 }, lazy: Boolean });
 const emit = defineEmits(["loaded"]);
 const root = ref(null),
@@ -38,7 +39,7 @@ watch(
 			emit("loaded", pdf.numPages);
 		} catch (e) {
 			if (generation === version) {
-				error.value = "This PDF could not be displayed. Reload to try again.";
+				error.value = __("This PDF could not be displayed. Reload to try again.");
 				loading.value = false;
 			}
 		}
@@ -68,7 +69,7 @@ watch(
 			loading.value = false;
 		} catch (e) {
 			if (e.name !== "RenderingCancelledException" && generation === version) {
-				error.value = "This PDF could not be displayed. Reload to try again.";
+				error.value = __("This PDF could not be displayed. Reload to try again.");
 				loading.value = false;
 			}
 		}
@@ -93,10 +94,10 @@ onBeforeUnmount(() => {
 </script>
 <template>
 	<div ref="root" class="pdf-render" :style="{ aspectRatio: ratio }">
-		<p v-if="loading && visible" class="pdf-loading" role="status">Loading document…</p>
+		<p v-if="loading && visible" class="pdf-loading" role="status">{{ __("Loading document…") }}</p>
 		<p v-if="error" role="alert" class="error">{{ error }}</p>
-		<canvas v-if="visible" ref="canvas" aria-label="Document page" />
-		<p class="sr-only" aria-label="Document page text">{{ readableText }}</p>
+		<canvas v-if="visible" ref="canvas" :aria-label="__('Document page')" />
+		<p class="sr-only" :aria-label="__('Document page text')">{{ readableText }}</p>
 		<slot v-if="!loading && !error" />
 	</div>
 </template>

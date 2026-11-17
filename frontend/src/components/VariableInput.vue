@@ -77,7 +77,7 @@ function key(e) {
 				@keydown="key" /></label
 		><EditorButton
 			icon="Tag"
-			:label="'Insert variable in ' + label"
+			:label="__('Insert variable in {0}', [label])"
 			@mousedown.prevent
 			@click="
 				explicit = true;
@@ -89,7 +89,7 @@ function key(e) {
 			v-if="open"
 			class="variable-menu"
 			role="listbox"
-			:aria-label="'Variables for ' + label"
+			:aria-label="__('Variables for {0}', [label])"
 		>
 			<button
 				v-for="(o, i) in options"
@@ -100,7 +100,7 @@ function key(e) {
 			>
 				{{ o.key }}<small>{{ o.value || o.label }}</small>
 			</button>
-			<p v-if="!options.length">No matching variables</p>
+			<p v-if="!options.length">{{ __("No matching variables") }}</p>
 		</div>
 	</div>
 </template>

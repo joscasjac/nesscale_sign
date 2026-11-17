@@ -17,34 +17,34 @@ async function expand(event) {
 </script>
 <template>
 	<details class="activity-summary" @toggle="expand">
-		<summary>Activity overview</summary>
+		<summary>{{ __("Activity overview") }}</summary>
 		<dl>
 			<div>
-				<dt>Total documents</dt>
+				<dt>{{ __("Total documents") }}</dt>
 				<dd>{{ stats.total || 0 }}</dd>
 			</div>
 			<div>
-				<dt>Completion rate</dt>
+				<dt>{{ __("Completion rate") }}</dt>
 				<dd>{{ stats.completion_rate || 0 }}%</dd>
 			</div>
 			<div>
-				<dt>Awaiting me</dt>
+				<dt>{{ __("Awaiting me") }}</dt>
 				<dd>{{ stats.awaiting_me || 0 }}</dd>
 			</div>
 			<div>
-				<dt>Active templates</dt>
+				<dt>{{ __("Active templates") }}</dt>
 				<dd>{{ stats.templates || 0 }}</dd>
 			</div>
 		</dl>
-		<h2>Completions in the last 30 days</h2>
+		<h2>{{ __("Completions in the last 30 days") }}</h2>
 		<p v-if="error" role="alert">{{ error }}</p>
-		<p v-else-if="!loaded">Loading activity…</p>
-		<p v-else-if="!days.length">No completed documents in this period.</p>
+		<p v-else-if="!loaded">{{ __("Loading activity…") }}</p>
+		<p v-else-if="!days.length">{{ __("No completed documents in this period.") }}</p>
 		<table v-else>
 			<thead>
 				<tr>
-					<th>Date</th>
-					<th>Completed documents</th>
+					<th>{{ __("Date") }}</th>
+					<th>{{ __("Completed documents") }}</th>
 				</tr>
 			</thead>
 			<tbody>

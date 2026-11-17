@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { __ } from "../translation";
 const props = defineProps({ initialName: { type: String, default: "" } });
 const emit = defineEmits(["change"]);
 const uploadError = ref("");
@@ -67,7 +68,7 @@ async function uploadSignature(event) {
 	const file = event.target.files?.[0];
 	if (!file) return;
 	if (!["image/png", "image/jpeg"].includes(file.type) || file.size > 2 * 1024 * 1024) {
-		uploadError.value = "Choose a PNG or JPG smaller than 2 MB.";
+		uploadError.value = __("Choose a PNG or JPG smaller than 2 MB.");
 		return;
 	}
 	const url = URL.createObjectURL(file);
@@ -85,7 +86,7 @@ async function uploadSignature(event) {
 		);
 		send();
 	} catch {
-		uploadError.value = "This image could not be opened. Choose another PNG or JPG.";
+		uploadError.value = __("This image could not be opened. Choose another PNG or JPG.");
 	} finally {
 		URL.revokeObjectURL(url);
 	}
@@ -99,17 +100,17 @@ onMounted(() => {
 	<div class="signature-pad">
 		<div v-if="mode !== 'Upload'" class="signature-options">
 			<label v-if="mode === 'Type'"
-				>Style<select v-model="style" @change="restyle">
-					<option value="Georgia">Classic</option>
-					<option value="cursive">Handwritten</option>
-					<option value="serif">Simple</option>
+				>{{ __("Style") }}<select v-model="style" @change="restyle">
+					<option value="Georgia">{{ __("Classic") }}</option>
+					<option value="cursive">{{ __("Handwritten") }}</option>
+					<option value="serif">{{ __("Simple") }}</option>
 				</select></label
 			>
 			<label
-				>Ink<select v-model="ink" @change="restyle">
-					<option value="#161b18">Black</option>
-					<option value="#174bc2">Blue</option>
-					<option value="#b42d27">Red</option>
+				>{{ __("Ink") }}<select v-model="ink" @change="restyle">
+					<option value="#161b18">{{ __("Black") }}</option>
+					<option value="#174bc2">{{ __("Blue") }}</option>
+					<option value="#b42d27">{{ __("Red") }}</option>
 				</select></label
 			>
 		</div>
@@ -122,7 +123,7 @@ onMounted(() => {
 					type();
 				"
 			>
-				Type signature</button
+				{{ __("Type signature") }}</button
 			><button
 				type="button"
 				:class="{ active: mode === 'Draw' }"
@@ -131,7 +132,7 @@ onMounted(() => {
 					clear();
 				"
 			>
-				Draw signature
+				{{ __("Draw signature") }}
 			</button>
 			<button
 				type="button"
@@ -141,22 +142,22 @@ onMounted(() => {
 					clear();
 				"
 			>
-				Upload signature
+				{{ __("Upload signature") }}
 			</button>
 		</div>
 		<label v-if="mode === 'Upload'"
-			>Signature image<input
+			>{{ __("Signature image") }}<input
 				type="file"
 				accept="image/png,image/jpeg"
 				@change="uploadSignature"
-			/><small>PNG or JPG, up to 2 MB</small></label
+			/><small>{{ __("PNG or JPG, up to 2 MB") }}</small></label
 		>
 		<p v-if="uploadError" role="alert">{{ uploadError }}</p>
 		<label v-if="mode === 'Type'"
-			>Full name<input
+			>{{ __("Full name") }}<input
 				v-model="name"
 				@input="type"
-				placeholder="Your full name"
+				:placeholder="__('Your full name')"
 				autocomplete="name"
 				maxlength="100" /></label
 		><canvas
@@ -164,11 +165,11 @@ onMounted(() => {
 			width="700"
 			height="180"
 			:class="{ drawing: mode === 'Draw' }"
-			aria-label="Signature preview; choose Type signature for keyboard entry"
+			:aria-label="__('Signature preview; choose Type signature for keyboard entry')"
 			@pointerdown="start"
 			@pointermove="move"
 			@pointerup="stop"
 			@pointercancel="stop"
-		/><button type="button" class="text-button" @click="clear">Clear signature</button>
+		/><button type="button" class="text-button" @click="clear">{{ __("Clear signature") }}</button>
 	</div>
 </template>

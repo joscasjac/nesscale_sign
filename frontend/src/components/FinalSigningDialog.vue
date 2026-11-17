@@ -27,17 +27,17 @@ watch(
 	>
 		<form @submit.prevent="consent && !busy && emit('submit')">
 			<div class="dialog-heading">
-				<h2 id="final-signing-title">Ready to finish</h2>
+				<h2 id="final-signing-title">{{ __("Ready to finish") }}</h2>
 				<button
 					type="button"
-					aria-label="Back to document"
+					:aria-label="__('Back to document')"
 					:disabled="busy"
 					@click="emit('close')"
 				>
 					×
 				</button>
 			</div>
-			<p>All required fields are complete. Confirm your consent to finish signing.</p>
+			<p>{{ __("All required fields are complete. Confirm your consent to finish signing.") }}</p>
 			<label class="check-label consent"
 				><input
 					id="finish-signing-consent"
@@ -51,9 +51,9 @@ watch(
 			<p v-if="error" class="error" role="alert">{{ error }}</p>
 			<footer class="button-group">
 				<button type="button" :disabled="busy" @click="emit('close')">
-					Review document</button
+					{{ __("Review document") }}</button
 				><button type="submit" class="primary" :disabled="busy || !consent">
-					{{ busy ? "Saving signature…" : "Finish signing" }}
+					{{ busy ? __("Saving signature…") : __("Finish signing") }}
 				</button>
 			</footer>
 		</form>

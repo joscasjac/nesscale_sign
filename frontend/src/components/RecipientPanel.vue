@@ -2,6 +2,7 @@
 import { ref, onMounted, nextTick, watch, onBeforeUnmount } from "vue";
 import EditorButton from "./EditorButton.vue";
 import { api } from "../api";
+import { __ } from "../translation";
 const props = defineProps({ modelValue: Object, primary: String, fields: Array });
 const emit = defineEmits(["update:modelValue", "update:primary"]);
 const error = ref(""),
@@ -62,13 +63,13 @@ async function search() {
 onMounted(search);
 function select(c) {
 	if (!c.email_id) {
-		error.value = "This contact needs an email address before they can sign.";
+		error.value = __("This contact needs an email address before they can sign.");
 		return;
 	}
 	const all = [...props.modelValue.signers];
 	if (!replaceRole.value) replaceRole.value = all.find((s) => !s.signer_email)?.role_key || null;
 	if (all.some((s) => s.signer_email === c.email_id && s.role_key !== replaceRole.value)) {
-		error.value = "This contact is already a recipient.";
+		error.value = __("This contact is already a recipient.");
 		return;
 	}
 	const role = replaceRole.value || crypto.randomUUID(),
@@ -112,7 +113,7 @@ async function create() {
 }
 function remove(role) {
 	if (props.fields?.some((f) => f.signer_role === role)) {
-		error.value = "Reassign or remove this recipient’s fields before removing them.";
+		error.value = __("Reassign or remove this recipient’s fields before removing them.");
 		return;
 	}
 	error.value = "";
@@ -133,7 +134,7 @@ function reorder(role, to) {
 </script>
 <template>
 	<div class="recipient-panel">
-		<h2>Recipients</h2>
+		<h2>{{ __("Recipients") }}</h2>
 		<p v-if="error" class="error" role="alert">{{ error }}</p>
 		<label class="routing-toggle"
 			><input
@@ -142,28 +143,28 @@ function reorder(role, to) {
 				:checked="modelValue.routing_type === 'Sequential'"
 				@change="set({ routing_type: $event.target.checked ? 'Sequential' : 'Parallel' })"
 			/><span
-				>Set signing order<small>{{
+				>{{ __("Set signing order") }}<small>{{
 					modelValue.routing_type === "Sequential"
-						? "Each recipient signs after the previous person completes their action."
-						: "All recipients can sign at the same time."
+						? __("Each recipient signs after the previous person completes their action.")
+						: __("All recipients can sign at the same time.")
 				}}</small></span
 			></label
 		>
 		<p v-if="modelValue.routing_type === 'Sequential'" class="routing-hint">
-			Drag recipients to change the order.
+			{{ __("Drag recipients to change the order.") }}
 		</p>
 		<div class="contact-picker-shell">
-			<label class="primary-contact">Primary contact</label>
+			<label class="primary-contact">{{ __("Primary contact") }}</label>
 			<button
 				class="contact-picker-trigger"
 				:aria-expanded="choosing"
-				aria-label="Choose primary contact"
+				:aria-label="__('Choose primary contact')"
 				@click="openPicker(null, true)"
 			>
 				<span>{{
 					modelValue.signers.find((s) => s.role_key === primary)?.signer_name ||
 					modelValue.signers.find((s) => s.signer_email)?.signer_name ||
-					"Select a contact"
+					__("Select a contact")
 				}}</span
 				><span aria-hidden="true">⌄</span>
 			</button>
@@ -171,13 +172,13 @@ function reorder(role, to) {
 				<input
 					v-model="query"
 					type="search"
-					aria-label="Filter ERPNext contacts"
-					placeholder="Search contacts…"
+					:aria-label="__('Filter ERPNext contacts')"
+					:placeholder="__('Search contacts…')"
 				/>
 				<div
 					class="contact-options"
 					role="group"
-					aria-label="ERPNext contacts"
+					:aria-label="__('ERPNext contacts')"
 					:aria-busy="busy"
 				>
 					<button
@@ -188,14 +189,14 @@ function reorder(role, to) {
 						@click="chooseContact(c)"
 					>
 						<strong>{{ c.full_name }}</strong
-						><small>{{ c.email_id || "No email address" }}</small>
+						><small>{{ c.email_id || __("No email address") }}</small>
 					</button>
 					<p v-if="!contacts.length">
-						{{ busy ? "Loading contacts…" : "No matching contacts." }}
+						{{ busy ? __("Loading contacts…") : __("No matching contacts.") }}
 					</p>
 				</div>
 				<button class="create-contact-action" @click="openCreate">
-					＋ Add new contact
+					＋ {{ __("Add new contact") }}
 				</button>
 			</div>
 		</div>
@@ -209,7 +210,7 @@ function reorder(role, to) {
 			<div class="recipient-summary">
 				<button
 					class="recipient-grip"
-					:aria-label="'Reorder recipient ' + (i + 1)"
+					:aria-label="__('Reorder recipient {0}', [i + 1])"
 					draggable="true"
 					@dragstart="$event.dataTransfer.setData('application/x-recipient', s.role_key)"
 					@keydown.up.prevent="reorder(s.role_key, i - 1)"
@@ -229,22 +230,22 @@ function reorder(role, to) {
 					><small>{{ s.signer_email }}</small>
 					<div class="recipient-badges">
 						<span v-if="(primary || modelValue.signers[0]?.role_key) === s.role_key"
-							>Primary</span
-						><span>Needs to sign</span>
+							>{{ __("Primary") }}</span
+						><span>{{ __("Needs to sign") }}</span>
 					</div>
 				</div>
 				<EditorButton
-					:label="'Change recipient ' + (i + 1)"
+					:label="__('Change recipient {0}', [i + 1])"
 					icon="Pencil"
 					@click="openPicker(s.role_key)"
 				/><EditorButton
-					:label="'Remove recipient ' + (i + 1)"
+					:label="__('Remove recipient {0}', [i + 1])"
 					icon="Trash2"
 					@click="remove(s.role_key)"
 				/>
 			</div>
 		</div>
-		<button class="add-recipient" @click="openPicker()">＋ Add recipient</button>
+		<button class="add-recipient" @click="openPicker()">＋ {{ __("Add recipient") }}</button>
 		<Teleport to="body">
 			<dialog
 				v-if="creating"
@@ -254,13 +255,13 @@ function reorder(role, to) {
 				@cancel.prevent="creating = false"
 			>
 				<div class="dialog-heading">
-					<h2 id="contact-dialog-title">Add contact</h2>
-					<EditorButton label="Close contact form" icon="X" @click="creating = false" />
+					<h2 id="contact-dialog-title">{{ __("Add contact") }}</h2>
+					<EditorButton :label="__('Close contact form')" icon="X" @click="creating = false" />
 				</div>
-				<p>Create an ERPNext contact and add them to this document.</p>
+				<p>{{ __("Create an ERPNext contact and add them to this document.") }}</p>
 				<form class="new-contact" @submit.prevent="create">
 					<label
-						>Full name<input
+						>{{ __("Full name") }}<input
 							v-model="name"
 							required
 							maxlength="140"
@@ -268,13 +269,13 @@ function reorder(role, to) {
 							autofocus
 					/></label>
 					<label
-						>Email<input v-model="email" type="email" required autocomplete="email"
+						>{{ __("Email") }}<input v-model="email" type="email" required autocomplete="email"
 					/></label>
 					<p v-if="error" class="error" role="alert">{{ error }}</p>
 					<footer>
-						<button type="button" @click="creating = false">Cancel</button
+						<button type="button" @click="creating = false">{{ __("Cancel") }}</button
 						><button class="primary" :disabled="busy">
-							{{ busy ? "Creating…" : "Create and select" }}
+							{{ busy ? __("Creating…") : __("Create and select") }}
 						</button>
 					</footer>
 				</form>

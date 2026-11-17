@@ -1,3 +1,4 @@
+import { __ } from "./translation.js";
 export const fieldTypes = [
 	"Signature",
 	"Initial",
@@ -24,7 +25,7 @@ export function repeatField(field, pageCount, existing, makeId = () => crypto.ra
 		copies.push({ ...field, name: undefined, field_key: makeId(), repeat_group: group, page });
 	}
 	if (existing.length + copies.length > 500)
-		throw new Error("A document can contain at most 500 fields.");
+		throw new Error(__("A document can contain at most 500 fields."));
 	field.repeat_group = group;
 	return copies;
 }

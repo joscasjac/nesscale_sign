@@ -38,6 +38,7 @@ def get_boot():
 			"csrf_token": frappe.sessions.get_csrf_token(),
 			"setup_complete": cint(frappe.get_system_settings("setup_complete")),
 			"user": frappe.session.user,
+			"lang": frappe.local.lang or "en",
 			"timezone": {
 				"system": get_system_timezone(),
 				"user": frappe.db.get_value("User", frappe.session.user, "time_zone")

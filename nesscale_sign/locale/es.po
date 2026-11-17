@@ -1,0 +1,2093 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: nesscale_sign\n"
+"PO-Revision-Date: 2026-11-17 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "1 required field remaining"
+msgstr "Falta 1 campo obligatorio"
+
+msgid "A PDF file is required."
+msgstr "Se requiere un archivo PDF."
+
+msgid "A certificate-based PDF seal was applied. Validate its certificate trust in your PDF reader."
+msgstr "Se aplicó un sello PDF basado en certificado. Valide la confianza del certificado en su lector de PDF."
+
+msgid "A clear record, at every step."
+msgstr "Un registro claro en cada paso."
+
+msgid "A copy is ready for your records."
+msgstr "Hay una copia lista para sus archivos."
+
+msgid "A dependable setup for every document you send."
+msgstr "Una configuración confiable para cada documento que envíe."
+
+msgid "A document can contain at most 500 fields."
+msgstr "Un documento puede contener como máximo 500 campos."
+
+msgid "A short note about this document"
+msgstr "Una nota breve sobre este documento"
+
+msgid "A visible signature is required."
+msgstr "Se requiere una firma visible."
+
+msgid "AGPL-3.0 · Full source for this fork is publicly available."
+msgstr "AGPL-3.0 · El código fuente completo de esta bifurcación está disponible públicamente."
+
+msgid "Access Count"
+msgstr "Número de accesos"
+
+msgid "Action"
+msgstr "Acción"
+
+msgid "Active"
+msgstr "Activo"
+
+msgid "Active templates"
+msgstr "Plantillas activas"
+
+msgid "Activity"
+msgstr "Actividad"
+
+msgid "Activity overview"
+msgstr "Resumen de actividad"
+
+msgid "Add a document"
+msgstr "Agregar un documento"
+
+msgid "Add an element"
+msgstr "Agregar un elemento"
+
+msgid "Add at least one signer before sending."
+msgstr "Agregue al menos un firmante antes de enviar."
+
+msgid "Add at least one signer role before publishing."
+msgstr "Agregue al menos un rol de firmante antes de publicar."
+
+msgid "Add attachment"
+msgstr "Agregar archivo adjunto"
+
+msgid "Add contact"
+msgstr "Agregar contacto"
+
+msgid "Add new contact"
+msgstr "Agregar contacto nuevo"
+
+msgid "Add page"
+msgstr "Agregar página"
+
+msgid "Add recipient"
+msgstr "Agregar destinatario"
+
+msgid "Add signing fields to your own document"
+msgstr "Agregue campos de firma a su propio documento"
+
+msgid "Add text to your document."
+msgstr "Agregue texto a su documento."
+
+msgid "Add variable"
+msgstr "Agregar variable"
+
+msgid "Adopt signature & continue"
+msgstr "Adoptar firma y continuar"
+
+msgid "Adopt your signature"
+msgstr "Adopte su firma"
+
+msgid "Agent"
+msgstr "Agente"
+
+msgid "Align center"
+msgstr "Centrar"
+
+msgid "Align left"
+msgstr "Alinear a la izquierda"
+
+msgid "Align right"
+msgstr "Alinear a la derecha"
+
+msgid "Alignment"
+msgstr "Alineación"
+
+msgid "All documents"
+msgstr "Todos los documentos"
+
+msgid "All recipients can sign at the same time."
+msgstr "Todos los destinatarios pueden firmar al mismo tiempo."
+
+msgid "All required fields are complete. Confirm your consent to finish signing."
+msgstr "Todos los campos obligatorios están completos. Confirme su consentimiento para finalizar la firma."
+
+msgid "All required fields are complete. Review the document, then confirm your consent to finish."
+msgstr "Todos los campos obligatorios están completos. Revise el documento y luego confirme su consentimiento para finalizar."
+
+msgid "All signatures received. Preparing the completed PDF…"
+msgstr "Se recibieron todas las firmas. Preparando el PDF completado…"
+
+msgid "All signed. You’re done."
+msgstr "Todo firmado. Ha terminado."
+
+msgid "All templates"
+msgstr "Todas las plantillas"
+
+msgid "An editable revision is ready. Previous signing links are inactive; send again when ready."
+msgstr "Hay una revisión editable lista. Los enlaces de firma anteriores están inactivos; vuelva a enviarlo cuando esté listo."
+
+msgid "Application settings"
+msgstr "Configuración de la aplicación"
+
+msgid "Apply & continue"
+msgstr "Aplicar y continuar"
+
+msgid "Apply a certificate-based seal to completed PDFs and completion records."
+msgstr "Aplique un sello basado en certificado a los PDF completados y a los registros de finalización."
+
+msgid "Archive"
+msgstr "Archivar"
+
+msgid "Archived"
+msgstr "Archivado"
+
+msgid "Assign every signing field to a recipient before sending."
+msgstr "Asigne cada campo de firma a un destinatario antes de enviar."
+
+msgid "Attachment"
+msgstr "Adjunto"
+
+msgid "Attachment upload failed."
+msgstr "No se pudo cargar el archivo adjunto."
+
+msgid "Attachments"
+msgstr "Archivos adjuntos"
+
+msgid "Audit Log entries are immutable and cannot be modified."
+msgstr "Las entradas del registro de auditoría son inmutables y no se pueden modificar."
+
+msgid "Audit Log entries cannot be deleted."
+msgstr "Las entradas del registro de auditoría no se pueden eliminar."
+
+msgid "Audit integrity check failed. Completion was stopped."
+msgstr "Falló la verificación de integridad de la auditoría. Se detuvo la finalización."
+
+msgid "Auth Method"
+msgstr "Método de autenticación"
+
+msgid "Auto Creation"
+msgstr "Creación automática"
+
+msgid "Auto-creation requires a normal DocType (not a child table or single)."
+msgstr "La creación automática requiere un DocType normal (no una tabla secundaria ni un DocType único)."
+
+msgid "Auto-send when ready"
+msgstr "Enviar automáticamente cuando esté listo"
+
+msgid "Automatically create an envelope from a document event."
+msgstr "Crear automáticamente un sobre a partir de un evento del documento."
+
+msgid "Automation"
+msgstr "Automatización"
+
+msgid "Awaiting me"
+msgstr "Pendientes de mí"
+
+msgid "Awaiting my signature"
+msgstr "Pendientes de mi firma"
+
+msgid "Back"
+msgstr "Volver"
+
+msgid "Back to ERPNext"
+msgstr "Volver a ERPNext"
+
+msgid "Back to document"
+msgstr "Volver al documento"
+
+msgid "Back to editor"
+msgstr "Volver al editor"
+
+msgid "Background color"
+msgstr "Color de fondo"
+
+msgid "Black"
+msgstr "Negro"
+
+msgid "Black & white"
+msgstr "Blanco y negro"
+
+msgid "Block margin"
+msgstr "Margen del bloque"
+
+msgid "Block padding"
+msgstr "Relleno del bloque"
+
+msgid "Blocks"
+msgstr "Bloques"
+
+msgid "Blue"
+msgstr "Azul"
+
+msgid "Bold"
+msgstr "Negrita"
+
+msgid "Brand Color"
+msgstr "Color de marca"
+
+msgid "Browser"
+msgstr "Navegador"
+
+msgid "Build a proposal or contract from scratch"
+msgstr "Cree una propuesta o un contrato desde cero"
+
+msgid "Bulleted list"
+msgstr "Lista con viñetas"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Cannot publish a template without a PDF."
+msgstr "No se puede publicar una plantilla sin PDF."
+
+msgid "Center"
+msgstr "Centro"
+
+msgid "Certificate Pdf"
+msgstr "PDF del certificado"
+
+msgid "Certificate configured; trust is determined by the validating PDF reader."
+msgstr "Certificado configurado; la confianza la determina el lector de PDF que lo valida."
+
+msgid "Certificate-based PDF sealing is not configured."
+msgstr "El sellado de PDF basado en certificado no está configurado."
+
+msgid "Change recipient {0}"
+msgstr "Cambiar destinatario {0}"
+
+msgid "Changed field"
+msgstr "Campo modificado"
+
+msgid "Changes To (optional)"
+msgstr "Cambia a (opcional)"
+
+msgid "Channel"
+msgstr "Canal"
+
+msgid "Checkbox"
+msgstr "Casilla de verificación"
+
+msgid "Choose PDF files"
+msgstr "Elegir archivos PDF"
+
+msgid "Choose a PDF smaller than 15 MB."
+msgstr "Elija un PDF de menos de 15 MB."
+
+msgid "Choose a PNG or JPG smaller than 2 MB."
+msgstr "Elija un PNG o JPG de menos de 2 MB."
+
+msgid "Choose a template"
+msgstr "Elija una plantilla"
+
+msgid "Choose an existing reference document and its document type."
+msgstr "Elija un documento de referencia existente y su tipo de documento."
+
+msgid "Choose an option"
+msgstr "Elija una opción"
+
+msgid "Choose at most five files, totaling 10 MB or less."
+msgstr "Elija como máximo cinco archivos, con un total de 10 MB o menos."
+
+msgid "Choose how your signature will appear. It will be applied to your signature, initial and stamp fields when you finish signing."
+msgstr "Elija cómo se verá su firma. Se aplicará a sus campos de firma, iniciales y sello cuando finalice la firma."
+
+msgid "Choose primary contact"
+msgstr "Elegir contacto principal"
+
+msgid "Choose recipient"
+msgstr "Elegir destinatario"
+
+msgid "Choose up to 10 PDFs totaling 15 MB or less."
+msgstr "Elija hasta 10 PDF con un total de 15 MB o menos."
+
+msgid "Choose…"
+msgstr "Elegir…"
+
+msgid "Classic"
+msgstr "Clásico"
+
+msgid "Clear search"
+msgstr "Borrar búsqueda"
+
+msgid "Clear signature"
+msgstr "Borrar firma"
+
+msgid "Click a highlighted field on the document, or start here. We’ll guide you through each required field."
+msgstr "Haga clic en un campo resaltado del documento o empiece aquí. Lo guiaremos por cada campo obligatorio."
+
+msgid "Click or drag files here to upload"
+msgstr "Haga clic o arrastre archivos aquí para cargarlos"
+
+msgid "Click to sign"
+msgstr "Haga clic para firmar"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Close contact form"
+msgstr "Cerrar formulario de contacto"
+
+msgid "Close field editor"
+msgstr "Cerrar editor de campo"
+
+msgid "Close field properties"
+msgstr "Cerrar propiedades del campo"
+
+msgid "Close navigation"
+msgstr "Cerrar navegación"
+
+msgid "Close properties"
+msgstr "Cerrar propiedades"
+
+msgid "Close upload"
+msgstr "Cerrar carga"
+
+msgid "Color"
+msgstr "Color"
+
+msgid "Column 1"
+msgstr "Columna 1"
+
+msgid "Column 2"
+msgstr "Columna 2"
+
+msgid "Company"
+msgstr "Empresa"
+
+msgid "Complete {0}"
+msgstr "Completar {0}"
+
+msgid "Completed"
+msgstr "Completado"
+
+msgid "Completed On"
+msgstr "Completado el"
+
+msgid "Completed document SHA-256"
+msgstr "SHA-256 del documento completado"
+
+msgid "Completed documents"
+msgstr "Documentos completados"
+
+msgid "Completion URL"
+msgstr "URL de finalización"
+
+msgid "Completion URL Target"
+msgstr "Destino de la URL de finalización"
+
+msgid "Completion certificate"
+msgstr "Certificado de finalización"
+
+msgid "Completion queued"
+msgstr "Finalización en cola"
+
+msgid "Completion rate"
+msgstr "Tasa de finalización"
+
+msgid "Completion record"
+msgstr "Registro de finalización"
+
+msgid "Completions in the last 30 days"
+msgstr "Finalizaciones en los últimos 30 días"
+
+msgid "Config"
+msgstr "Configuración"
+
+msgid "Configure document triggers, field mappings and email templates in Desk."
+msgstr "Configure los disparadores de documentos, la asignación de campos y las plantillas de correo en Desk."
+
+msgid "Configured"
+msgstr "Configurado"
+
+msgid "Configured sender name"
+msgstr "Nombre de remitente configurado"
+
+msgid "Confirm decline"
+msgstr "Confirmar rechazo"
+
+msgid "Confirm void"
+msgstr "Confirmar anulación"
+
+msgid "Consent text"
+msgstr "Texto de consentimiento"
+
+msgid "Consent version"
+msgstr "Versión del consentimiento"
+
+msgid "Contact name"
+msgstr "Nombre del contacto"
+
+msgid "Continue"
+msgstr "Continuar"
+
+msgid "Copy {0}"
+msgstr "Copiar {0}"
+
+msgid "Could not copy. Select the variable name to copy it manually."
+msgstr "No se pudo copiar. Seleccione el nombre de la variable para copiarlo manualmente."
+
+msgid "Country"
+msgstr "País"
+
+msgid "Create a document"
+msgstr "Crear un documento"
+
+msgid "Create a document or upload a PDF, then add fields first."
+msgstr "Primero cree un documento o suba un PDF y luego agregue campos."
+
+msgid "Create a template"
+msgstr "Crear una plantilla"
+
+msgid "Create an ERPNext contact and add them to this document."
+msgstr "Cree un contacto de ERPNext y agréguelo a este documento."
+
+msgid "Create and select"
+msgstr "Crear y seleccionar"
+
+msgid "Create automatically from ERP records"
+msgstr "Crear automáticamente desde registros del ERP"
+
+msgid "Create template"
+msgstr "Crear plantilla"
+
+msgid "Created"
+msgstr "Creado"
+
+msgid "Created date"
+msgstr "Fecha de creación"
+
+msgid "Creating…"
+msgstr "Creando…"
+
+msgid "Current Order"
+msgstr "Orden actual"
+
+msgid "Current Version"
+msgstr "Versión actual"
+
+msgid "Custom"
+msgstr "Personalizado"
+
+msgid "Custom URL"
+msgstr "URL personalizada"
+
+msgid "Dark appearance"
+msgstr "Apariencia oscura"
+
+msgid "Date"
+msgstr "Fecha"
+
+msgid "Date Field"
+msgstr "Campo de fecha"
+
+msgid "Date Signed"
+msgstr "Fecha de firma"
+
+msgid "Date field"
+msgstr "Campo de fecha"
+
+msgid "Days"
+msgstr "Días"
+
+msgid "Days After"
+msgstr "Días después"
+
+msgid "Days Before"
+msgstr "Días antes"
+
+msgid "Decline Reason"
+msgstr "Motivo del rechazo"
+
+msgid "Decline to sign"
+msgstr "Rechazar la firma"
+
+msgid "Declined"
+msgstr "Rechazado"
+
+msgid "Declined On"
+msgstr "Rechazado el"
+
+msgid "Default Expiry Days"
+msgstr "Días de vencimiento predeterminados"
+
+msgid "Default Organization"
+msgstr "Organización predeterminada"
+
+msgid "Default Sender Email"
+msgstr "Correo del remitente predeterminado"
+
+msgid "Default Sender Name"
+msgstr "Nombre del remitente predeterminado"
+
+msgid "Default Value"
+msgstr "Valor predeterminado"
+
+msgid "Default expiry (days)"
+msgstr "Vencimiento predeterminado (días)"
+
+msgid "Default invitation"
+msgstr "Invitación predeterminada"
+
+msgid "Default organization, support address, sender address and public signing URL."
+msgstr "Organización predeterminada, dirección de soporte, dirección del remitente y URL pública de firma."
+
+msgid "Default sending account"
+msgstr "Cuenta de envío predeterminada"
+
+msgid "Delete block"
+msgstr "Eliminar bloque"
+
+msgid "Delete field"
+msgstr "Eliminar campo"
+
+msgid "Delete page"
+msgstr "Eliminar página"
+
+msgid "Delete selected column"
+msgstr "Eliminar columna seleccionada"
+
+msgid "Delete selected row"
+msgstr "Eliminar fila seleccionada"
+
+msgid "Demo workspace"
+msgstr "Espacio de demostración"
+
+msgid "Description"
+msgstr "Descripción"
+
+msgid "Detail"
+msgstr "Detalle"
+
+msgid "Details"
+msgstr "Detalles"
+
+msgid "Device"
+msgstr "Dispositivo"
+
+msgid "Disabled"
+msgstr "Deshabilitado"
+
+msgid "Divider"
+msgstr "Separador"
+
+msgid "Document"
+msgstr "Documento"
+
+msgid "Document builder"
+msgstr "Editor de documentos"
+
+msgid "Document image"
+msgstr "Imagen del documento"
+
+msgid "Document integrity"
+msgstr "Integridad del documento"
+
+msgid "Document name"
+msgstr "Nombre del documento"
+
+msgid "Document page"
+msgstr "Página del documento"
+
+msgid "Document page text"
+msgstr "Texto de la página del documento"
+
+msgid "Document preview"
+msgstr "Vista previa del documento"
+
+msgid "Document sent"
+msgstr "Documento enviado"
+
+msgid "Document settings"
+msgstr "Configuración del documento"
+
+msgid "Document signing"
+msgstr "Firma de documentos"
+
+msgid "Document source"
+msgstr "Origen del documento"
+
+msgid "Document status"
+msgstr "Estado del documento"
+
+msgid "Document title"
+msgstr "Título del documento"
+
+msgid "Document variables"
+msgstr "Variables del documento"
+
+msgid "Document voided"
+msgstr "Documento anulado"
+
+msgid "Documents"
+msgstr "Documentos"
+
+msgid "Download PDF"
+msgstr "Descargar PDF"
+
+msgid "Downloaded"
+msgstr "Descargado"
+
+msgid "Draft"
+msgstr "Borrador"
+
+msgid "Draft saved"
+msgstr "Borrador guardado"
+
+msgid "Drafts"
+msgstr "Borradores"
+
+msgid "Drag recipients to change the order."
+msgstr "Arrastre los destinatarios para cambiar el orden."
+
+msgid "Draw"
+msgstr "Dibujar"
+
+msgid "Draw signature"
+msgstr "Dibujar firma"
+
+msgid "Drop a block here, or choose one from the left."
+msgstr "Suelte un bloque aquí o elija uno a la izquierda."
+
+msgid "Dropdown"
+msgstr "Lista desplegable"
+
+msgid "Duplicate"
+msgstr "Duplicar"
+
+msgid "Duplicate block"
+msgstr "Duplicar bloque"
+
+msgid "Duplicate field"
+msgstr "Duplicar campo"
+
+msgid "ERP field mapping"
+msgstr "Asignación de campo del ERP"
+
+msgid "ERPNext Signable Documents, Contracts and NDAs"
+msgstr "Documentos firmables, contratos y NDA de ERPNext"
+
+msgid "ERPNext contacts"
+msgstr "Contactos de ERPNext"
+
+msgid "ERPNext document type (optional)"
+msgstr "Tipo de documento de ERPNext (opcional)"
+
+msgid "ERPNext workspace"
+msgstr "Espacio de trabajo de ERPNext"
+
+msgid "Each recipient signs after the previous person completes their action."
+msgstr "Cada destinatario firma después de que la persona anterior complete su acción."
+
+msgid "Each signer must have a unique email address."
+msgstr "Cada firmante debe tener una dirección de correo electrónico única."
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Edit document"
+msgstr "Editar documento"
+
+msgid "Edit email templates"
+msgstr "Editar plantillas de correo"
+
+msgid "Edit the invitations, reminders and completion emails used by the signing workflow."
+msgstr "Edite las invitaciones, los recordatorios y los correos de finalización del flujo de firma."
+
+msgid "Edit unsigned document"
+msgstr "Editar documento sin firmar"
+
+msgid "Edit {0}"
+msgstr "Editar {0}"
+
+msgid "Email"
+msgstr "Correo electrónico"
+
+msgid "Email Defaults"
+msgstr "Valores predeterminados de correo"
+
+msgid "Email Field"
+msgstr "Campo de correo"
+
+msgid "Email Footer"
+msgstr "Pie del correo"
+
+msgid "Email Message"
+msgstr "Mensaje del correo"
+
+msgid "Email Queue"
+msgstr "Cola de correo"
+
+msgid "Email Subject"
+msgstr "Asunto del correo"
+
+msgid "Email Wording Mode"
+msgstr "Modo de redacción del correo"
+
+msgid "Email body"
+msgstr "Cuerpo del correo"
+
+msgid "Email delivery"
+msgstr "Envío de correos"
+
+msgid "Email field"
+msgstr "Campo de correo electrónico"
+
+msgid "Email subject"
+msgstr "Asunto del correo"
+
+msgid "Email template"
+msgstr "Plantilla de correo"
+
+msgid "Email templates"
+msgstr "Plantillas de correo"
+
+msgid "Enforce Audit Chain"
+msgstr "Exigir cadena de auditoría"
+
+msgid "Enter an email subject"
+msgstr "Escriba el asunto del correo"
+
+msgid "Envelope"
+msgstr "Sobre"
+
+msgid "Envelope is already in a final state."
+msgstr "El sobre ya está en un estado final."
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Event"
+msgstr "Evento"
+
+msgid "Every agreement, from first send to final signature."
+msgstr "Cada acuerdo, desde el primer envío hasta la firma final."
+
+msgid "Every signer needs an email address."
+msgstr "Cada firmante necesita una dirección de correo electrónico."
+
+msgid "Expired"
+msgstr "Vencido"
+
+msgid "Expires On"
+msgstr "Vence el"
+
+msgid "Expires on (optional)"
+msgstr "Vence el (opcional)"
+
+msgid "Expiry Days"
+msgstr "Días de vencimiento"
+
+msgid "Failed"
+msgstr "Fallido"
+
+msgid "Field Filled"
+msgstr "Campo completado"
+
+msgid "Field Key"
+msgstr "Clave del campo"
+
+msgid "Field Type"
+msgstr "Tipo de campo"
+
+msgid "Field properties"
+msgstr "Propiedades del campo"
+
+msgid "Field repeated across all pages."
+msgstr "Campo repetido en todas las páginas."
+
+msgid "Fields Snapshot"
+msgstr "Instantánea de campos"
+
+msgid "Fields sharing this id are repeats of one field across pages."
+msgstr "Los campos que comparten este ID son repeticiones de un mismo campo en varias páginas."
+
+msgid "Fill from a contact"
+msgstr "Completar desde un contacto"
+
+msgid "Fillable fields"
+msgstr "Campos rellenables"
+
+msgid "Filled"
+msgstr "Completado"
+
+msgid "Filled On"
+msgstr "Completado el"
+
+msgid "Filter ERPNext contacts"
+msgstr "Filtrar contactos de ERPNext"
+
+msgid "Find contact"
+msgstr "Buscar contacto"
+
+msgid "Finish signing"
+msgstr "Finalizar firma"
+
+msgid "Fixed email (optional)"
+msgstr "Correo electrónico fijo (opcional)"
+
+msgid "Fixed name (optional)"
+msgstr "Nombre fijo (opcional)"
+
+msgid "Font"
+msgstr "Fuente"
+
+msgid "Font Family"
+msgstr "Familia de fuente"
+
+msgid "Font Size"
+msgstr "Tamaño de fuente"
+
+msgid "Font family"
+msgstr "Fuente"
+
+msgid "Font size"
+msgstr "Tamaño de fuente"
+
+msgid "For example, Sales Order"
+msgstr "Por ejemplo, Sales Order"
+
+msgid "For example, {0}"
+msgstr "Por ejemplo, {0}"
+
+msgid "From Email Account"
+msgstr "Cuenta de correo de envío"
+
+msgid "From Name"
+msgstr "Nombre del remitente"
+
+msgid "From email"
+msgstr "Correo del remitente"
+
+msgid "From name"
+msgstr "Nombre del remitente"
+
+msgid "Full name"
+msgstr "Nombre completo"
+
+msgid "Generated"
+msgstr "Generado"
+
+msgid "Give this document a title."
+msgstr "Asigne un título a este documento."
+
+msgid "Handwritten"
+msgstr "Manuscrito"
+
+msgid "Hash"
+msgstr "Hash"
+
+msgid "Heading"
+msgstr "Encabezado"
+
+msgid "Heading {0}"
+msgstr "Encabezado {0}"
+
+msgid "Height"
+msgstr "Alto"
+
+msgid "Height (%)"
+msgstr "Alto (%)"
+
+msgid "Image"
+msgstr "Imagen"
+
+msgid "In Progress"
+msgstr "En curso"
+
+msgid "In progress"
+msgstr "En curso"
+
+msgid "Initial"
+msgstr "Iniciales"
+
+msgid "Ink"
+msgstr "Tinta"
+
+msgid "Insert column right"
+msgstr "Insertar columna a la derecha"
+
+msgid "Insert row below"
+msgstr "Insertar fila debajo"
+
+msgid "Insert variable"
+msgstr "Insertar variable"
+
+msgid "Insert variable in {0}"
+msgstr "Insertar variable en {0}"
+
+msgid "Integrity"
+msgstr "Integridad"
+
+msgid "Invalid field values."
+msgstr "Valores de campo no válidos."
+
+msgid "Invalid signing link."
+msgstr "Enlace de firma no válido."
+
+msgid "Invalid signing request."
+msgstr "Solicitud de firma no válida."
+
+msgid "Invitation"
+msgstr "Invitación"
+
+msgid "Invitation attachments"
+msgstr "Adjuntos de la invitación"
+
+msgid "Invitation email body"
+msgstr "Cuerpo del correo de invitación"
+
+msgid "Invitation email template"
+msgstr "Plantilla de correo de invitación"
+
+msgid "Invitations and reminders use your Frappe outgoing email account."
+msgstr "Las invitaciones y los recordatorios usan su cuenta de correo saliente de Frappe."
+
+msgid "Ip Address"
+msgstr "Dirección IP"
+
+msgid "Is Current"
+msgstr "Es la actual"
+
+msgid "It is not your turn to sign yet. You will be notified when ready."
+msgstr "Aún no es su turno para firmar. Se le notificará cuando esté listo."
+
+msgid "Italic"
+msgstr "Cursiva"
+
+msgid "Label"
+msgstr "Etiqueta"
+
+msgid "Last Activity"
+msgstr "Última actividad"
+
+msgid "Last Reminder On"
+msgstr "Último recordatorio el"
+
+msgid "Last updated"
+msgstr "Última actualización"
+
+msgid "Left"
+msgstr "Izquierda"
+
+msgid "Left (%)"
+msgstr "Izquierda (%)"
+
+msgid "Lifecycle"
+msgstr "Ciclo de vida"
+
+msgid "Light appearance"
+msgstr "Apariencia clara"
+
+msgid "Line spacing"
+msgstr "Interlineado"
+
+msgid "Link to an ERPNext record"
+msgstr "Vincular a un registro de ERPNext"
+
+msgid "Loading activity…"
+msgstr "Cargando actividad…"
+
+msgid "Loading contacts…"
+msgstr "Cargando contactos…"
+
+msgid "Loading document…"
+msgstr "Cargando documento…"
+
+msgid "Loading your workspace…"
+msgstr "Cargando su espacio de trabajo…"
+
+msgid "Loading…"
+msgstr "Cargando…"
+
+msgid "Local design preview · fictional documents · no email is sent"
+msgstr "Vista previa local del diseño · documentos ficticios · no se envían correos"
+
+msgid "Local preview"
+msgstr "Vista previa local"
+
+msgid "Logo"
+msgstr "Logotipo"
+
+msgid "Main navigation"
+msgstr "Navegación principal"
+
+msgid "Manage email"
+msgstr "Administrar correo"
+
+msgid "Manage email templates in Desk"
+msgstr "Administrar plantillas de correo en Desk"
+
+msgid "Manage organizations"
+msgstr "Administrar organizaciones"
+
+msgid "Manage sender identities, reminder intervals, expiry defaults and organization settings."
+msgstr "Administre las identidades de remitente, los intervalos de recordatorio, los vencimientos predeterminados y la configuración de la organización."
+
+msgid "Manual Email"
+msgstr "Correo manual"
+
+msgid "Manual Name"
+msgstr "Nombre manual"
+
+msgid "Map From Field"
+msgstr "Asignar desde el campo"
+
+msgid "Margin"
+msgstr "Margen"
+
+msgid "Max Length"
+msgstr "Longitud máxima"
+
+msgid "Message"
+msgstr "Mensaje"
+
+msgid "Meta"
+msgstr "Metadatos"
+
+msgid "Metadata Json"
+msgstr "JSON de metadatos"
+
+msgid "Move PDF up"
+msgstr "Subir PDF"
+
+msgid "Move block"
+msgstr "Mover bloque"
+
+msgid "Move block down"
+msgstr "Bajar bloque"
+
+msgid "Move block up"
+msgstr "Subir bloque"
+
+msgid "Move page down"
+msgstr "Bajar página"
+
+msgid "Move page up"
+msgstr "Subir página"
+
+msgid "NS Audit Log"
+msgstr "Registro de auditoría NS"
+
+msgid "NS Envelope"
+msgstr "Sobre NS"
+
+msgid "NS Envelope Field"
+msgstr "Campo de sobre NS"
+
+msgid "NS Envelope Signer"
+msgstr "Firmante de sobre NS"
+
+msgid "NS Notification"
+msgstr "Notificación NS"
+
+msgid "NS Organization"
+msgstr "Organización NS"
+
+msgid "NS Settings"
+msgstr "Configuración NS"
+
+msgid "NS Signature"
+msgstr "Firma NS"
+
+msgid "NS Signer Role"
+msgstr "Rol de firmante NS"
+
+msgid "NS Signing Session"
+msgstr "Sesión de firma NS"
+
+msgid "NS Template"
+msgstr "Plantilla NS"
+
+msgid "NS Template Field"
+msgstr "Campo de plantilla NS"
+
+msgid "NS Template Version"
+msgstr "Versión de plantilla NS"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Name Field"
+msgstr "Campo de nombre"
+
+msgid "Name and email are copied into this recipient for review. Later contact changes won’t change the document."
+msgstr "El nombre y el correo electrónico se copian en este destinatario para su revisión. Los cambios posteriores en el contacto no modificarán el documento."
+
+msgid "Name field"
+msgstr "Campo de nombre"
+
+msgid "Needs setup"
+msgstr "Requiere configuración"
+
+msgid "Needs to sign"
+msgstr "Debe firmar"
+
+msgid "Nesscale Sign"
+msgstr "Nesscale Sign"
+
+msgid "New"
+msgstr "Nuevo"
+
+msgid "New Document"
+msgstr "Nuevo documento"
+
+msgid "New Template"
+msgstr "Nueva plantilla"
+
+msgid "New document"
+msgstr "Nuevo documento"
+
+msgid "New tab"
+msgstr "Nueva pestaña"
+
+msgid "Next"
+msgstr "Siguiente"
+
+msgid "Next PDF page"
+msgstr "Página siguiente del PDF"
+
+msgid "Next page"
+msgstr "Página siguiente"
+
+msgid "Next required field"
+msgstr "Siguiente campo obligatorio"
+
+msgid "No completed documents in this period."
+msgstr "No hay documentos completados en este período."
+
+msgid "No email address"
+msgstr "Sin correo electrónico"
+
+msgid "No matching contacts you can access."
+msgstr "No hay contactos coincidentes a los que tenga acceso."
+
+msgid "No matching contacts."
+msgstr "No hay contactos coincidentes."
+
+msgid "No matching documents"
+msgstr "No hay documentos que coincidan"
+
+msgid "No matching variables"
+msgstr "No hay variables coincidentes"
+
+msgid "No matching variables. Add one in Document variables."
+msgstr "No hay variables coincidentes. Agregue una en Variables del documento."
+
+msgid "None"
+msgstr "Ninguno"
+
+msgid "Not configured"
+msgstr "No configurado"
+
+msgid "Notes"
+msgstr "Notas"
+
+msgid "Nothing is submitted until you review the document and choose Finish signing."
+msgstr "No se envía nada hasta que revise el documento y elija Finalizar firma."
+
+msgid "Notification Type"
+msgstr "Tipo de notificación"
+
+msgid "Number"
+msgstr "Número"
+
+msgid "Number of days"
+msgstr "Número de días"
+
+msgid "Numbered list"
+msgstr "Lista numerada"
+
+msgid "Only PDF files are supported."
+msgstr "Solo se admiten archivos PDF."
+
+msgid "Only draft envelopes can be sent."
+msgstr "Solo se pueden enviar sobres en borrador."
+
+msgid "Only email-link authentication is currently supported."
+msgstr "Actualmente solo se admite la autenticación mediante enlace por correo electrónico."
+
+msgid "Only fully signed documents can be completed."
+msgstr "Solo se pueden completar documentos firmados en su totalidad."
+
+msgid "Open E-Sign ERPNext builds on Nesscale Sign by Nesscale Solutions."
+msgstr "Open E-Sign ERPNext se basa en Nesscale Sign de Nesscale Solutions."
+
+msgid "Open E-Sign home"
+msgstr "Inicio de Open E-Sign"
+
+msgid "Open application settings"
+msgstr "Abrir configuración de la aplicación"
+
+msgid "Open document"
+msgstr "Abrir documento"
+
+msgid "Open in"
+msgstr "Abrir en"
+
+msgid "Open navigation"
+msgstr "Abrir navegación"
+
+msgid "Open original PDF"
+msgstr "Abrir PDF original"
+
+msgid "Open source"
+msgstr "Código abierto"
+
+msgid "Open template settings"
+msgstr "Abrir configuración de plantillas"
+
+msgid "Open {0}"
+msgstr "Abrir {0}"
+
+msgid "Open-source software"
+msgstr "Software de código abierto"
+
+msgid "Opened"
+msgstr "Abierto"
+
+msgid "Optional"
+msgstr "Opcional"
+
+msgid "Options"
+msgstr "Opciones"
+
+msgid "Options (one per line)"
+msgstr "Opciones (una por línea)"
+
+msgid "Or use a template"
+msgstr "O use una plantilla"
+
+msgid "Organization"
+msgstr "Organización"
+
+msgid "Organization Name"
+msgstr "Nombre de la organización"
+
+msgid "Organizations & reminder policies"
+msgstr "Organizaciones y políticas de recordatorio"
+
+msgid "Original document SHA-256"
+msgstr "SHA-256 del documento original"
+
+msgid "Original fingerprint recorded at send time."
+msgstr "Huella digital original registrada al momento del envío."
+
+msgid "Os"
+msgstr "Sistema operativo"
+
+msgid "PDF preview"
+msgstr "Vista previa del PDF"
+
+msgid "PDF processing"
+msgstr "Procesamiento del PDF"
+
+msgid "PDF seal"
+msgstr "Sello del PDF"
+
+msgid "PDF sealing"
+msgstr "Sellado de PDF"
+
+msgid "PDF · up to 10 files · 15 MB total · 100 pages"
+msgstr "PDF · hasta 10 archivos · 15 MB en total · 100 páginas"
+
+msgid "PDF · up to 15 MB · 100 pages"
+msgstr "PDF · hasta 15 MB · 100 páginas"
+
+msgid "PNG or JPG, up to 2 MB"
+msgstr "PNG o JPG, hasta 2 MB"
+
+msgid "Padding"
+msgstr "Relleno"
+
+msgid "Page"
+msgstr "Página"
+
+msgid "Page Count"
+msgstr "Número de páginas"
+
+msgid "Page break"
+msgstr "Salto de página"
+
+msgid "Page {0}"
+msgstr "Página {0}"
+
+msgid "Page {0} is full. Move a block to a new page before saving."
+msgstr "La página {0} está llena. Mueva un bloque a una página nueva antes de guardar."
+
+msgid "Page {0} of {1}"
+msgstr "Página {0} de {1}"
+
+msgid "Page {0} · Optional"
+msgstr "Página {0} · Opcional"
+
+msgid "Pages"
+msgstr "Páginas"
+
+msgid "Paragraph"
+msgstr "Párrafo"
+
+msgid "Parallel"
+msgstr "Paralelo"
+
+msgid "Pdf File"
+msgstr "Archivo PDF"
+
+msgid "Pending"
+msgstr "Pendiente"
+
+msgid "Placeholder"
+msgstr "Texto de ejemplo"
+
+msgid "Please agree to sign electronically."
+msgstr "Acepte firmar electrónicamente."
+
+msgid "Please complete all required fields: {0}"
+msgstr "Complete todos los campos obligatorios: {0}"
+
+msgid "Please review the document before signing."
+msgstr "Revise el documento antes de firmar."
+
+msgid "Policies"
+msgstr "Políticas"
+
+msgid "Pos X"
+msgstr "Pos. X"
+
+msgid "Pos Y"
+msgstr "Pos. Y"
+
+msgid "Position"
+msgstr "Posición"
+
+msgid "Powered by Open E-Sign ERPNext"
+msgstr "Con la tecnología de Open E-Sign ERPNext"
+
+msgid "Prefill this field from the reference document."
+msgstr "Rellenar previamente este campo desde el documento de referencia."
+
+msgid "Prefilled value"
+msgstr "Valor precargado"
+
+msgid "Prev Hash"
+msgstr "Hash anterior"
+
+msgid "Preview PDF"
+msgstr "Vista previa del PDF"
+
+msgid "Preview filled variables"
+msgstr "Vista previa con variables completadas"
+
+msgid "Previous PDF page"
+msgstr "Página anterior del PDF"
+
+msgid "Previous page"
+msgstr "Página anterior"
+
+msgid "Primary"
+msgstr "Principal"
+
+msgid "Primary contact"
+msgstr "Contacto principal"
+
+msgid "Primary contact email"
+msgstr "Correo electrónico del contacto principal"
+
+msgid "Primary contact name"
+msgstr "Nombre del contacto principal"
+
+msgid "Processing error"
+msgstr "Error de procesamiento"
+
+msgid "Progress"
+msgstr "Progreso"
+
+msgid "Properties"
+msgstr "Propiedades"
+
+msgid "Public Base Url"
+msgstr "URL base pública"
+
+msgid "Radio"
+msgstr "Opción única"
+
+msgid "Read Only"
+msgstr "Solo lectura"
+
+msgid "Read only"
+msgstr "Solo lectura"
+
+msgid "Ready for your first signature"
+msgstr "Todo listo para su primera firma"
+
+msgid "Ready to finish"
+msgstr "Listo para finalizar"
+
+msgid "Reason (optional)"
+msgstr "Motivo (opcional)"
+
+msgid "Reason for voiding"
+msgstr "Motivo de la anulación"
+
+msgid "Reassign fields belonging to a removed recipient before sending."
+msgstr "Reasigne los campos de un destinatario eliminado antes de enviar."
+
+msgid "Reassign or remove this recipient’s fields before removing them."
+msgstr "Reasigne o elimine los campos de este destinatario antes de eliminarlo."
+
+msgid "Recipient"
+msgstr "Destinatario"
+
+msgid "Recipient mappings below read from this ERP record. Save these rules with the reusable template."
+msgstr "Las asignaciones de destinatarios a continuación se leen de este registro del ERP. Guarde estas reglas con la plantilla reutilizable."
+
+msgid "Recipient {0}"
+msgstr "Destinatario {0}"
+
+msgid "Recipients"
+msgstr "Destinatarios"
+
+msgid "Red"
+msgstr "Rojo"
+
+msgid "Redirect after signing"
+msgstr "Redirigir después de firmar"
+
+msgid "Redo"
+msgstr "Rehacer"
+
+msgid "Reference DocType"
+msgstr "DocType de referencia"
+
+msgid "Reference number"
+msgstr "Número de referencia"
+
+msgid "Reload"
+msgstr "Recargar"
+
+msgid "Reminded"
+msgstr "Recordatorio enviado"
+
+msgid "Reminder"
+msgstr "Recordatorio"
+
+msgid "Reminder Count"
+msgstr "Número de recordatorios"
+
+msgid "Reminder Enabled"
+msgstr "Recordatorio habilitado"
+
+msgid "Reminder Interval Days"
+msgstr "Intervalo de recordatorios (días)"
+
+msgid "Reminder Max Count"
+msgstr "Número máximo de recordatorios"
+
+msgid "Reminder queued"
+msgstr "Recordatorio en cola"
+
+msgid "Reminders"
+msgstr "Recordatorios"
+
+msgid "Remove recipient {0}"
+msgstr "Quitar destinatario {0}"
+
+msgid "Remove {0}"
+msgstr "Quitar {0}"
+
+msgid "Reorder recipient {0}"
+msgstr "Reordenar destinatario {0}"
+
+msgid "Repeat Group"
+msgstr "Grupo de repetición"
+
+msgid "Repeat on all pages"
+msgstr "Repetir en todas las páginas"
+
+msgid "Replace PDF"
+msgstr "Reemplazar PDF"
+
+msgid "Require All Fields"
+msgstr "Exigir todos los campos"
+
+msgid "Required"
+msgstr "Obligatorio"
+
+msgid "Requires permission to create Frappe Email Templates."
+msgstr "Requiere permiso para crear plantillas de correo de Frappe."
+
+msgid "Retry completion"
+msgstr "Reintentar finalización"
+
+msgid "Review and finish"
+msgstr "Revisar y finalizar"
+
+msgid "Review document"
+msgstr "Revisar documento"
+
+msgid "Right"
+msgstr "Derecha"
+
+msgid "Role Key"
+msgstr "Clave del rol"
+
+msgid "Role Label"
+msgstr "Etiqueta del rol"
+
+msgid "Role name"
+msgstr "Nombre del rol"
+
+msgid "Roles Snapshot"
+msgstr "Instantánea de roles"
+
+msgid "Routing Type"
+msgstr "Tipo de enrutamiento"
+
+msgid "Row {0} column {1}"
+msgstr "Fila {0}, columna {1}"
+
+msgid "Same tab"
+msgstr "Misma pestaña"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Save and publish template"
+msgstr "Guardar y publicar plantilla"
+
+msgid "Save as reusable template"
+msgstr "Guardar como plantilla reutilizable"
+
+msgid "Save draft"
+msgstr "Guardar borrador"
+
+msgid "Save email template"
+msgstr "Guardar plantilla de correo"
+
+msgid "Save wording as a template"
+msgstr "Guardar el texto como plantilla"
+
+msgid "Saved"
+msgstr "Guardado"
+
+msgid "Saving signature…"
+msgstr "Guardando firma…"
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "Search contacts…"
+msgstr "Buscar contactos…"
+
+msgid "Search documents"
+msgstr "Buscar documentos"
+
+msgid "Search templates"
+msgstr "Buscar plantillas"
+
+msgid "Search variables"
+msgstr "Buscar variables"
+
+msgid "Search your contacts"
+msgstr "Busque en sus contactos"
+
+msgid "Select a Reference DocType for auto-creation."
+msgstr "Seleccione un DocType de referencia para la creación automática."
+
+msgid "Select a block or field to adjust its properties."
+msgstr "Seleccione un bloque o campo para ajustar sus propiedades."
+
+msgid "Select a contact"
+msgstr "Seleccione un contacto"
+
+msgid "Select an image"
+msgstr "Seleccione una imagen"
+
+msgid "Send automatically when recipients are resolved"
+msgstr "Enviar automáticamente cuando se resuelvan los destinatarios"
+
+msgid "Send for signature"
+msgstr "Enviar para firma"
+
+msgid "Send reminder"
+msgstr "Enviar recordatorio"
+
+msgid "Sender"
+msgstr "Remitente"
+
+msgid "Sender & Email"
+msgstr "Remitente y correo"
+
+msgid "Sender Email"
+msgstr "Correo del remitente"
+
+msgid "Sender Name"
+msgstr "Nombre del remitente"
+
+msgid "Sent"
+msgstr "Enviado"
+
+msgid "Sent On"
+msgstr "Enviado el"
+
+msgid "Sent by"
+msgstr "Enviado por"
+
+msgid "Sequential"
+msgstr "Secuencial"
+
+msgid "Set signing order"
+msgstr "Establecer orden de firma"
+
+msgid "Settings"
+msgstr "Configuración"
+
+msgid "Setup guide"
+msgstr "Guía de configuración"
+
+msgid "Signature"
+msgstr "Firma"
+
+msgid "Signature Image"
+msgstr "Imagen de la firma"
+
+msgid "Signature Type"
+msgstr "Tipo de firma"
+
+msgid "Signature image"
+msgstr "Imagen de la firma"
+
+msgid "Signature preview; choose Type signature for keyboard entry"
+msgstr "Vista previa de la firma; elija Escribir firma para ingresarla con el teclado"
+
+msgid "Signed"
+msgstr "Firmado"
+
+msgid "Signed On"
+msgstr "Firmado el"
+
+msgid "Signed PDF"
+msgstr "PDF firmado"
+
+msgid "Signed Pdf"
+msgstr "PDF firmado"
+
+msgid "Signed copies and completion records stay with your documents."
+msgstr "Las copias firmadas y los registros de finalización se conservan con sus documentos."
+
+msgid "Signer"
+msgstr "Firmante"
+
+msgid "Signer Email"
+msgstr "Correo del firmante"
+
+msgid "Signer Name"
+msgstr "Nombre del firmante"
+
+msgid "Signer Role"
+msgstr "Rol de firmante"
+
+msgid "Signer Roles"
+msgstr "Roles de firmante"
+
+msgid "Signer has already signed."
+msgstr "El firmante ya firmó."
+
+msgid "Signer not found."
+msgstr "No se encontró el firmante."
+
+msgid "Signers"
+msgstr "Firmantes"
+
+msgid "Signing Brand Name"
+msgstr "Nombre de marca para la firma"
+
+msgid "Signing Order"
+msgstr "Orden de firma"
+
+msgid "Signing Session"
+msgstr "Sesión de firma"
+
+msgid "Signing as {0}"
+msgstr "Firmando como {0}"
+
+msgid "Signing page message"
+msgstr "Mensaje de la página de firma"
+
+msgid "Signing works without a seal, but the PDFs are not cryptographically signed."
+msgstr "La firma funciona sin sello, pero los PDF no quedan firmados criptográficamente."
+
+msgid "Simple"
+msgstr "Sencillo"
+
+msgid "Snapshot"
+msgstr "Instantánea"
+
+msgid "Source & documentation"
+msgstr "Código fuente y documentación"
+
+msgid "Source Pdf"
+msgstr "PDF de origen"
+
+msgid "Stamp"
+msgstr "Sello"
+
+msgid "Start signing"
+msgstr "Comenzar a firmar"
+
+msgid "Start with a document you use again and again."
+msgstr "Empiece con un documento que use una y otra vez."
+
+msgid "Started On"
+msgstr "Iniciado el"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Strikethrough"
+msgstr "Tachado"
+
+msgid "Style"
+msgstr "Estilo"
+
+msgid "Subject"
+msgstr "Asunto"
+
+msgid "Submit"
+msgstr "Validar"
+
+msgid "Support Email"
+msgstr "Correo de soporte"
+
+msgid "Supporting files sent to every invited signer. These are separate from the document they sign."
+msgstr "Archivos de apoyo enviados a cada firmante invitado. Son independientes del documento que firman."
+
+msgid "Table"
+msgstr "Tabla"
+
+msgid "Tables support up to 100 rows."
+msgstr "Las tablas admiten hasta 100 filas."
+
+msgid "Tags"
+msgstr "Etiquetas"
+
+msgid "Target value"
+msgstr "Valor objetivo"
+
+msgid "Template"
+msgstr "Plantilla"
+
+msgid "Template Version"
+msgstr "Versión de la plantilla"
+
+msgid "Template has no PDF document."
+msgstr "La plantilla no tiene documento PDF."
+
+msgid "Template name"
+msgstr "Nombre de la plantilla"
+
+msgid "Template rules & ERP automation"
+msgstr "Reglas de la plantilla y automatización del ERP"
+
+msgid "Templates"
+msgstr "Plantillas"
+
+msgid "Templates & ERP automation"
+msgstr "Plantillas y automatización del ERP"
+
+msgid "Text"
+msgstr "Texto"
+
+msgid "Text color"
+msgstr "Color del texto"
+
+msgid "Text formatting"
+msgstr "Formato de texto"
+
+msgid "Text style"
+msgstr "Estilo de texto"
+
+msgid "That variable already exists."
+msgstr "Esa variable ya existe."
+
+msgid "The original document has changed. Completion was stopped."
+msgstr "El documento original cambió. Se detuvo la finalización."
+
+msgid "The request failed. Please try again."
+msgstr "La solicitud falló. Inténtelo de nuevo."
+
+msgid "The secure signing link is always added. Mail uses your configured Frappe sending account."
+msgstr "El enlace seguro de firma siempre se agrega. El correo usa su cuenta de envío configurada en Frappe."
+
+msgid "The server could not respond. Please try again."
+msgstr "El servidor no pudo responder. Inténtelo de nuevo."
+
+msgid "This PDF could not be displayed. Reload to try again."
+msgstr "No se pudo mostrar este PDF. Vuelva a cargar la página para intentarlo de nuevo."
+
+msgid "This contact is already a recipient."
+msgstr "Este contacto ya es un destinatario."
+
+msgid "This contact needs an email address before they can sign."
+msgstr "Este contacto necesita un correo electrónico antes de poder firmar."
+
+msgid "This document is {0} and can no longer be signed."
+msgstr "Este documento tiene el estado {0} y ya no se puede firmar."
+
+msgid "This image could not be opened. Choose another PNG or JPG."
+msgstr "No se pudo abrir esta imagen. Elija otro PNG o JPG."
+
+msgid "This signing link has expired."
+msgstr "Este enlace de firma venció."
+
+msgid "This signing link is invalid or has expired."
+msgstr "Este enlace de firma no es válido o venció."
+
+msgid "This signing link is no longer available."
+msgstr "Este enlace de firma ya no está disponible."
+
+msgid "This signing request has expired."
+msgstr "Esta solicitud de firma venció."
+
+msgid "Timestamp"
+msgstr "Marca de tiempo"
+
+msgid "Timestamps"
+msgstr "Marcas de tiempo"
+
+msgid "Timezone"
+msgstr "Zona horaria"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Token"
+msgstr "Token"
+
+msgid "Top (%)"
+msgstr "Superior (%)"
+
+msgid "Total documents"
+msgstr "Total de documentos"
+
+msgid "Tracking"
+msgstr "Seguimiento"
+
+msgid "Trigger"
+msgstr "Disparador"
+
+msgid "Try another title or clear your filters."
+msgstr "Pruebe con otro título o borre los filtros."
+
+msgid "Try signing"
+msgstr "Pruebe a firmar"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Type signature"
+msgstr "Escribir firma"
+
+msgid "Typed Text"
+msgstr "Texto escrito"
+
+msgid "Underline"
+msgstr "Subrayado"
+
+msgid "Undo"
+msgstr "Deshacer"
+
+msgid "Unsupported signature type."
+msgstr "Tipo de firma no compatible."
+
+msgid "Untitled Document"
+msgstr "Documento sin título"
+
+msgid "Untitled Template"
+msgstr "Plantilla sin título"
+
+msgid "Up to 5 files · 10 MB total"
+msgstr "Hasta 5 archivos · 10 MB en total"
+
+msgid "Upload"
+msgstr "Subir"
+
+msgid "Upload a PDF"
+msgstr "Subir un PDF"
+
+msgid "Upload a PDF or build a document to continue."
+msgstr "Suba un PDF o cree un documento para continuar."
+
+msgid "Upload an existing PDF"
+msgstr "Subir un PDF existente"
+
+msgid "Upload an existing PDF and choose who needs to sign."
+msgstr "Suba un PDF existente y elija quién debe firmar."
+
+msgid "Upload and rearrange files for this document."
+msgstr "Cargue y reorganice los archivos de este documento."
+
+msgid "Upload failed. Please try again."
+msgstr "No se pudo subir el archivo. Inténtelo de nuevo."
+
+msgid "Upload files"
+msgstr "Cargar archivos"
+
+msgid "Upload signature"
+msgstr "Cargar firma"
+
+msgid "Uploading…"
+msgstr "Cargando…"
+
+msgid "Use a name starting with a letter, with letters, numbers or underscores."
+msgstr "Use un nombre que empiece con una letra y contenga letras, números o guiones bajos."
+
+msgid "User Agent"
+msgstr "Agente de usuario"
+
+msgid "Validation"
+msgstr "Validación"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Value Change"
+msgstr "Cambio de valor"
+
+msgid "Variables for {0}"
+msgstr "Variables para {0}"
+
+msgid "Version Count"
+msgstr "Número de versiones"
+
+msgid "Version No"
+msgstr "N.º de versión"
+
+msgid "View source"
+msgstr "Ver código fuente"
+
+msgid "Viewed"
+msgstr "Visto"
+
+msgid "Viewed On"
+msgstr "Visto el"
+
+msgid "Void Reason"
+msgstr "Motivo de anulación"
+
+msgid "Void document"
+msgstr "Anular documento"
+
+msgid "Voided"
+msgstr "Anulado"
+
+msgid "Voided On"
+msgstr "Anulado el"
+
+msgid "Waiting for others"
+msgstr "Esperando a otros"
+
+msgid "Watch Field"
+msgstr "Campo a observar"
+
+msgid "We’re preparing the final document."
+msgstr "Estamos preparando el documento final."
+
+msgid "Width"
+msgstr "Ancho"
+
+msgid "Width (%)"
+msgstr "Ancho (%)"
+
+msgid "Workspace"
+msgstr "Espacio de trabajo"
+
+msgid "Workspace settings"
+msgstr "Configuración del espacio de trabajo"
+
+msgid "Write your invitation"
+msgstr "Escriba su invitación"
+
+msgid "You declined this document. The sender will be notified."
+msgstr "Usted rechazó este documento. Se notificará al remitente."
+
+msgid "You have already signed this document."
+msgstr "Usted ya firmó este documento."
+
+msgid "You have declined this document."
+msgstr "Usted rechazó este documento."
+
+msgid "Your adopted signature"
+msgstr "Su firma adoptada"
+
+msgid "Your completed copy will be available after everyone signs."
+msgstr "Su copia completada estará disponible cuando todos firmen."
+
+msgid "Your details"
+msgstr "Sus datos"
+
+msgid "Your full name"
+msgstr "Su nombre completo"
+
+msgid "Your reusable documents belong here"
+msgstr "Aquí se guardan sus documentos reutilizables"
+
+msgid "Your signature is saved."
+msgstr "Su firma se guardó."
+
+msgid "Your workspace"
+msgstr "Su espacio de trabajo"
+
+msgid "You’ll be notified when it’s your turn to sign."
+msgstr "Se le notificará cuando sea su turno de firmar."
+
+msgid "You’ll receive a copy when everyone has signed."
+msgstr "Recibirá una copia cuando todos hayan firmado."
+
+msgid "custom"
+msgstr "personalizado"
+
+msgid "for ERPNext"
+msgstr "para ERPNext"
+
+msgid "template"
+msgstr "plantilla"
+
+msgid "{0} completed"
+msgstr "{0} completados"
+
+msgid "{0} documents"
+msgstr "{0} documentos"
+
+msgid "{0} drafts"
+msgstr "{0} borradores"
+
+msgid "{0} has shared a document with you"
+msgstr "{0} compartió un documento con usted"
+
+msgid "{0} of {1} required fields complete"
+msgstr "{0} de {1} campos obligatorios completados"
+
+msgid "{0} required fields remaining"
+msgstr "Faltan {0} campos obligatorios"
+
+msgid "{0} signing"
+msgstr "Firma: {0}"
+
+msgid "{0} templates"
+msgstr "{0} plantillas"
+
+msgid "{0} waiting for signatures"
+msgstr "{0} en espera de firmas"

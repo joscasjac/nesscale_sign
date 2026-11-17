@@ -58,7 +58,7 @@ class SigningService:
 			self.envelope.status in EnvelopeStatus.TERMINAL
 			and self.envelope.status != EnvelopeStatus.COMPLETED
 		):
-			frappe.throw(_("This document is {0} and can no longer be signed.").format(self.envelope.status))
+			frappe.throw(_("This document is {0} and can no longer be signed.").format(_(self.envelope.status)))
 		if self.envelope.expires_on and get_datetime(self.envelope.expires_on) < now_datetime():
 			frappe.throw(_("This signing request has expired."))
 		if self.signer.status == SignerStatus.SIGNED:

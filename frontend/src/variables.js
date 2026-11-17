@@ -1,3 +1,4 @@
+import { __ } from "./translation.js";
 export function activeVariable(text, caret = text.length) {
 	const before = text.slice(0, caret),
 		start = before.lastIndexOf("{{");
@@ -20,11 +21,11 @@ export function documentVariables(data, form = {}) {
 	const first =
 		form.signers?.find((s) => s.role_key === data.primaryRecipient) || form.signers?.[0] || {};
 	return [
-		{ key: "document.title", value: form.title || "", label: "Document title" },
-		{ key: "document.createdDate", value: data.createdDate || "", label: "Created date" },
-		{ key: "document.refNumber", value: data.refNumber || "", label: "Reference number" },
-		{ key: "contact.name", value: first.signer_name || "", label: "Primary contact name" },
-		{ key: "contact.email", value: first.signer_email || "", label: "Primary contact email" },
+		{ key: "document.title", value: form.title || "", label: __("Document title") },
+		{ key: "document.createdDate", value: data.createdDate || "", label: __("Created date") },
+		{ key: "document.refNumber", value: data.refNumber || "", label: __("Reference number") },
+		{ key: "contact.name", value: first.signer_name || "", label: __("Primary contact name") },
+		{ key: "contact.email", value: first.signer_email || "", label: __("Primary contact email") },
 		...(data.variables || []),
 	];
 }

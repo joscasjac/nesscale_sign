@@ -53,28 +53,29 @@ function save() {
 		<form v-if="field" @submit.prevent="save">
 			<div class="dialog-heading">
 				<div>
-					<p>Page {{ field.page }} · {{ field.required ? "Required" : "Optional" }}</p>
+					<p>{{ __("Page {0}", [field.page]) }} · {{ field.required ? __("Required") : __("Optional") }}</p>
 					<h2 id="field-dialog-title">
 						{{
 							signatureTypes.includes(field.field_type)
-								? "Adopt your signature"
-								: field.label || field.field_type
+								? __("Adopt your signature")
+								: field.label || __(field.field_type)
 						}}
 					</h2>
 				</div>
 				<button
 					type="button"
 					class="text-button"
-					aria-label="Close field editor"
+					:aria-label="__('Close field editor')"
 					@click="$emit('close')"
 				>
-					Close
+					{{ __("Close") }}
 				</button>
 			</div>
 			<template v-if="signatureTypes.includes(field.field_type)">
 				<p>
-					Choose how your signature will appear. It will be applied to your signature,
-					initial and stamp fields when you finish signing.
+					{{
+						__("Choose how your signature will appear. It will be applied to your signature, initial and stamp fields when you finish signing.")
+					}}
 				</p>
 				<SignaturePad
 					:key="field.field_key"
@@ -92,13 +93,13 @@ function save() {
 				/>{{ field.label }}</label
 			>
 			<label v-else
-				>{{ field.label || field.field_type }}
+				>{{ field.label || __(field.field_type) }}
 				<select
 					v-if="field.field_type === 'Dropdown'"
 					v-model="entry"
 					:required="!!field.required"
 				>
-					<option value="">Choose an option</option>
+					<option value="">{{ __("Choose an option") }}</option>
 					<option
 						v-for="option in (field.options || '').split('\n').filter(Boolean)"
 						:key="option"
@@ -122,21 +123,22 @@ function save() {
 				/>
 			</label>
 			<div class="dialog-actions">
-				<button type="button" @click="$emit('close')">Cancel</button
+				<button type="button" @click="$emit('close')">{{ __("Cancel") }}</button
 				><button
 					class="primary"
 					:disabled="signatureTypes.includes(field.field_type) && !adopted"
 				>
 					{{
 						signatureTypes.includes(field.field_type)
-							? "Adopt signature & continue"
-							: "Apply & continue"
+							? __("Adopt signature & continue")
+							: __("Apply & continue")
 					}}
 				</button>
 			</div>
 			<small
-				>Nothing is submitted until you review the document and choose Finish
-				signing.</small
+				>{{
+					__("Nothing is submitted until you review the document and choose Finish signing.")
+				}}</small
 			>
 		</form>
 	</dialog>

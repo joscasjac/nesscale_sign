@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import VariableInput from "./VariableInput.vue";
 import { api } from "../api";
+import { __ } from "../translation";
 const props = defineProps({ modelValue: Object, variables: Array });
 const emit = defineEmits(["update:modelValue"]);
 const senders = ref([]);
@@ -52,7 +53,7 @@ async function attach(e) {
 	if (!file) return;
 	error.value = "";
 	if (file.size > 10 * 1024 * 1024 || files.value.length >= 5) {
-		error.value = "Choose at most five files, totaling 10 MB or less.";
+		error.value = __("Choose at most five files, totaling 10 MB or less.");
 		return;
 	}
 	busy.value = true;
@@ -67,7 +68,7 @@ async function attach(e) {
 			body,
 		});
 		const result = await response.json();
-		if (!response.ok || !result.message?.name) throw Error("Attachment upload failed.");
+		if (!response.ok || !result.message?.name) throw Error(__("Attachment upload failed."));
 		files.value.push({ name: result.message.name, file_name: file.name });
 		set("email_attachments", JSON.stringify(files.value.map((f) => f.name)));
 	} catch (e) {
@@ -102,51 +103,52 @@ async function saveTemplate() {
 <template>
 	<div class="email-options">
 		<label
-			>From name<input
+			>{{ __("From name") }}<input
 				:value="modelValue.email_from_name"
-				placeholder="Configured sender name"
+				:placeholder="__('Configured sender name')"
 				@input="set('email_from_name', $event.target.value)"
 		/></label>
 		<label
-			>From email<select
+			>{{ __("From email") }}<select
 				:value="modelValue.email_from_account || ''"
 				@change="set('email_from_account', $event.target.value)"
 			>
-				<option value="">Default sending account</option>
+				<option value="">{{ __("Default sending account") }}</option>
 				<option v-for="s in senders" :value="s.name">{{ s.email_id }}</option>
 			</select></label
 		>
 
 		<label
-			>Email template<select :value="mode" @change="chooseMode($event.target.value)">
-				<option value="default">Default invitation</option>
-				<option value="custom">Custom</option>
+			>{{ __("Email template") }}<select :value="mode" @change="chooseMode($event.target.value)">
+				<option value="default">{{ __("Default invitation") }}</option>
+				<option value="custom">{{ __("Custom") }}</option>
 				<option v-for="t in templates" :value="t.name">{{ t.name }}</option>
 			</select></label
 		>
-		<a class="button" href="/desk/email-template" target="_blank" rel="noopener">Manage email templates in Desk</a>
+		<a class="button" href="/desk/email-template" target="_blank" rel="noopener">{{ __("Manage email templates in Desk") }}</a>
 		<VariableInput
 			v-if="mode === 'custom'"
-			label="Email subject"
+			:label="__('Email subject')"
 			:model-value="modelValue.email_subject"
 			:variables="variables"
 			maxlength="200"
-			placeholder="Enter an email subject"
+			:placeholder="__('Enter an email subject')"
 			@update:model-value="set('email_subject', $event)"
 		/>
 		<VariableInput
 			v-if="mode === 'custom'"
-			label="Email body"
+			:label="__('Email body')"
 			:model-value="modelValue.email_message"
 			:variables="variables"
 			multiline
 			maxlength="20000"
-			placeholder="Write your invitation"
+			:placeholder="__('Write your invitation')"
 			@update:model-value="set('email_message', $event)"
 		/>
 		<small
-			>The secure signing link is always added. Mail uses your configured Frappe sending
-			account.</small
+			>{{
+				__("The secure signing link is always added. Mail uses your configured Frappe sending account.")
+			}}</small
 		>
 		<div class="completion-settings">
 			<label class="routing-toggle"
@@ -158,48 +160,49 @@ async function saveTemplate() {
 						modelValue.completion_redirect_url !== null
 					"
 					@change="set('completion_redirect_url', $event.target.checked ? '' : null)"
-				/><span>Redirect after signing</span></label
+				/><span>{{ __("Redirect after signing") }}</span></label
 			><template
 				v-if="
 					modelValue.completion_redirect_url !== undefined &&
 					modelValue.completion_redirect_url !== null
 				"
 				><label
-					>Custom URL<input
+					>{{ __("Custom URL") }}<input
 						type="url"
 						:value="modelValue.completion_redirect_url"
 						placeholder="https://example.com/thank-you"
 						@input="set('completion_redirect_url', $event.target.value)" /></label
 				><label
-					>Open in<select
+					>{{ __("Open in") }}<select
 						:value="modelValue.completion_redirect_target || 'Same tab'"
 						@change="set('completion_redirect_target', $event.target.value)"
 					>
-						<option>Same tab</option>
-						<option>New tab</option>
+						<option value="Same tab">{{ __("Same tab") }}</option>
+						<option value="New tab">{{ __("New tab") }}</option>
 					</select></label
 				></template
 			>
 		</div>
-		<h3>Attachments</h3>
+		<h3>{{ __("Attachments") }}</h3>
 		<p class="muted">
-			Supporting files sent to every invited signer. These are separate from the document
-			they sign.
+			{{
+				__("Supporting files sent to every invited signer. These are separate from the document they sign.")
+			}}
 		</p>
 		<label class="upload-control"
-			>+ Add attachment<input type="file" :disabled="busy" @change="attach" /></label
-		><small>Up to 5 files · 10 MB total</small>
+			>+ {{ __("Add attachment") }}<input type="file" :disabled="busy" @change="attach" /></label
+		><small>{{ __("Up to 5 files · 10 MB total") }}</small>
 		<ul class="attachment-list">
 			<li v-for="file in files">
 				<span>{{ file.file_name }}</span
-				><button @click="remove(file.name)" :aria-label="'Remove ' + file.file_name">
+				><button @click="remove(file.name)" :aria-label="__('Remove {0}', [file.file_name])">
 					×
 				</button>
 			</li>
 		</ul>
 		<details v-if="mode === 'custom'">
-			<summary>Save wording as a template</summary>
-			<label>Template name<input v-model="templateName" /></label
+			<summary>{{ __("Save wording as a template") }}</summary>
+			<label>{{ __("Template name") }}<input v-model="templateName" /></label
 			><button
 				:disabled="
 					busy ||
@@ -209,8 +212,8 @@ async function saveTemplate() {
 				"
 				@click="saveTemplate"
 			>
-				Save email template</button
-			><small>Requires permission to create Frappe Email Templates.</small>
+				{{ __("Save email template") }}</button
+			><small>{{ __("Requires permission to create Frappe Email Templates.") }}</small>
 		</details>
 		<p v-if="error" role="alert" class="error">{{ error }}</p>
 	</div>

@@ -3,6 +3,7 @@ import { ref, computed, nextTick, defineAsyncComponent, watch } from "vue";
 import { resolveVariables } from "../variables";
 import { editorIcons as Lucide } from "../editor-icons";
 import { fieldTypes, repeatField } from "../fields";
+import { __ } from "../translation";
 import EditorButton from "./EditorButton.vue";
 import RichBlock from "./RichBlock.vue";
 import VariableInput from "./VariableInput.vue";
@@ -136,10 +137,12 @@ function add(type, p = current.value, index = null) {
 			type,
 			text:
 				type === "Table"
-					? "Column 1\tColumn 2\nValue\tValue"
-					: "Heading\nAdd text to your document.",
+					? `${__("Column 1")}\t${__("Column 2")}\n${__("Value")}\t${__("Value")}`
+					: `${__("Heading")}\n${__("Add text to your document.")}`,
 			html:
-				type === "Text" ? "<h2>Heading</h2><p>Add text to your document.</p>" : undefined,
+				type === "Text"
+					? `<h2>${__("Heading")}</h2><p>${__("Add text to your document.")}</p>`
+					: undefined,
 			font_size: 16,
 			color: "#242a27",
 			background: "#ffffff",
@@ -267,7 +270,7 @@ function addSigningField(type, p = current.value, index = null, position = null)
 	const f = {
 		field_key: crypto.randomUUID(),
 		field_type: type,
-		label: type,
+		label: __(type),
 		page: p + 1,
 		pos_x: position ? Math.max(0, Math.min(0.55, position.x)) : 0.08,
 		pos_y: position ? Math.max(0, Math.min(0.9, position.y)) : 0.2,
@@ -391,7 +394,7 @@ async function imageFile(e) {
 	const f = e.target.files?.[0];
 	if (!f) return;
 	if (!["image/png", "image/jpeg"].includes(f.type) || f.size > 2 * 1024 * 1024) {
-		error.value = "Choose a PNG or JPG smaller than 2 MB.";
+		error.value = __("Choose a PNG or JPG smaller than 2 MB.");
 		return;
 	}
 	const reader = new FileReader();
@@ -408,7 +411,7 @@ async function tableKey(e, b, r, c) {
 	const rows = rowsFor(b);
 	if (r === rows.length - 1) {
 		if (rows.length >= 100) {
-			error.value = "Tables support up to 100 rows.";
+			error.value = __("Tables support up to 100 rows.");
 			return;
 		}
 		activeCell.value = { row: r, column: c };
@@ -441,18 +444,18 @@ function tableChange(b, action) {
 }
 function copyVariable(key) {
 	navigator.clipboard.writeText("{{" + key + "}}").catch(() => {
-		error.value = "Could not copy. Select the variable name to copy it manually.";
+		error.value = __("Could not copy. Select the variable name to copy it manually.");
 	});
 }
 function createVariable() {
 	const name = variableName.value.trim();
 	if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)) {
-		error.value = "Use a name starting with a letter, with letters, numbers or underscores.";
+		error.value = __("Use a name starting with a letter, with letters, numbers or underscores.");
 		return;
 	}
 	const key = "custom." + name;
 	if (props.variables.some((v) => v.key === key)) {
-		error.value = "That variable already exists.";
+		error.value = __("That variable already exists.");
 		return;
 	}
 	change((d) => {
@@ -542,7 +545,7 @@ async function prepare() {
 				b.height = Math.ceil(r.height * sy);
 				if (b.y + b.height > (props.backgroundUrl ? rect.height - 32 : 810))
 					throw Error(
-						"Page " + (p + 1) + " is full. Move a block to a new page before saving.",
+						__("Page {0} is full. Move a block to a new page before saving.", [p + 1]),
 					);
 				if (b.type === "Field") {
 					const f = fields.find((f) => f.field_key === b.field_key);
@@ -611,19 +614,19 @@ defineExpose({ prepare });
 					:key="name"
 					:label="
 						name === 'Document'
-							? 'Add an element'
+							? __('Add an element')
 							: name === 'Variables'
-								? 'Document variables'
-								: name
+								? __('Document variables')
+								: __(name)
 					"
 					:icon="icon"
 					:active="activePanel === name"
 					@click="emit('update:activePanel', name)"
 				/>
 			</div>
-			<div class="text-controls" aria-label="Text formatting">
+			<div class="text-controls" :aria-label="__('Text formatting')">
 				<select
-					aria-label="Font family"
+					:aria-label="__('Font family')"
 					:disabled="
 						filledPreview || !selected || !['Text', 'Heading'].includes(selected.type)
 					"
@@ -635,7 +638,7 @@ defineExpose({ prepare });
 					<option>Courier New</option>
 				</select>
 				<select
-					aria-label="Font size"
+					:aria-label="__('Font size')"
 					:disabled="filledPreview || !selected"
 					:value="selected?.font_size || 16"
 					@change="update('font_size', Number($event.target.value))"
@@ -645,15 +648,15 @@ defineExpose({ prepare });
 					</option>
 				</select>
 				<select
-					aria-label="Text style"
+					:aria-label="__('Text style')"
 					:disabled="
 						filledPreview || !selected || !['Text', 'Heading'].includes(selected.type)
 					"
 					:value="'p'"
 					@change="textEditor?.command('formatBlock', $event.target.value)"
 				>
-					<option value="p">Paragraph</option>
-					<option v-for="n in 5" :value="'h' + n">Heading {{ n }}</option>
+					<option value="p">{{ __("Paragraph") }}</option>
+					<option v-for="n in 5" :value="'h' + n">{{ __("Heading {0}", [n]) }}</option>
 				</select>
 				<EditorButton
 					v-for="[label, icon, cmd] in [
@@ -664,7 +667,7 @@ defineExpose({ prepare });
 						['Bulleted list', 'List', 'insertUnorderedList'],
 						['Numbered list', 'ListOrdered', 'insertOrderedList'],
 					]"
-					:label="label"
+					:label="__(label)"
 					:icon="icon"
 					:disabled="
 						filledPreview ||
@@ -681,7 +684,7 @@ defineExpose({ prepare });
 						['center', 'AlignCenter'],
 						['right', 'AlignRight'],
 					]"
-					:label="'Align ' + align"
+					:label="{ left: __('Align left'), center: __('Align center'), right: __('Align right') }[align]"
 					:icon="icon"
 					:disabled="filledPreview || !selected"
 					:active="selected?.align === align"
@@ -689,15 +692,15 @@ defineExpose({ prepare });
 					@click="update('align', align)"
 				/>
 				<select
-					aria-label="Line spacing"
+					:aria-label="__('Line spacing')"
 					:disabled="filledPreview || !selected"
 					:value="selected?.line_height || 1.5"
 					@change="update('line_height', Number($event.target.value))"
 				>
 					<option v-for="n in [1, 1.35, 1.5, 2]" :value="n">{{ n }}</option>
 				</select>
-				<label class="toolbar-color" data-tooltip="Text color"
-					><span class="sr-only">Text color</span
+				<label class="toolbar-color" :data-tooltip="__('Text color')"
+					><span class="sr-only">{{ __("Text color") }}</span
 					><input
 						type="color"
 						:disabled="filledPreview || !selected"
@@ -705,7 +708,7 @@ defineExpose({ prepare });
 						@input="update('color', $event.target.value)"
 				/></label>
 				<EditorButton
-					label="Insert variable"
+					:label="__('Insert variable')"
 					icon="Tag"
 					:disabled="filledPreview || !selected || !textEditor"
 					@mousedown.prevent
@@ -714,17 +717,17 @@ defineExpose({ prepare });
 			</div>
 			<div class="editor-history">
 				<EditorButton
-					label="Preview filled variables"
+					:label="__('Preview filled variables')"
 					icon="Eye"
 					:active="filledPreview"
 					@click="filledPreview = !filledPreview"
 				/><EditorButton
-					label="Undo"
+					:label="__('Undo')"
 					icon="Undo2"
 					:disabled="!history.length"
 					@click="undo"
 				/><EditorButton
-					label="Redo"
+					:label="__('Redo')"
 					icon="Redo2"
 					:disabled="!future.length"
 					@click="redo"
@@ -734,8 +737,8 @@ defineExpose({ prepare });
 		<div class="flow-workspace">
 			<aside class="flow-library">
 				<template v-if="activePanel === 'Document'"
-					><h2>Add an element</h2>
-					<h3>Blocks</h3>
+					><h2>{{ __("Add an element") }}</h2>
+					<h3>{{ __("Blocks") }}</h3>
 					<div class="element-cards">
 						<button
 							v-for="type in types"
@@ -748,10 +751,10 @@ defineExpose({ prepare });
 								:is="Lucide[icons[type]]"
 								:size="30"
 								aria-hidden="true"
-							/><span>{{ type }}</span>
+							/><span>{{ __(type) }}</span>
 						</button>
 					</div>
-					<h3>Fillable fields</h3>
+					<h3>{{ __("Fillable fields") }}</h3>
 					<div class="element-cards field-cards">
 						<button
 							v-for="type in fieldTypes"
@@ -764,14 +767,14 @@ defineExpose({ prepare });
 								:is="Lucide[icons[type] || 'Type']"
 								:size="30"
 								aria-hidden="true"
-							/><span>{{ type }}</span>
+							/><span>{{ __(type) }}</span>
 						</button>
 					</div></template
 				>
 				<template v-else-if="activePanel === 'Pages'"
-					><h2>Pages</h2>
+					><h2>{{ __("Pages") }}</h2>
 					<EditorButton
-						label="Add page"
+						:label="__('Add page')"
 						icon="Plus"
 						:disabled="!!backgroundUrl || pageCount >= 20"
 						@click="addPage" /><button
@@ -783,43 +786,43 @@ defineExpose({ prepare });
 					</button>
 					<div class="button-group">
 						<EditorButton
-							label="Move page up"
+							:label="__('Move page up')"
 							icon="ArrowUp"
 							:disabled="!!backgroundUrl || current === 0"
 							@click="movePage(-1)"
 						/><EditorButton
-							label="Move page down"
+							:label="__('Move page down')"
 							icon="ArrowDown"
 							:disabled="!!backgroundUrl || current === pageCount - 1"
 							@click="movePage(1)"
 						/><EditorButton
-							label="Delete page"
+							:label="__('Delete page')"
 							icon="Trash2"
 							:disabled="!!backgroundUrl || pageCount === 1"
 							@click="deletePage"
 						/></div
 				></template>
 				<template v-else-if="activePanel === 'Variables'"
-					><h2>Document variables</h2>
+					><h2>{{ __("Document variables") }}</h2>
 					<div class="variable-search">
 						<input
 							v-model="variableSearch"
-							aria-label="Search variables"
-							placeholder="Search"
+							:aria-label="__('Search variables')"
+							:placeholder="__('Search')"
 						/><EditorButton
-							label="Add variable"
+							:label="__('Add variable')"
 							icon="Plus"
 							@click="newVariable = !newVariable"
 						/>
 					</div>
 					<form v-if="newVariable" class="new-variable" @submit.prevent="createVariable">
 						<label
-							>Name<input
+							>{{ __("Name") }}<input
 								v-model="variableName"
 								placeholder="project_name"
 								required /></label
-						><label>Value<input v-model="variableValue" required /></label
-						><button class="primary">Add variable</button>
+						><label>{{ __("Value") }}<input v-model="variableValue" required /></label
+						><button class="primary">{{ __("Add variable") }}</button>
 					</form>
 					<div
 						v-for="v in variables.filter((v) =>
@@ -834,7 +837,7 @@ defineExpose({ prepare });
 								:readonly="!v.key.startsWith('custom.')"
 								@change="updateVariable(v.key, $event.target.value)" /></label
 						><EditorButton
-							:label="'Copy ' + v.key"
+							:label="__('Copy {0}', [v.key])"
 							icon="Copy"
 							@click="copyVariable(v.key)"
 						/></div
@@ -845,10 +848,10 @@ defineExpose({ prepare });
 				<p v-if="error" class="error" role="alert">{{ error }}</p>
 				<template v-for="(p, pi) in modelValue.pages" :key="pi"
 					><div class="flow-page-heading">
-						<span>Page {{ pi + 1 }} of {{ pageCount }}</span
+						<span>{{ __("Page {0} of {1}", [pi + 1, pageCount]) }}</span
 						><EditorButton
 							v-if="!backgroundUrl"
-							label="Add page"
+							:label="__('Add page')"
 							icon="Plus"
 							@click="addPage"
 						/>
@@ -883,7 +886,7 @@ defineExpose({ prepare });
 								@pointerup="endField"
 								@pointercancel="dragging = null"
 							>
-								{{ f.label || f.field_type }}
+								{{ f.label || __(f.field_type) }}
 							</button></template
 						>
 						<div :class="{ 'pdf-content-overlay': backgroundUrl }">
@@ -917,7 +920,7 @@ defineExpose({ prepare });
 								>
 									<div class="flow-block-actions">
 										<EditorButton
-											label="Move block"
+											:label="__('Move block')"
 											icon="GripVertical"
 											draggable="true"
 											@dragstart="
@@ -927,17 +930,17 @@ defineExpose({ prepare });
 												)
 											"
 										/><EditorButton
-											label="Move block up"
+											:label="__('Move block up')"
 											icon="ArrowUp"
 											:disabled="i === 0"
 											@click.stop="moveBlock(b, pi, i, -1)"
 										/><EditorButton
-											label="Move block down"
+											:label="__('Move block down')"
 											icon="ArrowDown"
 											:disabled="i === p.blocks.length - 1"
 											@click.stop="moveBlock(b, pi, i, 1)"
 										/><EditorButton
-											label="Delete block"
+											:label="__('Delete block')"
 											icon="Trash2"
 											@click.stop="removeBlock(b.id)"
 										/>
@@ -954,7 +957,7 @@ defineExpose({ prepare });
 												height: fieldFor(b).height * 842 + 'px',
 											}"
 										>
-											{{ fieldFor(b).label || fieldFor(b).field_type
+											{{ fieldFor(b).label || __(fieldFor(b).field_type)
 											}}<span v-if="fieldFor(b).required"> *</span>
 										</button></template
 									>
@@ -962,7 +965,7 @@ defineExpose({ prepare });
 										><img
 											v-if="b.image"
 											:src="b.image"
-											alt="Document image"
+											:alt="__('Document image')"
 											:style="{
 												width: (b.image_width || 450) + 'px',
 												height: (b.image_height || 180) + 'px',
@@ -971,7 +974,7 @@ defineExpose({ prepare });
 											v-else
 											class="image-placeholder"
 											:style="{ height: (b.image_height || 180) + 'px' }"
-											>Select an image<input
+											>{{ __("Select an image") }}<input
 												type="file"
 												accept="image/png,image/jpeg"
 												@click="select(b)"
@@ -1003,7 +1006,7 @@ defineExpose({ prepare });
 													],
 												]"
 												:badge="badge"
-												:label="label"
+												:label="__(label)"
 												:icon="icon"
 												@click="tableChange(b, action)"
 											/>
@@ -1018,7 +1021,7 @@ defineExpose({ prepare });
 															activeCell = { row: r, column: c }
 														"
 														:aria-label="
-															'Row ' + (r + 1) + ' column ' + (c + 1)
+															__('Row {0} column {1}', [r + 1, c + 1])
 														"
 													>
 														<RichBlock
@@ -1026,10 +1029,7 @@ defineExpose({ prepare });
 															:variables="variables"
 															:preview="filledPreview"
 															:label="
-																'Row ' +
-																(r + 1) +
-																' column ' +
-																(c + 1)
+																__('Row {0} column {1}', [r + 1, c + 1])
 															"
 															@change="tableCell(b, r, c, $event)"
 															@focus="
@@ -1047,7 +1047,7 @@ defineExpose({ prepare });
 										:text="b.text"
 										:variables="variables"
 										:preview="filledPreview"
-										:label="'Edit ' + b.type"
+										:label="__('Edit {0}', [__(b.type)])"
 										@change="edit(b, $event)"
 										@focus="
 											select(b);
@@ -1072,7 +1072,7 @@ defineExpose({ prepare });
 										!backgroundUrl &&
 										!modelValue.pages.some((page) => page.blocks.length)
 									"
-									>Drop a block here, or choose one from the left.</span
+									>{{ __("Drop a block here, or choose one from the left.") }}</span
 								>
 							</div>
 						</div>
@@ -1081,39 +1081,39 @@ defineExpose({ prepare });
 			</div>
 			<aside class="flow-properties" v-if="selected">
 				<div class="dialog-heading">
-					<h2>Properties</h2>
-					<EditorButton label="Close properties" icon="X" @click="selectedId = null" />
+					<h2>{{ __("Properties") }}</h2>
+					<EditorButton :label="__('Close properties')" icon="X" @click="selectedId = null" />
 				</div>
 				<template v-if="selected.type === 'Image'"
 					><label
-						>Image<input
+						>{{ __("Image") }}<input
 							type="file"
 							accept="image/png,image/jpeg"
 							@change="imageFile" /></label
 					><label
-						>Alignment<select
+						>{{ __("Alignment") }}<select
 							:value="selected.align || 'left'"
 							@change="update('align', $event.target.value)"
 						>
-							<option>left</option>
-							<option>center</option>
-							<option>right</option>
+							<option value="left">{{ __("Left") }}</option>
+							<option value="center">{{ __("Center") }}</option>
+							<option value="right">{{ __("Right") }}</option>
 						</select></label
 					><label class="check-label"
 						><input
 							type="checkbox"
 							:checked="selected.grayscale"
 							@change="update('grayscale', $event.target.checked)"
-						/>Black & white</label
+						/>{{ __("Black & white") }}</label
 					><label
-						>Height<input
+						>{{ __("Height") }}<input
 							type="number"
 							min="20"
 							max="700"
 							:value="selected.image_height || 180"
 							@change="update('image_height', Number($event.target.value))" /></label
 					><label
-						>Width<input
+						>{{ __("Width") }}<input
 							type="number"
 							min="20"
 							max="479"
@@ -1121,15 +1121,15 @@ defineExpose({ prepare });
 							@change="update('image_width', Number($event.target.value))" /></label
 				></template>
 				<label v-if="selected.type !== 'Table'"
-					>Background color<input
+					>{{ __("Background color") }}<input
 						type="color"
 						:value="selected.background || '#ffffff'"
 						@input="update('background', $event.target.value)"
 				/></label>
 				<div class="spacing-diagram">
 					<label v-if="selected.type !== 'Table'"
-						>Margin<input
-							aria-label="Block margin"
+						>{{ __("Margin") }}<input
+							:aria-label="__('Block margin')"
 							type="number"
 							min="0"
 							max="80"
@@ -1139,8 +1139,8 @@ defineExpose({ prepare });
 					>
 					<div class="padding-box">
 						<label
-							>Padding<input
-								aria-label="Block padding"
+							>{{ __("Padding") }}<input
+								:aria-label="__('Block padding')"
 								type="number"
 								min="0"
 								max="80"
@@ -1152,11 +1152,11 @@ defineExpose({ prepare });
 				</div>
 				<div class="button-group">
 					<EditorButton
-						label="Duplicate block"
+						:label="__('Duplicate block')"
 						icon="Copy"
 						@click="duplicate"
 					/><EditorButton
-						label="Delete block"
+						:label="__('Delete block')"
 						icon="Trash2"
 						@click="removeBlock(selected.id)"
 					/>
@@ -1164,24 +1164,24 @@ defineExpose({ prepare });
 			</aside>
 			<aside v-if="selectedField" class="flow-properties">
 				<div class="dialog-heading">
-					<h2>Field properties</h2>
-					<button @click="selectedFieldId = null" aria-label="Close field properties">
+					<h2>{{ __("Field properties") }}</h2>
+					<button @click="selectedFieldId = null" :aria-label="__('Close field properties')">
 						×
 					</button>
 				</div>
 				<label
-					>Label<input
+					>{{ __("Label") }}<input
 						:value="selectedField.label"
 						@input="setSigningField({ label: $event.target.value })"
 				/></label>
 				<label
-					>Recipient<select
+					>{{ __("Recipient") }}<select
 						:value="selectedField.signer_role"
 						@change="setSigningField({ signer_role: $event.target.value })"
 					>
-						<option value="">Choose recipient</option>
+						<option value="">{{ __("Choose recipient") }}</option>
 						<option v-for="s in recipients" :value="s.role_key">
-							{{ s.signer_name || s.role_label || "Recipient" }}
+							{{ s.signer_name || s.role_label || __("Recipient") }}
 						</option>
 					</select></label
 				>
@@ -1190,7 +1190,7 @@ defineExpose({ prepare });
 						type="checkbox"
 						:checked="!!selectedField.required"
 						@change="setSigningField({ required: $event.target.checked ? 1 : 0 })"
-					/>Required</label
+					/>{{ __("Required") }}</label
 				>
 				<div class="property-grid">
 					<label
@@ -1199,10 +1199,10 @@ defineExpose({ prepare });
 							: ['width', 'height']"
 						>{{
 							{
-								pos_x: "Left (%)",
-								pos_y: "Top (%)",
-								width: "Width (%)",
-								height: "Height (%)",
+								pos_x: __("Left (%)"),
+								pos_y: __("Top (%)"),
+								width: __("Width (%)"),
+								height: __("Height (%)"),
 							}[key]
 						}}<input
 							type="number"
@@ -1215,18 +1215,18 @@ defineExpose({ prepare });
 					/></label>
 				</div>
 				<label v-if="selectedField.field_type === 'Dropdown'"
-					>Options (one per line)<textarea
+					>{{ __("Options (one per line)") }}<textarea
 						:value="selectedField.options"
 						@input="setSigningField({ options: $event.target.value })"
 					/>
 				</label>
 				<label
-					>Prefilled value<input
+					>{{ __("Prefilled value") }}<input
 						:value="selectedField.default_value"
 						@input="setSigningField({ default_value: $event.target.value })"
 				/></label>
 				<label
-					>Font size<input
+					>{{ __("Font size") }}<input
 						type="number"
 						min="6"
 						max="48"
@@ -1234,7 +1234,7 @@ defineExpose({ prepare });
 						@change="setSigningField({ font_size: Number($event.target.value) })"
 				/></label>
 				<label
-					>ERP field mapping<input
+					>{{ __("ERP field mapping") }}<input
 						:value="selectedField.mapping_key"
 						@input="setSigningField({ mapping_key: $event.target.value })"
 				/></label>
@@ -1243,20 +1243,20 @@ defineExpose({ prepare });
 						type="checkbox"
 						:checked="!!selectedField.read_only"
 						@change="setSigningField({ read_only: $event.target.checked ? 1 : 0 })"
-					/>Read only</label
+					/>{{ __("Read only") }}</label
 				>
 				<button :disabled="pageCount < 2" @click="repeatSigningField">
-					Repeat on all pages
+					{{ __("Repeat on all pages") }}
 				</button>
 				<EditorButton
-					label="Duplicate field"
+					:label="__('Duplicate field')"
 					icon="Copy"
 					@click="duplicateField"
-				/><EditorButton label="Delete field" icon="Trash2" @click="removeField" />
+				/><EditorButton :label="__('Delete field')" icon="Trash2" @click="removeField" />
 			</aside>
 			<aside v-if="!selected && !selectedField" class="flow-properties properties-empty">
-				<h2>Properties</h2>
-				<p>Select a block or field to adjust its properties.</p>
+				<h2>{{ __("Properties") }}</h2>
+				<p>{{ __("Select a block or field to adjust its properties.") }}</p>
 			</aside>
 		</div>
 	</div>

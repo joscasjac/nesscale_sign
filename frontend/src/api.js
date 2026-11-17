@@ -1,3 +1,4 @@
+import { __, lang } from "./translation.js";
 export async function api(method, args = {}) {
 	const response = await fetch("/api/method/nesscale_sign.api." + method, {
 		method: "POST",
@@ -12,10 +13,10 @@ export async function api(method, args = {}) {
 	try {
 		data = await response.json();
 	} catch {
-		throw new Error("The server could not respond. Please try again.");
+		throw new Error(__("The server could not respond. Please try again."));
 	}
 	if (!response.ok || data.exc) {
-		let message = "The request failed. Please try again.";
+		let message = __("The request failed. Please try again.");
 		try {
 			message = JSON.parse(JSON.parse(data._server_messages)[0]).message;
 		} catch {
@@ -27,7 +28,7 @@ export async function api(method, args = {}) {
 	return data.message;
 }
 export async function upload(file) {
-	if (!file || file.size > 15 * 1024 * 1024) throw new Error("Choose a PDF smaller than 15 MB.");
+	if (!file || file.size > 15 * 1024 * 1024) throw new Error(__("Choose a PDF smaller than 15 MB."));
 	const body = new FormData();
 	body.append("file", file);
 	body.append("is_private", "1");
@@ -38,7 +39,7 @@ export async function upload(file) {
 		body,
 	});
 	const data = await r.json();
-	if (!r.ok || !data.message?.file_url) throw new Error("Upload failed. Please try again.");
+	if (!r.ok || !data.message?.file_url) throw new Error(__("Upload failed. Please try again."));
 	return data.message.file_url;
 }
 export const downloadUrl = (method, args) =>
@@ -49,7 +50,7 @@ export function date(value) {
 	const parsed = new Date(/^\d{4}-\d{2}-\d{2}$/.test(text) ? text + "T00:00:00" : text);
 	return Number.isNaN(parsed.getTime())
 		? "—"
-		: new Intl.DateTimeFormat("en", {
+		: new Intl.DateTimeFormat(lang, {
 				month: "short",
 				day: "numeric",
 				year: "numeric",

@@ -7,7 +7,7 @@ defineEmits(["home"]);
 		class="brand identity"
 		:class="{ 'identity-compact': compact }"
 		href="/nesscale-sign"
-		aria-label="Open E-Sign home"
+		:aria-label="__('Open E-Sign home')"
 		@click.prevent="$emit('home')"
 	>
 		<svg class="identity-symbol" viewBox="0 0 40 44" fill="none" aria-hidden="true">
@@ -25,6 +25,6 @@ defineEmits(["home"]);
 				stroke-linejoin="round"
 			/>
 		</svg>
-		<span class="identity-name">Open E-Sign<small v-if="!compact">for ERPNext</small></span>
+		<span class="identity-name">Open E-Sign<small v-if="!compact">{{ __("for ERPNext") }}</small></span>
 	</a>
 </template>

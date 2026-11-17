@@ -39,7 +39,7 @@ function save() {
 			v-if="field.field_type === 'Dropdown'"
 			ref="input"
 			:value="value"
-			:aria-label="field.label || field.field_type"
+			:aria-label="field.label || __(field.field_type)"
 			:required="!!field.required"
 			@focus="$emit('activate')"
 			@change="
@@ -48,7 +48,7 @@ function save() {
 			"
 			@keydown.enter.prevent="save"
 		>
-			<option value="">Choose…</option>
+			<option value="">{{ __("Choose…") }}</option>
 			<option
 				v-for="option in (field.options || '').split('\n').filter(Boolean)"
 				:key="option"
@@ -70,8 +70,8 @@ function save() {
 			"
 			:value="value"
 			:checked="field.field_type === 'Checkbox' ? !!value : undefined"
-			:aria-label="field.label || field.field_type"
-			:placeholder="field.label || field.field_type"
+			:aria-label="field.label || __(field.field_type)"
+			:placeholder="field.label || __(field.field_type)"
 			:required="!!field.required"
 			maxlength="10000"
 			@focus="$emit('activate')"
@@ -89,7 +89,7 @@ function save() {
 			@keydown.enter.prevent="save"
 		/>
 		<button v-if="active" type="button" class="field-next-guide" @click="save">
-			Next <span aria-hidden="true">→</span>
+			{{ __("Next") }} <span aria-hidden="true">→</span>
 		</button>
 	</div>
 </template>

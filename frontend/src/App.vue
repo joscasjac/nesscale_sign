@@ -28,6 +28,7 @@ import {
 	Menu,
 } from "@lucide/vue";
 import { api, date, downloadUrl, upload } from "./api";
+import { __ } from "./translation";
 const PdfPage = defineAsyncComponent(() => import("./components/PdfPage.vue"));
 import ActivitySummary from "./components/ActivitySummary.vue";
 import TemplateOptions from "./components/TemplateOptions.vue";
@@ -140,7 +141,7 @@ try {
 function repeatSelected() {
 	run(async () => {
 		fields.value.push(...repeatField(selected.value, pages.value, fields.value));
-		flash("Field repeated across all pages.");
+		flash(__("Field repeated across all pages."));
 	});
 }
 const userInitial = (window.user?.[0] || "W").toUpperCase();
@@ -173,7 +174,7 @@ const demo = ref(false),
 	pdfUrl = ref(""),
 	draftId = ref(null);
 const form = ref({
-	title: "New Document",
+	title: __("New Document"),
 	signers: [],
 	routing_type: "Sequential",
 	message: "",
@@ -352,7 +353,7 @@ async function load() {
 			fields.value = [];
 			pdfUrl.value = "";
 			form.value = {
-				title: creatingTemplate.value ? "New Template" : "New Document",
+				title: creatingTemplate.value ? __("New Template") : __("New Document"),
 				signers: [],
 				routing_type: "Sequential",
 				message: "",
@@ -491,9 +492,9 @@ function position(f) {
 }
 async function saveDraft() {
 	await renderBuilder();
-	if (!pdfUrl.value) throw new Error("Upload a PDF or build a document to continue.");
+	if (!pdfUrl.value) throw new Error(__("Upload a PDF or build a document to continue."));
 
-	if (!form.value.title.trim()) throw new Error("Give this document a title.");
+	if (!form.value.title.trim()) throw new Error(__("Give this document a title."));
 	const data = {
 		...form.value,
 		pdf_file: form.value.source_pdf || pdfUrl.value,
@@ -564,11 +565,11 @@ async function saveTemplate() {
 	await run(async () => {
 		await renderBuilder();
 		if (!pdfUrl.value || !fields.value.length)
-			throw new Error("Create a document or upload a PDF, then add fields first.");
+			throw new Error(__("Create a document or upload a PDF, then add fields first."));
 		const templateData = { ...form.value };
 		const roles = form.value.signers.map((s) => ({
 			...s,
-			role_label: s.role_label || s.signer_name || "Signer",
+			role_label: s.role_label || s.signer_name || __("Signer"),
 			role_key: s.role_key,
 			signing_order: s.signing_order,
 		}));
@@ -593,7 +594,7 @@ async function saveTemplate() {
 				signers: form.value.signers.filter((s) => s.signer_name || s.signer_email),
 				signer_roles: form.value.signers.map((s) => ({
 					...s,
-					role_label: s.role_label || s.signer_name || "Signer",
+					role_label: s.role_label || s.signer_name || __("Signer"),
 					role_key: s.role_key,
 					signing_order: s.signing_order,
 				})),
@@ -604,7 +605,7 @@ async function saveTemplate() {
 		go(root + "/templates");
 	});
 }
-async function action(method, args = {}, text = "Saved") {
+async function action(method, args = {}, text = __("Saved")) {
 	await run(async () => {
 		await api(method, { name: detail.value.envelope.name, ...args });
 		await load();
@@ -634,7 +635,7 @@ async function decline() {
 	await run(async () => {
 		await api("signing.decline", { token: token.value, reason: reason.value });
 		signContext.value = null;
-		flash("You declined this document. The sender will be notified.");
+		flash(__("You declined this document. The sender will be notified."));
 	});
 }
 async function reviseUnsigned() {
@@ -644,7 +645,7 @@ async function reviseUnsigned() {
 		await load();
 		editDraft();
 		flash(
-			"An editable revision is ready. Previous signing links are inactive; send again when ready.",
+			__("An editable revision is ready. Previous signing links are inactive; send again when ready."),
 		);
 	});
 }
@@ -695,30 +696,30 @@ onBeforeUnmount(() => {
 		@uploaded="run(() => acceptUpload($event))"
 	/>
 	<div v-if="demo" class="preview-banner">
-		Local design preview · fictional documents · no email is sent
+		{{ __("Local design preview · fictional documents · no email is sent") }}
 		<a href="/sign/demo-signer" @click.prevent="go('/sign/demo-signer')"
-			>Try signing <ArrowUpRight :size="13"
+			>{{ __("Try signing") }} <ArrowUpRight :size="13"
 		/></a>
 	</div>
 	<div :class="['app', { 'signer-app': isSigner, 'composer-app': view === 'new' }]">
 		<button
 			v-if="mobile && !isSigner"
 			class="nav-backdrop"
-			aria-label="Close navigation"
+			:aria-label="__('Close navigation')"
 			@click="mobile = false"
 		/>
 		<aside v-if="!isSigner && view !== 'new'" :class="['sidebar', { open: mobile }]">
 			<BrandLogo @home="goHome" />
 			<button class="text-button mobile-menu" @click="mobile = false">
-				Close navigation
+				{{ __("Close navigation") }}
 			</button>
-			<p class="nav-label">Workspace</p>
-			<nav aria-label="Main navigation">
+			<p class="nav-label">{{ __("Workspace") }}</p>
+			<nav :aria-label="__('Main navigation')">
 				<a
 					:class="{ active: ['documents', 'document', 'new'].includes(view) }"
 					:href="root"
 					@click.prevent="go(root)"
-					><FileText :size="18" /> Documents</a
+					><FileText :size="18" /> {{ __("Documents") }}</a
 				><a
 					:class="{ active: isTemplate }"
 					:href="root + '/templates'"
@@ -726,34 +727,34 @@ onBeforeUnmount(() => {
 						filter = 'All documents';
 						go(root + '/templates');
 					"
-					><Files :size="18" /> Templates</a
+					><Files :size="18" /> {{ __("Templates") }}</a
 				><a
 					:class="{ active: view === 'settings' }"
 					:href="root + '/settings'"
 					@click.prevent="go(root + '/settings')"
-					><Settings :size="18" /> Settings</a
+					><Settings :size="18" /> {{ __("Settings") }}</a
 				><a
 					:class="{ active: isPending }"
 					:href="root + '/my-sign'"
 					@click.prevent="go(root + '/my-sign')"
-					><PenLine :size="18" /> Awaiting my signature</a
+					><PenLine :size="18" /> {{ __("Awaiting my signature") }}</a
 				>
 			</nav>
 			<div class="sidebar-bottom">
 				<button class="text-button" @click="setTheme(theme === 'dark' ? 'light' : 'dark')">
-					{{ theme === "dark" ? "Light appearance" : "Dark appearance" }}
+					{{ theme === "dark" ? __("Light appearance") : __("Dark appearance") }}
 				</button>
-				<a href="/desk"><ArrowUpRight :size="16" /> Back to ERPNext</a
+				<a href="/desk"><ArrowUpRight :size="16" /> {{ __("Back to ERPNext") }}</a
 				><a
 					href="https://github.com/joscasjac/nesscale_sign"
 					target="_blank"
 					rel="noopener"
-					>Source & documentation <ExternalLink :size="13"
+					>{{ __("Source & documentation") }} <ExternalLink :size="13"
 				/></a>
 				<div class="workspace-id">
 					<span class="avatar">{{ demo ? "D" : userInitial }}</span
 					><span
-						>{{ demo ? "Demo workspace" : "Your workspace"
+						>{{ demo ? __("Demo workspace") : __("Your workspace")
 						}}<small>Open E-Sign ERPNext</small></span
 					>
 				</div>
@@ -764,7 +765,7 @@ onBeforeUnmount(() => {
 				<button
 					v-if="!isSigner"
 					class="icon-button mobile-menu"
-					aria-label="Open navigation"
+					:aria-label="__('Open navigation')"
 					:aria-expanded="mobile"
 					@click="mobile = !mobile"
 				>
@@ -775,25 +776,25 @@ onBeforeUnmount(() => {
 					compact
 					@home="goHome"
 				/><span v-if="!isSigner" class="breadcrumb"
-					>Workspace <span>/</span>
+					>{{ __("Workspace") }} <span>/</span>
 					{{
-						isTemplate ? "Templates" : view === "settings" ? "Settings" : "Documents"
+						isTemplate ? __("Templates") : view === "settings" ? __("Settings") : __("Documents")
 					}}</span
 				><button
 					v-if="isSigner"
 					class="text-button"
 					@click="setTheme(theme === 'dark' ? 'light' : 'dark')"
 				>
-					{{ theme === "dark" ? "Light" : "Dark" }} appearance</button
+					{{ theme === "dark" ? __("Light appearance") : __("Dark appearance") }}</button
 				><span class="topbar-note">{{
-					isSigner ? "Document signing" : demo ? "Local preview" : "ERPNext workspace"
+					isSigner ? __("Document signing") : demo ? __("Local preview") : __("ERPNext workspace")
 				}}</span>
 			</header>
 			<div v-if="error" role="alert" class="error global-message">
-				{{ error }} <button class="text-button" @click="load">Reload</button>
+				{{ error }} <button class="text-button" @click="load">{{ __("Reload") }}</button>
 			</div>
 			<div v-if="notice" role="status" class="notice global-message">{{ notice }}</div>
-			<div v-if="loading" class="loading-state" role="status">Loading your workspace…</div>
+			<div v-if="loading" class="loading-state" role="status">{{ __("Loading your workspace…") }}</div>
 			<template v-else>
 				<section
 					v-if="view === 'documents' || isTemplate || isPending"
@@ -804,17 +805,17 @@ onBeforeUnmount(() => {
 							<h1>
 								{{
 									isTemplate
-										? "Templates"
+										? __("Templates")
 										: isPending
-											? "Awaiting my signature"
-											: "Documents"
+											? __("Awaiting my signature")
+											: __("Documents")
 								}}
 							</h1>
 							<p>
 								{{
 									isTemplate
-										? "Start with a document you use again and again."
-										: "Every agreement, from first send to final signature."
+										? __("Start with a document you use again and again.")
+										: __("Every agreement, from first send to final signature.")
 								}}
 							</p>
 						</div>
@@ -825,21 +826,21 @@ onBeforeUnmount(() => {
 								@click="newMenu = !newMenu"
 							>
 								<Plus :size="17" />
-								{{ isTemplate ? "Create template" : "New document" }}
+								{{ isTemplate ? __("Create template") : __("New document") }}
 							</button>
 							<div v-if="newMenu" class="new-document-options">
 								<button @click="createDocument('build')">
 									<FileText :size="22" /><span
-										><strong>{{ isTemplate ? "Create a template" : "Create a document" }}</strong
+										><strong>{{ isTemplate ? __("Create a template") : __("Create a document") }}</strong
 										><small
-											>Build a proposal or contract from scratch</small
+											>{{ __("Build a proposal or contract from scratch") }}</small
 										></span
 									></button
 								><button @click="createDocument('upload')">
 									<Files :size="22" /><span
-										><strong>Upload an existing PDF</strong
+										><strong>{{ __("Upload an existing PDF") }}</strong
 										><small
-											>Add signing fields to your own document</small
+											>{{ __("Add signing fields to your own document") }}</small
 										></span
 									>
 								</button>
@@ -848,15 +849,16 @@ onBeforeUnmount(() => {
 					</div>
 					<div v-if="!isTemplate && !isPending" class="summary-line">
 						<span
-							><i class="dot waiting" /> {{ stats.in_flight || 0 }} waiting for
-							signatures</span
+							><i class="dot waiting" />
+							{{ __("{0} waiting for signatures", [stats.in_flight || 0]) }}</span
 						><span
-							><i class="dot complete" /> {{ stats.completed || 0 }} completed</span
-						><span>{{ stats.counts?.Draft || 0 }} drafts</span>
+							><i class="dot complete" />
+							{{ __("{0} completed", [stats.completed || 0]) }}</span
+						><span>{{ __("{0} drafts", [stats.counts?.Draft || 0]) }}</span>
 					</div>
 					<ActivitySummary v-if="!isTemplate && !isPending" :stats="stats" />
 					<div v-if="!isPending" class="register-tools">
-						<div class="tabs" aria-label="Document status">
+						<div class="tabs" :aria-label="__('Document status')">
 							<button
 								v-for="f in isTemplate
 									? ['All documents']
@@ -874,26 +876,26 @@ onBeforeUnmount(() => {
 								:class="{ active: filter === f }"
 								@click="setFilter(f)"
 							>
-								{{ isTemplate ? "All templates" : f }}
+								{{ isTemplate ? __("All templates") : __(f) }}
 							</button>
 						</div>
 						<form class="search" @submit.prevent="search">
 							<Search :size="16" /><input
 								v-model="query"
-								:placeholder="isTemplate ? 'Search templates' : 'Search documents'"
-								aria-label="Search documents"
-							/><button class="sr-only">Search</button>
+								:placeholder="isTemplate ? __('Search templates') : __('Search documents')"
+								:aria-label="isTemplate ? __('Search templates') : __('Search documents')"
+							/><button class="sr-only">{{ __("Search") }}</button>
 						</form>
 					</div>
 					<div class="table-wrap">
 						<table>
 							<thead>
 								<tr>
-									<th>{{ isTemplate ? "Template name" : "Document name" }}</th>
-									<th>Status</th>
-									<th>{{ isTemplate ? "Pages" : "Sent by" }}</th>
-									<th>Last updated</th>
-									<th><span class="sr-only">Open document</span></th>
+									<th>{{ isTemplate ? __("Template name") : __("Document name") }}</th>
+									<th>{{ __("Status") }}</th>
+									<th>{{ isTemplate ? __("Pages") : __("Sent by") }}</th>
+									<th>{{ __("Last updated") }}</th>
+									<th><span class="sr-only">{{ __("Open document") }}</span></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -920,30 +922,30 @@ onBeforeUnmount(() => {
 									</td>
 									<td>
 										<span :class="['status', statusClass(r.status)]"
-											><i />{{ r.status }}</span
+											><i />{{ __(r.status) }}</span
 										>
 									</td>
 									<td>{{ isTemplate ? r.page_count : r.sender_name || "—" }}</td>
 									<td>{{ date(r.modified) }}</td>
 									<td>
 										<div v-if="isTemplate" class="template-actions">
-											<button @click="editTemplate(r.name)">Edit</button
+											<button @click="editTemplate(r.name)">{{ __("Edit") }}</button
 											><button
 												@click="
 													templateAction('duplicate_template', r.name)
 												"
 											>
-												Duplicate</button
+												{{ __("Duplicate") }}</button
 											><button
 												v-if="r.status !== 'Archived'"
 												@click="templateAction('archive_template', r.name)"
 											>
-												Archive
+												{{ __("Archive") }}
 											</button>
 										</div>
 										<button
 											class="icon-button"
-											:aria-label="'Open ' + r.title"
+											:aria-label="__('Open {0}', [r.title])"
 											@click="
 												isTemplate
 													? openTemplate(r.name)
@@ -966,34 +968,37 @@ onBeforeUnmount(() => {
 							<h2>
 								{{
 									query
-										? "No matching documents"
+										? __("No matching documents")
 										: isTemplate
-											? "Your reusable documents belong here"
-											: "Ready for your first signature"
+											? __("Your reusable documents belong here")
+											: __("Ready for your first signature")
 								}}
 							</h2>
 							<p>
 								{{
 									query
-										? "Try another title or clear your filters."
-										: "Upload an existing PDF and choose who needs to sign."
+										? __("Try another title or clear your filters.")
+										: __("Upload an existing PDF and choose who needs to sign.")
 								}}
 							</p>
 							<button @click="query ? ((query = ''), search()) : createDocument('build')">
-								{{ query ? "Clear search" : "Add a document" }}
+								{{ query ? __("Clear search") : __("Add a document") }}
 							</button>
 						</div>
 					</div>
 					<footer v-if="!isPending" class="table-footer">
 						<span
-							>{{ rows.length ? `${offset + 1}–${offset + rows.length}` : "0" }}
-							{{ isTemplate ? "templates" : "documents" }}</span
+							>{{
+								isTemplate
+									? __("{0} templates", [rows.length ? `${offset + 1}–${offset + rows.length}` : "0"])
+									: __("{0} documents", [rows.length ? `${offset + 1}–${offset + rows.length}` : "0"])
+							}}</span
 						>
 						<div>
 							<button
 								class="icon-button"
 								:disabled="offset === 0"
-								aria-label="Previous page"
+								:aria-label="__('Previous page')"
 								@click="
 									offset -= 20;
 									load();
@@ -1003,7 +1008,7 @@ onBeforeUnmount(() => {
 							><button
 								class="icon-button"
 								:disabled="rows.length < 20"
-								aria-label="Next page"
+								:aria-label="__('Next page')"
 								@click="
 									offset += 20;
 									load();
@@ -1014,24 +1019,24 @@ onBeforeUnmount(() => {
 						</div>
 					</footer>
 					<div class="quiet-note">
-						<span>A clear record, at every step.</span> Signed copies and completion
-						records stay with your documents.
+						<span>{{ __("A clear record, at every step.") }}</span>
+						{{ __("Signed copies and completion records stay with your documents.") }}
 					</div>
 				</section>
 				<section v-else-if="view === 'document' && detail" class="content">
 					<button class="text-button back" @click="go(root)">
-						<ArrowLeft :size="15" /> Documents
+						<ArrowLeft :size="15" /> {{ __("Documents") }}
 					</button>
 					<div class="page-title">
 						<div>
 							<h1>{{ detail.envelope.title }}</h1>
 							<p>
 								{{ detail.envelope.name }} ·
-								{{ detail.envelope.routing_type }} signing
+								{{ __("{0} signing", [__(detail.envelope.routing_type)]) }}
 							</p>
 						</div>
 						<span :class="['status', statusClass(detail.envelope.status)]"
-							><i />{{ detail.envelope.status }}</span
+							><i />{{ __(detail.envelope.status) }}</span
 						>
 					</div>
 					<div class="document-actions">
@@ -1043,26 +1048,26 @@ onBeforeUnmount(() => {
 							:disabled="busy"
 							@click="reviseUnsigned"
 						>
-							Edit unsigned document
+							{{ __("Edit unsigned document") }}
 						</button>
 						<template v-if="detail.envelope.status === 'Draft'"
-							><button @click="editDraft">Edit document</button
+							><button @click="editDraft">{{ __("Edit document") }}</button
 							><button
 								class="primary"
 								:disabled="busy"
-								@click="action('envelope.send_envelope', {}, 'Document sent')"
+								@click="action('envelope.send_envelope', {}, __('Document sent'))"
 							>
-								<Send :size="15" /> Send for signature
+								<Send :size="15" /> {{ __("Send for signature") }}
 							</button></template
 						><template
 							v-else-if="['Sent', 'In Progress'].includes(detail.envelope.status)"
 							><button
 								:disabled="busy"
-								@click="action('envelope.remind_envelope', {}, 'Reminder queued')"
+								@click="action('envelope.remind_envelope', {}, __('Reminder queued'))"
 							>
-								Send reminder</button
+								{{ __("Send reminder") }}</button
 							><button :disabled="busy" @click="declining = !declining">
-								Void document
+								{{ __("Void document") }}
 							</button></template
 						><template v-if="detail.envelope.status === 'Completed'"
 							><a
@@ -1072,7 +1077,7 @@ onBeforeUnmount(() => {
 										name: detail.envelope.name,
 									})
 								"
-								><Download :size="15" /> Signed PDF</a
+								><Download :size="15" /> {{ __("Signed PDF") }}</a
 							><a
 								class="button"
 								:href="
@@ -1080,7 +1085,7 @@ onBeforeUnmount(() => {
 										name: detail.envelope.name,
 									})
 								"
-								>Completion record</a
+								>{{ __("Completion record") }}</a
 							></template
 						>
 					</div>
@@ -1088,34 +1093,34 @@ onBeforeUnmount(() => {
 						v-if="declining"
 						class="inline-form"
 						@submit.prevent="
-							action('envelope.void_envelope', { reason }, 'Document voided');
+							action('envelope.void_envelope', { reason }, __('Document voided'));
 							declining = false;
 						"
 					>
-						<label>Reason for voiding<input v-model="reason" required /></label
-						><button :disabled="busy">Confirm void</button
-						><button type="button" @click="declining = false">Cancel</button>
+						<label>{{ __("Reason for voiding") }}<input v-model="reason" required /></label
+						><button :disabled="busy">{{ __("Confirm void") }}</button
+						><button type="button" @click="declining = false">{{ __("Cancel") }}</button>
 					</form>
 					<div v-if="detail.envelope.finalization_status === 'Pending'" class="notice">
-						All signatures received. Preparing the completed PDF…
+						{{ __("All signatures received. Preparing the completed PDF…") }}
 					</div>
 					<div v-if="detail.envelope.finalization_status === 'Failed'" class="error">
 						{{ detail.envelope.finalization_error
 						}}<button
 							:disabled="busy"
-							@click="action('envelope.retry_completion', {}, 'Completion queued')"
+							@click="action('envelope.retry_completion', {}, __('Completion queued'))"
 						>
-							Retry completion
+							{{ __("Retry completion") }}
 						</button>
 					</div>
 					<div class="document-layout">
 						<div class="document-stage">
 							<div class="page-control">
-								<span>Document preview</span>
+								<span>{{ __("Document preview") }}</span>
 								<div>
 									<button
 										class="icon-button"
-										aria-label="Previous PDF page"
+										:aria-label="__('Previous PDF page')"
 										:disabled="page <= 1"
 										@click="page--"
 									>
@@ -1123,7 +1128,7 @@ onBeforeUnmount(() => {
 									>{{ page }} / {{ pages
 									}}<button
 										class="icon-button"
-										aria-label="Next PDF page"
+										:aria-label="__('Next PDF page')"
 										:disabled="page >= pages"
 										@click="page++"
 									>
@@ -1134,7 +1139,7 @@ onBeforeUnmount(() => {
 							<PdfPage :url="pdfUrl" :page="page" @loaded="pages = $event" />
 						</div>
 						<aside class="detail-panel">
-							<h2>Recipients</h2>
+							<h2>{{ __("Recipients") }}</h2>
 							<div
 								v-for="(s, i) in detail.envelope.signers"
 								:key="s.name"
@@ -1149,33 +1154,33 @@ onBeforeUnmount(() => {
 											'status',
 											s.status === 'Signed' ? 'complete' : 'waiting',
 										]"
-										><i />{{ s.status }}</span
+										><i />{{ __(s.status) }}</span
 									>
 								</div>
 							</div>
-							<h2>Activity</h2>
+							<h2>{{ __("Activity") }}</h2>
 							<ol class="timeline">
 								<li v-for="event in detail.audit" :key="event.name">
-									<strong>{{ event.action }}</strong
+									<strong>{{ __(event.action) }}</strong
 									><small
 										>{{
-											event.signer_name || event.signer_email || "Workspace"
+											event.signer_name || event.signer_email || __("Workspace")
 										}}
 										· {{ date(event.timestamp) }}</small
 									>
 								</li>
 							</ol>
 							<div class="integrity-note">
-								<h3>Document integrity</h3>
+								<h3>{{ __("Document integrity") }}</h3>
 								<p>
 									{{
 										detail.envelope.seal_status === "Sealed"
-											? "A certificate-based PDF seal was applied. Validate its certificate trust in your PDF reader."
-											: "Certificate-based PDF sealing is not configured."
+											? __("A certificate-based PDF seal was applied. Validate its certificate trust in your PDF reader.")
+											: __("Certificate-based PDF sealing is not configured.")
 									}}
 								</p>
 								<small v-if="detail.envelope.source_sha256"
-									>Original fingerprint recorded at send time.</small
+									>{{ __("Original fingerprint recorded at send time.") }}</small
 								>
 							</div>
 						</aside>
@@ -1184,18 +1189,18 @@ onBeforeUnmount(() => {
 				<section v-else-if="view === 'new'" class="content compose">
 					<div class="page-title composer-heading">
 						<button class="text-button" @click="go(root)">
-							<ArrowLeft :size="16" /> Back
+							<ArrowLeft :size="16" /> {{ __("Back") }}
 						</button>
 						<label class="composer-title"
-							><span class="sr-only">Document title</span
+							><span class="sr-only">{{ __("Document title") }}</span
 							><input
 								v-model="form.title"
 								maxlength="140"
-								placeholder="New document"
+								:placeholder="__('New document')"
 						/></label>
 						<div class="button-group">
 							<EditorButton
-								label="Preview PDF"
+								:label="__('Preview PDF')"
 								icon="Eye"
 								:disabled="busy || (!builderOpen && !pdfUrl)"
 								@click="run(previewDocument)"
@@ -1206,25 +1211,25 @@ onBeforeUnmount(() => {
 								:disabled="busy"
 								@click="saveTemplate"
 							>
-								Save and publish template</button
+								{{ __("Save and publish template") }}</button
 							><button
 								v-if="!templateEditor"
 								:disabled="busy"
 								@click="
 									run(async () => {
 										await saveDraft();
-										flash('Draft saved');
+										flash(__('Draft saved'));
 									})
 								"
 							>
-								Save draft</button
+								{{ __("Save draft") }}</button
 							><button
 								class="primary"
 								:disabled="busy || (!builderOpen && !pdfUrl)"
 								@click="sendDraft"
 								v-if="!templateEditor"
 							>
-								<Send :size="16" /> Send for signature
+								<Send :size="16" /> {{ __("Send for signature") }}
 							</button>
 						</div>
 					</div>
@@ -1244,24 +1249,24 @@ onBeforeUnmount(() => {
 					>
 						<template #panel>
 							<div v-show="composeTab === 'Settings'">
-								<h2>Document settings</h2>
+								<h2>{{ __("Document settings") }}</h2>
 								<EmailOptions v-model="form" :variables="availableVariables" />
 								<details class="settings-disclosure">
-									<summary>Document source</summary>
+									<summary>{{ __("Document source") }}</summary>
 									<label class="upload-control"
 										><FileText :size="19" />
-										{{ pdfUrl ? "Replace PDF" : "Upload a PDF"
+										{{ pdfUrl ? __("Replace PDF") : __("Upload a PDF")
 										}}<input
 											type="file"
 											accept="application/pdf"
 											@change="pickFile"
 											:disabled="busy" /></label
-									><small>PDF · up to 15 MB · 100 pages</small
+									><small>{{ __("PDF · up to 15 MB · 100 pages") }}</small
 									><label v-if="templates.length"
-										>Or use a template<select
+										>{{ __("Or use a template") }}<select
 											@change="useTemplate($event.target.value)"
 										>
-											<option value="">Choose a template</option>
+											<option value="">{{ __("Choose a template") }}</option>
 											<option v-for="t in templates" :value="t.name">
 												{{ t.title }}
 											</option>
@@ -1280,26 +1285,26 @@ onBeforeUnmount(() => {
 							/>
 							<div v-show="composeTab === 'Settings'">
 								<details class="settings-disclosure">
-									<summary>Link to an ERPNext record</summary>
+									<summary>{{ __("Link to an ERPNext record") }}</summary>
 									<label
-										>ERPNext document type (optional)<input
+										>{{ __("ERPNext document type (optional)") }}<input
 											v-model="form.source_doctype"
-											placeholder="For example, Sales Order" /></label
+											:placeholder="__('For example, Sales Order')" /></label
 									><label
-										>Document name<input
+										>{{ __("Document name") }}<input
 											v-model="form.source_name"
-											placeholder="For example, SAL-ORD-2026-00001"
+											:placeholder="__('For example, {0}', ['SAL-ORD-2026-00001'])"
 									/></label>
 								</details>
 								<label
-									>Expires on (optional)<input
+									>{{ __("Expires on (optional)") }}<input
 										type="datetime-local"
 										v-model="form.expires_on" /></label
 								><label
-									>Signing page message<textarea
+									>{{ __("Signing page message") }}<textarea
 										v-model="form.message"
 										rows="3"
-										placeholder="A short note about this document"
+										:placeholder="__('A short note about this document')"
 									/></label
 								><button
 									:disabled="busy || (!builderOpen && !pdfUrl)"
@@ -1307,8 +1312,8 @@ onBeforeUnmount(() => {
 								>
 									{{
 										editingTemplate
-											? "Save and publish template"
-											: "Save as reusable template"
+											? __("Save and publish template")
+											: __("Save as reusable template")
 									}}
 								</button>
 								<TemplateOptions :form="form" />
@@ -1322,119 +1327,114 @@ onBeforeUnmount(() => {
 						class="pdf-preview-overlay"
 						role="dialog"
 						aria-modal="true"
-						aria-label="PDF preview"
+						:aria-label="__('PDF preview')"
 					>
 						<div class="preview-heading">
-							<h2>PDF preview</h2>
-							<button @click="previewOpen = false">Back to editor</button>
+							<h2>{{ __("PDF preview") }}</h2>
+							<button @click="previewOpen = false">{{ __("Back to editor") }}</button>
 						</div>
 						<PdfPage :url="pdfUrl" :page="page" @loaded="pages = $event" />
 						<div class="button-group">
-							<button :disabled="page <= 1" @click="page--">Previous page</button
+							<button :disabled="page <= 1" @click="page--">{{ __("Previous page") }}</button
 							><span>{{ page }} / {{ pages }}</span
-							><button :disabled="page >= pages" @click="page++">Next page</button>
+							><button :disabled="page >= pages" @click="page++">{{ __("Next page") }}</button>
 						</div>
 					</dialog>
 				</section>
 				<section v-else-if="view === 'settings' && settings" class="content settings">
 					<div class="page-title">
 						<div>
-							<h1>Workspace settings</h1>
-							<p>A dependable setup for every document you send.</p>
+							<h1>{{ __("Workspace settings") }}</h1>
+							<p>{{ __("A dependable setup for every document you send.") }}</p>
 						</div>
 					</div>
 					<div class="settings-row">
 						<div>
-							<h2>Email delivery</h2>
+							<h2>{{ __("Email delivery") }}</h2>
 							<p>
-								Invitations and reminders use your Frappe outgoing email account.
+								{{ __("Invitations and reminders use your Frappe outgoing email account.") }}
 							</p>
 						</div>
 						<span
 							:class="['status', settings.email_configured ? 'complete' : 'waiting']"
-							>{{ settings.email_configured ? "Configured" : "Needs setup" }}</span
+							>{{ settings.email_configured ? __("Configured") : __("Needs setup") }}</span
 						><a class="button" href="/desk/email-account"
-							>Manage email <ArrowUpRight :size="14"
+							>{{ __("Manage email") }} <ArrowUpRight :size="14"
 						/></a>
 					</div>
 					<div class="settings-row">
 						<div>
-							<h2>PDF sealing</h2>
+							<h2>{{ __("PDF sealing") }}</h2>
 							<p>
-								Apply a certificate-based seal to completed PDFs and completion
-								records.
+								{{ __("Apply a certificate-based seal to completed PDFs and completion records.") }}
 							</p>
 							<small>{{
 								settings.seal_configured
-									? "Certificate configured; trust is determined by the validating PDF reader."
-									: "Signing works without a seal, but the PDFs are not cryptographically signed."
+									? __("Certificate configured; trust is determined by the validating PDF reader.")
+									: __("Signing works without a seal, but the PDFs are not cryptographically signed.")
 							}}</small>
 						</div>
 						<span
 							:class="['status', settings.seal_configured ? 'complete' : 'waiting']"
-							>{{ settings.seal_configured ? "Configured" : "Not configured" }}</span
+							>{{ settings.seal_configured ? __("Configured") : __("Not configured") }}</span
 						><a
 							class="button"
 							href="https://github.com/joscasjac/nesscale_sign/blob/codex/open-esign/docs/SECURITY.md"
 							target="_blank"
 							rel="noopener"
-							>Setup guide <ArrowUpRight :size="14"
+							>{{ __("Setup guide") }} <ArrowUpRight :size="14"
 						/></a>
 					</div>
 					<div class="settings-row">
 						<div>
-							<h2>Templates & ERP automation</h2>
+							<h2>{{ __("Templates & ERP automation") }}</h2>
 							<p>
-								Configure document triggers, field mappings and email templates in
-								Desk.
+								{{ __("Configure document triggers, field mappings and email templates in Desk.") }}
 							</p>
 						</div>
 						<a class="button" href="/desk/ns-template"
-							>Open template settings <ArrowUpRight :size="14"
+							>{{ __("Open template settings") }} <ArrowUpRight :size="14"
 						/></a>
 					</div>
 					<div class="settings-row">
 						<div>
-							<h2>Organizations & reminder policies</h2>
+							<h2>{{ __("Organizations & reminder policies") }}</h2>
 							<p>
-								Manage sender identities, reminder intervals, expiry defaults and
-								organization settings.
+								{{ __("Manage sender identities, reminder intervals, expiry defaults and organization settings.") }}
 							</p>
 						</div>
 						<a class="button" href="/desk/ns-organization"
-							>Manage organizations <ArrowUpRight :size="14"
+							>{{ __("Manage organizations") }} <ArrowUpRight :size="14"
 						/></a>
 					</div>
 					<div class="settings-row">
 						<div>
-							<h2>Email templates</h2>
+							<h2>{{ __("Email templates") }}</h2>
 							<p>
-								Edit the invitations, reminders and completion emails used by the
-								signing workflow.
+								{{ __("Edit the invitations, reminders and completion emails used by the signing workflow.") }}
 							</p>
 						</div>
-						<a class="button" href="/desk/email-template">Edit email templates <ArrowUpRight :size="14" /></a>
+						<a class="button" href="/desk/email-template">{{ __("Edit email templates") }} <ArrowUpRight :size="14" /></a>
 					</div>
 					<div class="settings-row">
 						<div>
-							<h2>Application settings</h2>
+							<h2>{{ __("Application settings") }}</h2>
 							<p>
-								Default organization, support address, sender address and public
-								signing URL.
+								{{ __("Default organization, support address, sender address and public signing URL.") }}
 							</p>
 						</div>
 						<a class="button" href="/desk/ns-settings"
-							>Open application settings <ArrowUpRight :size="14"
+							>{{ __("Open application settings") }} <ArrowUpRight :size="14"
 						/></a>
 					</div>
 					<div class="settings-row">
 						<div>
-							<h2>Open source</h2>
+							<h2>{{ __("Open source") }}</h2>
 							<p>
-								Open E-Sign ERPNext builds on Nesscale Sign by Nesscale Solutions.
+								{{ __("Open E-Sign ERPNext builds on Nesscale Sign by Nesscale Solutions.") }}
 							</p>
 							<small
-								>AGPL-3.0 · Full source for this fork is publicly available.</small
+								>{{ __("AGPL-3.0 · Full source for this fork is publicly available.") }}</small
 							>
 						</div>
 						<a
@@ -1442,7 +1442,7 @@ onBeforeUnmount(() => {
 							href="https://github.com/joscasjac/nesscale_sign"
 							target="_blank"
 							rel="noopener"
-							>View source <ExternalLink :size="14"
+							>{{ __("View source") }} <ExternalLink :size="14"
 						/></a>
 					</div>
 				</section>
@@ -1473,14 +1473,13 @@ onBeforeUnmount(() => {
 					<div class="page-title">
 						<div>
 							<p class="sender-line">
-								{{ signContext.envelope.sender_name }} has shared a document with
-								you
+								{{ __("{0} has shared a document with you", [signContext.envelope.sender_name]) }}
 							</p>
 							<h1>{{ signContext.envelope.title }}</h1>
 							<p>
 								{{
 									signContext.envelope.message ||
-									"Please review the document before signing."
+									__("Please review the document before signing.")
 								}}
 							</p>
 						</div>
@@ -1491,7 +1490,7 @@ onBeforeUnmount(() => {
 					>
 						<Check :size="28" />
 						<div>
-							<h2>All signed. You’re done.</h2>
+							<h2>{{ __("All signed. You’re done.") }}</h2>
 							<a
 								v-if="signContext.envelope.completion_redirect_url"
 								:href="signContext.envelope.completion_redirect_url"
@@ -1502,23 +1501,23 @@ onBeforeUnmount(() => {
 								"
 								rel="noopener noreferrer"
 								class="button"
-								>Continue</a
+								>{{ __("Continue") }}</a
 							>
-							<p>A copy is ready for your records.</p>
+							<p>{{ __("A copy is ready for your records.") }}</p>
 						</div>
 						<a
 							class="button primary"
 							:href="downloadUrl('signing.download_completed', { token })"
-							><Download :size="16" /> Download PDF</a
+							><Download :size="16" /> {{ __("Download PDF") }}</a
 						>
 						<a
 							class="button"
 							:href="downloadUrl('signing.download_certificate', { token })"
-							>Completion certificate</a
+							>{{ __("Completion certificate") }}</a
 						>
 					</div>
 					<div v-else-if="signContext.signer.status === 'Signed'" class="notice">
-						Your signature is saved.
+						{{ __("Your signature is saved.") }}
 						<a
 							v-if="signContext.envelope.completion_redirect_url"
 							:href="signContext.envelope.completion_redirect_url"
@@ -1528,25 +1527,25 @@ onBeforeUnmount(() => {
 									: '_self'
 							"
 							rel="noopener noreferrer"
-							>Continue</a
+							>{{ __("Continue") }}</a
 						>
 						{{
 							signContext.envelope.finalization_status === "Pending"
-								? "We’re preparing the final document."
-								: "You’ll receive a copy when everyone has signed."
+								? __("We’re preparing the final document.")
+								: __("You’ll receive a copy when everyone has signed.")
 						}}
 					</div>
 					<div class="sign-layout">
 						<div class="document-stage">
 							<div class="page-control">
 								<a :href="signContext.pdf_url" target="_blank" rel="noopener"
-									>Open original PDF <ArrowUpRight :size="12"
+									>{{ __("Open original PDF") }} <ArrowUpRight :size="12"
 								/></a>
 								<div>
 									<button
 										class="icon-button"
 										:disabled="page <= 1"
-										aria-label="Previous PDF page"
+										:aria-label="__('Previous PDF page')"
 										@click="page--"
 									>
 										<ChevronLeft :size="16" /></button
@@ -1554,7 +1553,7 @@ onBeforeUnmount(() => {
 									}}<button
 										class="icon-button"
 										:disabled="page >= pages"
-										aria-label="Next PDF page"
+										:aria-label="__('Next PDF page')"
 										@click="page++"
 									>
 										<ChevronRight :size="16" />
@@ -1605,8 +1604,9 @@ onBeforeUnmount(() => {
 										]"
 										:style="position(f)"
 										:aria-label="
-											(fieldComplete(f) ? 'Edit ' : 'Complete ') +
-											(f.label || f.field_type)
+											fieldComplete(f)
+												? __('Edit {0}', [f.label || __(f.field_type)])
+												: __('Complete {0}', [f.label || __(f.field_type)])
 										"
 										@click="openSigningField(f)"
 									>
@@ -1615,13 +1615,13 @@ onBeforeUnmount(() => {
 												signatureTypes.includes(f.field_type) && signature
 											"
 											:src="signature.image"
-											alt="Your adopted signature"
+											:alt="__('Your adopted signature')"
 										/>
 										<span v-else>{{
 											values[f.field_key] ||
 											(signatureTypes.includes(f.field_type)
-												? "Click to sign"
-												: f.label || f.field_type)
+												? __("Click to sign")
+												: f.label || __(f.field_type))
 										}}</span>
 									</button>
 									<span
@@ -1634,16 +1634,15 @@ onBeforeUnmount(() => {
 							</PdfPage>
 						</div>
 						<aside class="sign-panel">
-							<h2>Your details</h2>
+							<h2>{{ __("Your details") }}</h2>
 							<p class="muted">
-								Signing as {{ signContext.signer.name }}<br />{{
+								{{ __("Signing as {0}", [signContext.signer.name]) }}<br />{{
 									signContext.signer.email
 								}}
 							</p>
 							<form v-if="signContext.signer.can_sign" @submit.prevent="sign">
 								<p class="sign-instruction">
-									Click a highlighted field on the document, or start here. We’ll
-									guide you through each required field.
+									{{ __("Click a highlighted field on the document, or start here. We’ll guide you through each required field.") }}
 								</p>
 								<button
 									type="button"
@@ -1653,35 +1652,33 @@ onBeforeUnmount(() => {
 								>
 									{{
 										ownFields.some(fieldComplete)
-											? "Next required field"
-											: "Start signing"
+											? __("Next required field")
+											: __("Start signing")
 									}}
 									<ArrowUpRight :size="16" />
 								</button>
 								<p role="status" class="sign-progress">
 									{{
-										ownFields.filter((f) => f.required).length -
-										requiredRemaining
+										__("{0} of {1} required fields complete", [
+											ownFields.filter((f) => f.required).length - requiredRemaining,
+											ownFields.filter((f) => f.required).length,
+										])
 									}}
-									of {{ ownFields.filter((f) => f.required).length }} required
-									fields complete
 								</p>
 								<ol class="sign-field-list">
 									<li v-for="f in ownFields" :key="f.field_key">
 										<button type="button" @click="openSigningField(f)">
 											<span
 												>{{ fieldComplete(f) ? "✓" : "○" }}
-												{{ f.label || f.field_type }}</span
+												{{ f.label || __(f.field_type) }}</span
 											><small
-												>Page {{ f.page
-												}}{{ f.required ? "" : " · Optional" }}</small
+												>{{ f.required ? __("Page {0}", [f.page]) : __("Page {0} · Optional", [f.page]) }}</small
 											>
 										</button>
 									</li>
 								</ol>
 								<p v-if="!requiredRemaining" class="notice">
-									All required fields are complete. Review the document, then
-									confirm your consent to finish.
+									{{ __("All required fields are complete. Review the document, then confirm your consent to finish.") }}
 								</p>
 								<button
 									type="button"
@@ -1689,13 +1686,15 @@ onBeforeUnmount(() => {
 									class="primary full"
 									@click="openFinalReview"
 								>
-									Review and finish
+									{{ __("Review and finish") }}
 								</button>
 								<p class="sign-footnote">
 									{{
 										requiredRemaining
-											? `${requiredRemaining} required fields remaining`
-											: "Your completed copy will be available after everyone signs."
+											? requiredRemaining === 1
+												? __("1 required field remaining")
+												: __("{0} required fields remaining", [requiredRemaining])
+											: __("Your completed copy will be available after everyone signs.")
 									}}
 								</p>
 								<button
@@ -1703,27 +1702,27 @@ onBeforeUnmount(() => {
 									class="text-button"
 									@click="declining = !declining"
 								>
-									Decline to sign
+									{{ __("Decline to sign") }}
 								</button>
 							</form>
 							<p v-else-if="signContext.signer.status !== 'Signed'" class="muted">
-								You’ll be notified when it’s your turn to sign.
+								{{ __("You’ll be notified when it’s your turn to sign.") }}
 							</p>
 							<form v-if="declining" class="decline-form" @submit.prevent="decline">
 								<label
-									>Reason (optional)<textarea v-model="reason" rows="3" /></label
-								><button :disabled="busy">Confirm decline</button
-								><button type="button" @click="declining = false">Cancel</button>
+									>{{ __("Reason (optional)") }}<textarea v-model="reason" rows="3" /></label
+								><button :disabled="busy">{{ __("Confirm decline") }}</button
+								><button type="button" @click="declining = false">{{ __("Cancel") }}</button>
 							</form>
 						</aside>
 					</div>
 					<footer class="sign-footer">
-						Powered by Open E-Sign ERPNext
+						{{ __("Powered by Open E-Sign ERPNext") }}
 						<a
 							href="https://github.com/joscasjac/nesscale_sign"
 							target="_blank"
 							rel="noopener"
-							>Open-source software</a
+							>{{ __("Open-source software") }}</a
 						>
 					</footer>
 				</section>

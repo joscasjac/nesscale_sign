@@ -36,31 +36,32 @@ async function choose(name) {
 </script>
 <template>
 	<details class="contact-picker">
-		<summary>Fill from a contact</summary>
+		<summary>{{ __("Fill from a contact") }}</summary>
 		<label
-			>Contact name<input
+			>{{ __("Contact name") }}<input
 				v-model="query"
-				placeholder="Search your contacts"
+				:placeholder="__('Search your contacts')"
 				@keydown.enter.prevent="search"
 		/></label>
 		<button type="button" :disabled="busy" @click="search">
-			{{ busy ? "Loading…" : "Find contact" }}
+			{{ busy ? __("Loading…") : __("Find contact") }}
 		</button>
 		<p v-if="error" role="alert" class="error">{{ error }}</p>
 		<p v-else-if="searched && !results.length" class="muted">
-			No matching contacts you can access.
+			{{ __("No matching contacts you can access.") }}
 		</p>
 		<ul v-if="results.length">
 			<li v-for="contact in results" :key="contact.name">
 				<button type="button" :disabled="busy" @click="choose(contact.name)">
 					{{ contact.full_name || contact.name
-					}}<small>{{ contact.email_id || "No email address" }}</small>
+					}}<small>{{ contact.email_id || __("No email address") }}</small>
 				</button>
 			</li>
 		</ul>
 		<small
-			>Name and email are copied into this recipient for review. Later contact changes won’t
-			change the document.</small
+			>{{
+				__("Name and email are copied into this recipient for review. Later contact changes won’t change the document.")
+			}}</small
 		>
 	</details>
 </template>

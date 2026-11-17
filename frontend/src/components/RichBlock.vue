@@ -158,7 +158,7 @@ function remember() {
 			@keydown="key"
 			@paste.prevent="paste"
 		></div>
-		<div v-if="open" class="variable-menu" role="listbox" aria-label="Document variables">
+		<div v-if="open" class="variable-menu" role="listbox" :aria-label="__('Document variables')">
 			<button
 				v-for="(o, i) in options"
 				role="option"
@@ -168,7 +168,7 @@ function remember() {
 			>
 				{{ o.key }}<small>{{ o.value || o.label }}</small>
 			</button>
-			<p v-if="!options.length">No matching variables. Add one in Document variables.</p>
+			<p v-if="!options.length">{{ __("No matching variables. Add one in Document variables.") }}</p>
 		</div>
 	</div>
 </template>
